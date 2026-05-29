@@ -12,4 +12,9 @@ public class TilPost {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long postId;
+
+    private boolean isDeleted;
+    public void deletePost(){
+        this.isDeleted = true;
+    }
 }

@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:tilog_test;MODE=MySQL;DATABASE_TO_LOWER=TRUE;NON_KEYWORDS=value
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+    show-sql: false
+  test:
+    database:
+      replace: none   # 위에서 직접 H2 설정했으므로 auto-replace 끔

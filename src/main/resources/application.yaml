@@ -1,3 +1,18 @@
 spring:
   application:
     name: tilog-backend
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/tilog?serverTimezone=UTC&characterEncoding=UTF-8
+    username: spring
+    password: 1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update   # 운영: validate / 로컬 개발: update
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true
+    open-in-view: false

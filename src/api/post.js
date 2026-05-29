@@ -1,5 +1,3 @@
-"use strict";
-
 import api from "./axios";
 
 // 게시글 목록 조회 API
@@ -9,8 +7,12 @@ export const getPostList = async () => {
 };
 
 // 게시글 상세 조회 API
-export const getPostDetail = async (postId) => {
-    const response = await api.get(`/api/posts/${postId}`);
+export const getPostDetail = async (postId, increaseViewCount = true) => {
+    const response = await api.get(`/api/posts/${postId}`, {
+        params: {
+            increaseViewCount,
+        },
+    });
     return response.data;
 };
 
@@ -31,3 +33,17 @@ export const deletePost = async (postId) => {
     const response = await api.delete(`/api/posts/${postId}`);
     return response.data;
 }
+
+// 게시글 이미지 업로드 API
+export const uploadPostImage = async (formData) => {
+    const response = await api.post(
+        "/api/posts/images",
+        formData,
+        {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        }
+    );
+    return response.data;
+};

@@ -1,75 +1,21 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-
-// Markdown 렌더링 라이브러리
 import ReactMarkdown from "react-markdown";
-
-// GitHub 스타일 Markdown 확장
 import remarkGfm from "remark-gfm";
-
-// 코드 블럭 문법 하이라이팅
 import rehypeHighlight from "rehype-highlight";
 
-// 코드 하이라이트 스타일
 import "highlight.js/styles/github-dark.css";
 
-import {
-    getPostDetail,
-    deletePost,
-} from "../../api/post";
+import { usePostDetail } from "../../hooks/post/usePostDetail";
 
 // 게시글 상세 페이지
 function PostDetailPage() {
-    // URL 게시글 ID 조회
-    const { postId } = useParams();
-
-    // 페이지 이동 객체
-    const navigate = useNavigate();
-
-    // 게시글 상태
-    const [post, setPost] = useState(null);
-
-    // 댓글 열기/닫기 상태
-    const [showComments, setShowComments] = useState(false);
-
-    // 임시 태그 데이터
-    const tags = ["Java", "Spring Security", "JWT", "Markdown"];
-
-    // 게시글 상세 조회
-    useEffect(() => {
-        const fetchPostDetail = async () => {
-            const data = await getPostDetail(postId);
-            setPost(data);
-        };
-
-        fetchPostDetail();
-    }, [postId]);
-
-    // 게시글 수정 이동
-    const handleEdit = () => {
-        navigate(`/posts/${postId}/edit`);
-    };
-
-    // 게시글 삭제
-    const handleDelete = async () => {
-        const confirmed = window.confirm(
-            "게시글을 삭제하시겠습니까?"
-        );
-
-        if (!confirmed) return;
-
-        try {
-            await deletePost(postId);
-
-            alert("게시글이 삭제되었습니다.");
-
-            navigate("/posts");
-        } catch (error) {
-            console.error(error);
-
-            alert("게시글 삭제 실패");
-        }
-    };
+    const {
+        post,
+        showComments,
+        handleEdit,
+        handleDelete,
+        handleMoveList,
+        handleToggleComments,
+    } = usePostDetail();
 
     // 게시글 로딩 상태
     if (!post) {
@@ -82,30 +28,38 @@ function PostDetailPage() {
 
     return (
         <main className="rounded-3xl bg-white/90 p-8 shadow-sm">
-
             {/* 게시글 제목 */}
             <h2 className="text-3xl font-bold text-slate-900">
                 {post.title}
             </h2>
 
             {/* 게시글 정보 */}
-            <p className="mt-3 text-sm text-gray-500">
-                {post.nickname}
-                · 조회수 {post.viewCount}
-                · 학습시간 {post.studyTime}분
-                · 난이도 {post.difficulty}
-            </p>
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-y border-gray-200 py-2 text-sm text-slate-700">
+                <div className="flex items-center gap-2 font-medium">
+                    <span>{post.nickname}</span>
+                </div>
 
-            {/* 태그 영역 */}
-            <div className="mt-6 flex gap-3">
-                {tags.map((tag) => (
-                    <span
-                        key={tag}
-                        className="rounded-full bg-slate-100 px-5 py-2 text-sm font-bold text-slate-700"
-                    >
-                        {tag}
+                <div className="flex flex-wrap items-center gap-y-1 text-xs font-semibold">
+                    <span className="px-2">
+                        조회수&nbsp;
+                        <span className="text-blue-600">{post.viewCount}</span>
                     </span>
-                ))}
+
+                    <span className="h-3 w-px bg-gray-300" />
+
+                    <span className="px-2">
+                        학습시간&nbsp;
+                        <span className="text-blue-600">{post.studyTime}</span>
+                        분
+                    </span>
+
+                    <span className="h-3 w-px bg-gray-300" />
+
+                    <span className="px-2">
+                        난이도&nbsp;
+                        <span className="text-blue-600">{post.difficulty}</span>
+                    </span>
+                </div>
             </div>
 
             {/* Markdown 본문 영역 */}
@@ -122,10 +76,19 @@ function PostDetailPage() {
                 </div>
 
                 {/* Markdown 렌더링 */}
-                <div className="prose max-w-none max-h-[360px] overflow-y-auto p-6">
+                <div className="prose max-w-none p-6">
                     <ReactMarkdown
                         remarkPlugins={[remarkGfm]}
                         rehypePlugins={[rehypeHighlight]}
+                        components={{
+                            // Markdown 이미지 표시 스타일
+                            img: ({ node, ...props }) => (
+                                <img
+                                    {...props}
+                                    className="my-4 max-w-full rounded-xl object-contain"
+                                />
+                            ),
+                        }}
                     >
                         {post.content}
                     </ReactMarkdown>
@@ -158,7 +121,7 @@ function PostDetailPage() {
 
                 {/* 게시글 목록 이동 */}
                 <button
-                    onClick={() => navigate("/posts")}
+                    onClick={handleMoveList}
                     className="rounded-xl border px-6 py-3 font-bold"
                 >
                     목록
@@ -180,7 +143,7 @@ function PostDetailPage() {
 
                     {/* 댓글 토글 버튼 */}
                     <button
-                        onClick={() => setShowComments(!showComments)}
+                        onClick={handleToggleComments}
                         className="rounded-xl bg-gradient-to-r from-purple-500 to-cyan-400 px-6 py-3 font-bold text-white"
                     >
                         {showComments ? "댓글 닫기 ▲" : "댓글 보기 ▼"}
@@ -190,7 +153,6 @@ function PostDetailPage() {
                 {/* 댓글 표시 */}
                 {showComments && (
                     <div className="mt-6 space-y-4">
-
                         {/* 댓글 아이템 */}
                         <div className="rounded-xl bg-slate-50 p-4">
                             <p className="font-bold">

@@ -1,104 +1,33 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Editor } from "@toast-ui/react-editor";
+import "@toast-ui/editor/dist/toastui-editor.css";
+import "@toast-ui/editor/dist/i18n/ko-kr";
 
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeHighlight from "rehype-highlight";
-
-import "highlight.js/styles/github-dark.css";
-
-import { createPost, getPostDetail, updatePost } from "../../api/post";
+import { usePostWriteForm } from "../../hooks/post/usePostWriteForm";
 
 import {
     difficultyOptions,
-    defaultDifficulty,
     markdownPlaceholder,
-    postListPath,
     visibilityOptions,
-    defaultVisibility,
+    editorHeight,
+    editorToolbarItems,
+    codeBlockSelectLabel,
+    codeBlockLanguageOptions,
 } from "../../constants/post";
 
 // 게시글 작성 페이지
 function PostWritePage() {
-    // 페이지 이동 객체
-    const navigate = useNavigate();
-
-    // URL 게시글 ID
-    const { postId } = useParams();
-
-    // 수정 모드 여부
-    const isEditMode = Boolean(postId);
-
-    // 게시글 폼 상태
-    const [form, setForm] = useState({
-        title: "",
-        content: "",
-        difficulty: defaultDifficulty,
-        studyTime: "",
-        visibility: defaultVisibility,
-    });
-
-    // 입력값 변경
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-
-        setForm((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
-    };
-
-    // 수정 모드 게시글 데이터 조회
-    useEffect(() => {
-        // 작성 모드면 종료
-        if (!isEditMode) return;
-
-        const fetchPostDetail = async () => {
-            const data = await getPostDetail(postId);
-
-            setForm({
-                title: data.title,
-                content: data.content,
-                difficulty: data.difficulty,
-                visibility: data.visibility ?? defaultVisibility,
-                studyTime: data.studyTime ?? "",
-            });
-        };
-
-        fetchPostDetail();
-    }, [isEditMode, postId]);
-
-    // 게시글 작성/수정 요청
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        try {
-            const postData = {
-                ...form,
-                studyTime: Number(form.studyTime),
-            };
-
-            // 수정 모드
-            if (isEditMode) {
-                await updatePost(postId, postData);
-
-                navigate(`/posts/${postId}`);
-            } else {
-                // 작성 모드
-                await createPost(postData);
-
-                navigate(postListPath);
-            }
-        } catch (error) {
-            console.error(error);
-
-            alert(
-                isEditMode
-                    ? "게시글 수정 실패"
-                    : "게시글 작성 실패"
-            );
-        }
-    };
+    const {
+        form,
+        editorRef,
+        editorKey,
+        isEditMode,
+        handleChange,
+        handleInsertCodeBlock,
+        handleUploadImage,
+        handleEditorLoad,
+        handleSubmit,
+        handleCancel,
+    } = usePostWriteForm();
 
     return (
         <main className="rounded-3xl bg-white/90 p-8 shadow-sm">
@@ -110,16 +39,15 @@ function PostWritePage() {
                     </h2>
 
                     <p className="mt-2 text-gray-500">
-                        {isEditMode ? "작성한 TIL 내용을 수정하세요" : "오늘 학습한 내용을 기록해보세요"}
+                        {isEditMode
+                            ? "작성한 TIL 내용을 수정하세요"
+                            : "오늘 학습한 내용을 기록해보세요"}
                     </p>
                 </div>
             </div>
 
             {/* 게시글 작성 폼 */}
-            <form
-                onSubmit={handleSubmit}
-                className="mt-10 space-y-7"
-            >
+            <form onSubmit={handleSubmit} className="mt-10 space-y-7">
                 {/* 제목 */}
                 <div>
                     <label className="mb-2 block text-sm font-bold text-gray-700">
@@ -149,10 +77,7 @@ function PostWritePage() {
                         className="w-full rounded-2xl border border-gray-200 px-5 py-4 outline-none"
                     >
                         {difficultyOptions.map((option) => (
-                            <option
-                                key={option}
-                                value={option}
-                            >
+                            <option key={option} value={option}>
                                 {option}
                             </option>
                         ))}
@@ -188,48 +113,56 @@ function PostWritePage() {
                         className="w-full rounded-2xl border border-gray-200 px-5 py-4 outline-none"
                     >
                         {visibilityOptions.map((option) => (
-                            <option
-                                key={option.value}
-                                value={option.value}
-                            >
+                            <option key={option.value} value={option.value}>
                                 {option.label}
                             </option>
                         ))}
                     </select>
                 </div>
 
-                {/* 본문 + Markdown Preview */}
+                {/* 본문 */}
                 <div>
                     <label className="mb-2 block text-sm font-bold text-gray-700">
                         내용
                     </label>
 
-                    <div
-                        className={`grid gap-6 ${
-                            form.content.trim() ? "grid-cols-2" : "grid-cols-1"
-                        }`}
-                    >
-                        {/* Markdown 작성 영역 */}
-                        <textarea
-                            name="content"
-                            value={form.content}
-                            onChange={handleChange}
-                            placeholder={markdownPlaceholder}
-                            rows={18}
-                            className="rounded-2xl border border-gray-200 px-5 py-4 font-mono outline-none"
-                        />
+                    <div className="relative overflow-hidden rounded-2xl border border-gray-200">
+                        {/* 코드블록 언어 선택 */}
+                        <select
+                            defaultValue=""
+                            onChange={(e) => {
+                                handleInsertCodeBlock(e.target.value);
 
-                        {/* Markdown Preview - 내용 입력 시에만 표시 */}
-                        {form.content.trim() && (
-                            <div className="prose max-w-none overflow-y-auto rounded-2xl border border-gray-200 bg-slate-50 p-5">
-                                <ReactMarkdown
-                                    remarkPlugins={[remarkGfm]}
-                                    rehypePlugins={[rehypeHighlight]}
-                                >
-                                    {form.content}
-                                </ReactMarkdown>
-                            </div>
-                        )}
+                                // 선택 후 초기화
+                                e.target.value = "";
+                            }}
+                            className="absolute right-3 top-2 z-10 h-8 rounded-md border border-gray-200 bg-white px-2 text-sm outline-none"
+                        >
+                            <option value="" disabled>
+                                {codeBlockSelectLabel}
+                            </option>
+
+                            {codeBlockLanguageOptions.map((option) => (
+                                <option key={option.value} value={option.value}>
+                                    {option.label}
+                                </option>
+                            ))}
+                        </select>
+
+                        <Editor
+                            key={editorKey}
+                            ref={editorRef}
+                            initialValue=""
+                            placeholder={markdownPlaceholder}
+                            previewStyle="tab"
+                            height={editorHeight}
+                            initialEditType="markdown"
+                            useCommandShortcut={true}
+                            language="ko-KR"
+                            toolbarItems={editorToolbarItems}
+                            onLoad={handleEditorLoad}
+                            hooks={{addImageBlobHook: handleUploadImage,}}
+                        />
                     </div>
                 </div>
 
@@ -238,7 +171,7 @@ function PostWritePage() {
                     {/* 취소 버튼 */}
                     <button
                         type="button"
-                        onClick={() => navigate(postListPath)}
+                        onClick={handleCancel}
                         className="rounded-2xl border px-7 py-3 font-bold"
                     >
                         취소

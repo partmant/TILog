@@ -1,27 +1,17 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { usePostList } from "../../hooks/post/usePostList";
 
-import { getPostList } from "../../api/post";
-import { categories, difficultyStyle } from "../../constants/post";
+import {
+    categories,
+    difficultyStyle,
+} from "../../constants/post";
 
 // 게시글 목록 페이지
-
 function PostListPage() {
-    // 페이지 이동 객체
-    const navigate = useNavigate();
-
-    // 게시글 목록 상태
-    const [posts, setPosts] = useState([]);
-
-    // 게시글 목록 조회
-    useEffect(() => {
-        const fetchPosts = async () => {
-            const data = await getPostList();
-            setPosts(data);
-        };
-
-        fetchPosts();
-    }, []);
+    const {
+        posts,
+        handleMoveWrite,
+        handleMoveDetail,
+    } = usePostList();
 
     return (
         <main className="rounded-3xl bg-white/90 p-8 shadow-sm">
@@ -39,7 +29,7 @@ function PostListPage() {
 
                 {/* 게시글 작성 페이지 이동 */}
                 <button
-                    onClick={() => navigate("/posts/write")}
+                    onClick={handleMoveWrite}
                     className="rounded-xl bg-gradient-to-r from-purple-500 to-cyan-400 px-8 py-3 font-bold text-white"
                 >
                     TIL 작성하기
@@ -75,7 +65,7 @@ function PostListPage() {
                         key={post.postId}
 
                         // 게시글 상세 페이지 이동
-                        onClick={() => navigate(`/posts/${post.postId}`)}
+                        onClick={() => handleMoveDetail(post.postId)}
 
                         className="cursor-pointer rounded-2xl border border-gray-100 border-l-4 border-l-indigo-500 bg-white p-6 shadow-sm transition hover:shadow-md"
                     >
@@ -90,7 +80,7 @@ function PostListPage() {
                                 <p className="mt-3 text-sm text-gray-500">
                                     난이도 {post.difficulty}
                                     · 작성자 {post.nickname}
-                                    · 조회수 {post.viewCount}
+                                    · 조회수 {post.viewCount}회
                                     · 학습시간 {post.studyTime}분
                                 </p>
                             </div>

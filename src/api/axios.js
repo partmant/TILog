@@ -1,5 +1,3 @@
-"use strict";
-
 import axios from "axios";
 
 // 공통 axios 인스턴스 생성

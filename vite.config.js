@@ -9,4 +9,10 @@ export default defineConfig({
     babel({ presets: [reactCompilerPreset()] }),
     tailwindcss(),
   ],
+  // 업로드 이미지 요청 백엔드 프록시
+  server: {
+    proxy: {
+      "/uploads": "http://localhost:8080",
+    },
+  },
 });

@@ -53,6 +53,15 @@ export const visibilityOptions = [
 // 게시글 작성 완료 후 이동 경로
 export const postListPath = "/posts";
 
+// 게시글 작성 페이지 경로
+export const postWritePath = "/posts/write";
+
+// 게시글 상세 페이지 경로 생성
+export const getPostDetailPath = (postId) => `/posts/${postId}`;
+
+// 게시글 수정 페이지 경로 생성
+export const getPostEditPath = (postId) => `/posts/${postId}/edit`;
+
 // 게시글 Markdown 작성 예시
 export const markdownPlaceholder = `# 제목을 입력하세요
 
@@ -69,3 +78,47 @@ int main() {
 }
 \`\`\`
 `;
+
+// =========================
+// Toast UI Editor 관련
+// =========================
+
+// Toast UI Editor 높이
+export const editorHeight = "500px";
+
+// Toast UI Editor 툴바 설정
+export const editorToolbarItems = [
+    // 제목 / 글자 스타일
+    ["heading", "bold", "italic", "strike"],
+
+    // 구분선 / 인용문
+    ["hr", "quote"],
+
+    // 목록
+    ["ul", "ol", "task"],
+
+    // 들여쓰기
+    ["indent", "outdent"],
+
+    // 표 / 이미지 / 링크
+    ["table", "image", "link"],
+
+    // 인라인 코드 / 코드블록
+    ["code", "codeblock"],
+];
+
+// 코드블록 선택 기본 라벨
+export const codeBlockSelectLabel = "코드블록";
+
+// 코드블록 언어 옵션
+export const codeBlockLanguageOptions = [
+    { value: "c", label: "C",},
+    { value: "java", label: "Java",},
+    { value: "javascript", label: "JavaScript",},
+    { value: "jsx", label: "JSX",},
+    { value: "html", label: "HTML",},
+    { value: "css", label: "CSS",},
+    { value: "sql", label: "SQL",},
+    { value: "bash", label: "Bash",},
+    { value: "json", label: "JSON",},
+];

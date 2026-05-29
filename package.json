@@ -12,6 +12,8 @@
   "dependencies": {
     "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.3.0",
+    "@toast-ui/editor": "^3.2.2",
+    "@toast-ui/react-editor": "^3.2.3",
     "axios": "^1.16.1",
     "highlight.js": "^11.11.1",
     "react": "^19.2.6",

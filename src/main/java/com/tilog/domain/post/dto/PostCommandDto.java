@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 
 public class PostCommandDto {
 
+    // 게시글 작성 요청 DTO
     @Getter
     @NoArgsConstructor
-    // 게시글 작성 요청 DTO
     public static class Create {
         private String title;
         private String content;
@@ -20,9 +20,9 @@ public class PostCommandDto {
         private Integer studyTime;
     }
 
+    // 게시글 수정 요청 DTO
     @Getter
     @NoArgsConstructor
-    // 게시글 수정 요청 DTO
     public static class Update {
         private String title;
         private String content;

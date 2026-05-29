@@ -20,4 +20,12 @@ public class Tag {
     // 태그 이름
     @Column(nullable = false, unique = true, length = 100)
     private String name;
+
+    // 태그 생성 메서드
+    public static Tag create(String name) {
+        Tag tag = new Tag();
+        tag.name = name;
+
+        return tag;
+    }
 }

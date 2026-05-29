@@ -15,6 +15,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+// [게시글---태그] 매핑 엔티티
+
 @Entity
 @Table(
         name = "til_post_tag",
@@ -39,4 +41,13 @@ public class PostTag {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tag_id", nullable = false)
     private Tag tag;
+
+    // 게시글-태그 매핑 생성 메서드
+    public static PostTag create(Post post, Tag tag) {
+        PostTag postTag = new PostTag();
+        postTag.post = post;
+        postTag.tag = tag;
+
+        return postTag;
+    }
 }

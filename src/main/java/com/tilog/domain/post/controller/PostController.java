@@ -24,8 +24,11 @@ public class PostController {
 
     // 게시글 상세 조회
     @GetMapping("/{postId}")
-    public PostQueryDto.DetailResponse getPostDetail(@PathVariable("postId") Long postId) {
-        return postService.getPostDetail(postId);
+    public PostQueryDto.DetailResponse getPostDetail(
+            @PathVariable("postId") Long postId,
+            @RequestParam(value = "increaseViewCount", defaultValue = "true") boolean increaseViewCount
+    ) {
+        return postService.getPostDetail(postId, increaseViewCount);
     }
 
     // 게시글 작성

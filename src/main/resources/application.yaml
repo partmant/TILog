@@ -1,6 +1,9 @@
+server:
+  port: 8080
+
 spring:
   application:
-    name: BE
+    name: tilog-backend
 
   profiles:
     active: local

@@ -20,6 +20,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
+// TIL 게시글 엔티티
+
 @Entity
 @Table(name = "til_post")
 @Getter
@@ -87,6 +89,11 @@ public class Post {
         this.difficulty = difficulty == null ? Difficulty.NORMAL : difficulty;
         this.visibility = visibility == null ? Visibility.PUBLIC : visibility;
         this.studyTime = studyTime;
+    }
+
+    // 게시글 조회수 증가 메서드
+    public void increaseViewCount() {
+        this.viewCount = this.viewCount == null ? 1 : this.viewCount + 1;
     }
 
     // 게시글 삭제 메서드 - (Setter 사용 대신 수정 책임을 엔티티에 위임)

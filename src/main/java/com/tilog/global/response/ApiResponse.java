@@ -5,6 +5,11 @@ public record ApiResponse<T>(
         String message,
         T data
 ) {
+    // 성공 응답 (메시지 기본값)
+    public static <T> ApiResponse<T> success(T data) {
+        return new ApiResponse<>(true, "요청이 성공적으로 처리되었습니다.", data);
+    }
+
     // 성공 응답 (데이터 포함)
     public static <T> ApiResponse<T> success(T data, String message) {
         return new ApiResponse<>(true, message, data);

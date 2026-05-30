@@ -15,6 +15,7 @@ import java.time.LocalDate;
 @Transactional(readOnly = true)
 public class WriteHistoryService {
     private final WriteHistoryRepository writeHistoryRepository;
+    private final StreakStatService streakStatService;
 
     @Transactional
     public WriteHistoryResponse recordWriteHistory(WriteHistoryRequest request) {
@@ -29,6 +30,8 @@ public class WriteHistoryService {
                 .orElseGet(() -> writeHistoryRepository.save(
                         WriteHistory.create(request.memberId(), today)
                 ));
+
+        streakStatService.updateStreak(request.memberId(), today);
 
         return WriteHistoryResponse.from(writeHistory);
     }

@@ -7,23 +7,29 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
-public class ReportProcess {
+public class Report {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long processId;
-
-    private Long targetId;
+    private Long reportId;
 
     @ManyToOne
-    @JoinColumn(name = "admin_id")
-    private Member admin;
+    @JoinColumn(name = "reporter_id")
+    private Member reporter;
+
+    private Long targetId;
 
     @Enumerated(EnumType.STRING)
     private TargetType targetType;
 
     @Enumerated(EnumType.STRING)
-    private TargetAction targetAction;
+    private ReasonType reasonType;
 
-    private String processContent;
+    private String reasonDetail;
+
+    @Enumerated(EnumType.STRING)
+    private Status status;
+
     private LocalDateTime createdAt;
+    private LocalDateTime processedAt;
 }
+

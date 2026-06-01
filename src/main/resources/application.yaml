@@ -19,5 +19,10 @@ spring:
         dialect: org.hibernate.dialect.MySQLDialect
     show-sql: true
 
-  profiles:
-    active: local
+# JWT 설정
+# - secret: Base64로 인코딩된 256bit 이상의 키 (운영에서는 반드시 환경변수로 주입)
+# - 아래 기본값은 로컬 개발용. 운영 배포 시 JWT_SECRET 환경변수로 반드시 교체할 것
+jwt:
+  secret: ${JWT_SECRET:dGlsb2ctZGVmYXVsdC1zZWNyZXQta2V5LWZvci1sb2NhbC1kZXZlbG9wbWVudC1vbmx5LXVzZS1lbnYtaW4tcHJvZHVjdGlvbi1leGFtcGxlLW9ubHk=}
+  access-token-validity-seconds: 1800       # 30분
+  refresh-token-validity-seconds: 1209600   # 14일

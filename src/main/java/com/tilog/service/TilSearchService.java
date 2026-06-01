@@ -2,7 +2,7 @@ package com.tilog.service;
 
 import com.tilog.dto.TilPostSearchCondition;
 import com.tilog.dto.TilPostSummaryDto;
-import com.tilog.repository.TilPostRepository;
+import com.tilog.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,9 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class TilSearchService {
 
-    private final TilPostRepository tilPostRepository;
+    private final PostRepository postRepository;
 
     public Page<TilPostSummaryDto> search(TilPostSearchCondition condition, Pageable pageable) {
-        return tilPostRepository.searchPosts(condition, pageable);
+        return postRepository.searchPosts(condition, pageable);
     }
 }

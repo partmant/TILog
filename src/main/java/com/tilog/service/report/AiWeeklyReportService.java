@@ -5,9 +5,9 @@ import com.tilog.dto.report.TechStackDistributionData;
 import com.tilog.dto.report.WeeklySummaryData;
 import com.tilog.entity.AiWeeklyReport;
 import com.tilog.entity.Member;
-import com.tilog.entity.enums.Difficulty;
+import com.tilog.entity.Difficulty;
 import com.tilog.repository.AiWeeklyReportRepository;
-import com.tilog.repository.TilPostRepository;
+import com.tilog.repository.PostRepository;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,7 +22,7 @@ import java.util.*;
 @Transactional(readOnly = true)
 public class AiWeeklyReportService {
 
-    private final TilPostRepository tilPostRepository;
+    private final PostRepository postRepository;
     private final AiWeeklyReportRepository aiWeeklyReportRepository;
     private final EntityManager entityManager;
 
@@ -80,13 +80,13 @@ public class AiWeeklyReportService {
 
     private WeeklySummaryData buildWeeklySummary(Long memberId, LocalDateTime from, LocalDateTime to) {
         // COUNT + SUM — 항상 1행 반환
-        Object[] row = tilPostRepository.findWeeklySummary(memberId, from, to).get(0);
+        Object[] row = postRepository.findWeeklySummary(memberId, from, to).get(0);
         int totalPosts = ((Long) row[0]).intValue();
         int totalTime  = ((Long) row[1]).intValue();
 
         // 난이도별 분포
         Map<String, Integer> difficultyDist = new LinkedHashMap<>();
-        tilPostRepository.findDifficultyDistribution(memberId, from, to).forEach(r -> {
+        postRepository.findDifficultyDistribution(memberId, from, to).forEach(r -> {
             Difficulty d = (Difficulty) r[0];
             if (d != null) difficultyDist.put(d.name(), ((Long) r[1]).intValue());
         });
@@ -101,7 +101,7 @@ public class AiWeeklyReportService {
     private TechStackDistributionData buildTechStackDistribution(Long memberId,
                                                                   LocalDateTime from,
                                                                   LocalDateTime to) {
-        List<Object[]> tagResult = tilPostRepository.findTagDistribution(memberId, from, to);
+        List<Object[]> tagResult = postRepository.findTagDistribution(memberId, from, to);
 
         Map<String, Integer> tagCounts      = new LinkedHashMap<>();
         Map<String, Integer> categoryCounts = new LinkedHashMap<>();

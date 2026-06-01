@@ -132,6 +132,23 @@
 
     <build>
         <plugins>
+            <!-- Q클래스 생성 경로를 컴파일 소스 루트에 추가 -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>add-querydsl-sources</id>
+                        <phase>generate-sources</phase>
+                        <goals><goal>add-source</goal></goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/generated-sources/annotations</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
@@ -160,6 +177,16 @@
                                     <groupId>org.projectlombok</groupId>
                                     <artifactId>lombok</artifactId>
                                 </path>
+                                <path>
+                                    <groupId>com.querydsl</groupId>
+                                    <artifactId>querydsl-apt</artifactId>
+                                    <version>${querydsl.version}</version>
+                                    <classifier>jakarta</classifier>
+                                </path>
+                                <path>
+                                    <groupId>jakarta.persistence</groupId>
+                                    <artifactId>jakarta.persistence-api</artifactId>
+                                </path>
                             </annotationProcessorPaths>
                         </configuration>
                     </execution>
@@ -174,6 +201,16 @@
                                 <path>
                                     <groupId>org.projectlombok</groupId>
                                     <artifactId>lombok</artifactId>
+                                </path>
+                                <path>
+                                    <groupId>com.querydsl</groupId>
+                                    <artifactId>querydsl-apt</artifactId>
+                                    <version>${querydsl.version}</version>
+                                    <classifier>jakarta</classifier>
+                                </path>
+                                <path>
+                                    <groupId>jakarta.persistence</groupId>
+                                    <artifactId>jakarta.persistence-api</artifactId>
                                 </path>
                             </annotationProcessorPaths>
                         </configuration>

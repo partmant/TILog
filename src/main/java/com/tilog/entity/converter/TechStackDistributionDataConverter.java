@@ -8,7 +8,8 @@ import jakarta.persistence.Converter;
 import org.springframework.util.StringUtils;
 
 @Converter
-public class TechStackDistributionDataConverter implements AttributeConverter<TechStackDistributionData, String> {
+public class
+TechStackDistributionDataConverter implements AttributeConverter<TechStackDistributionData, String> {
 
     private static final ObjectMapper om = new ObjectMapper();
 

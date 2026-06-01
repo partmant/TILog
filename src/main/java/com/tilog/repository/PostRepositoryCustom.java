@@ -5,7 +5,7 @@ import com.tilog.dto.TilPostSummaryDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-public interface TilPostRepositoryCustom {
+public interface PostRepositoryCustom {
 
     Page<TilPostSummaryDto> searchPosts(TilPostSearchCondition condition, Pageable pageable);
 }

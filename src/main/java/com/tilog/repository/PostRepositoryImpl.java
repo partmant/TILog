@@ -12,9 +12,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tilog.dto.TilPostSearchCondition;
 import com.tilog.dto.TilPostSummaryDto;
 import com.tilog.dto.TilSortType;
-import com.tilog.entity.*;
-import com.tilog.entity.enums.Difficulty;
-import com.tilog.entity.enums.Visibility;
+import com.tilog.entity.*;  // Q클래스 포함 (QPost, QMember, QPostTag, QTag, QTilPostLike, QTilComment 등)
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -27,16 +25,17 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
-public class TilPostRepositoryImpl implements TilPostRepositoryCustom {
+public class PostRepositoryImpl implements PostRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
 
-    // Q클래스 static 인스턴스 (mvnw compile 후 target/generated-sources 에 생성됨)
-    private static final QTilPost qPost     = QTilPost.tilPost;
-    private static final QMember qMember   = QMember.member;
-    private static final QTilPostTag qPostTag = QTilPostTag.tilPostTag;
-    private static final QTag qTag         = QTag.tag;
-    private static final QTilPostLike qLike = QTilPostLike.tilPostLike;
+    // Q클래스 — mvnw compile 후 target/generated-sources 에 생성됨
+    // Post.id (PK 컬럼명 post_id, 필드명 id), Post.isDeleted 주의
+    private static final QPost qPost         = QPost.post;
+    private static final QMember qMember     = QMember.member;
+    private static final QPostTag qPostTag   = QPostTag.postTag;
+    private static final QTag qTag           = QTag.tag;
+    private static final QTilPostLike qLike  = QTilPostLike.tilPostLike;
     private static final QTilComment qComment = QTilComment.tilComment;
 
     // ===== 공개 API =====
@@ -59,21 +58,20 @@ public class TilPostRepositoryImpl implements TilPostRepositoryCustom {
 
     private List<TilPostSummaryDto> fetchContent(TilPostSearchCondition cond, Pageable pageable) {
 
-        // SELECT 절에 포함할 좋아요/댓글 서브쿼리 (표시용)
         JPQLQuery<Long> likeSubQ = JPAExpressions
                 .select(qLike.postLikeId.count())
                 .from(qLike)
-                .where(qLike.post.postId.eq(qPost.postId));
+                .where(qLike.post.id.eq(qPost.id));   // Post.id (PK 필드명)
 
         JPQLQuery<Long> commentSubQ = JPAExpressions
                 .select(qComment.commentId.count())
                 .from(qComment)
-                .where(qComment.post.postId.eq(qPost.postId),
-                        qComment.deleted.isFalse());
+                .where(qComment.post.id.eq(qPost.id),
+                        qComment.isDeleted.isFalse());  // TilComment.isDeleted
 
         return queryFactory
                 .select(Projections.constructor(TilPostSummaryDto.class,
-                        qPost.postId,
+                        qPost.id,               // Post.id → TilPostSummaryDto.postId
                         qPost.title,
                         qMember.nickname,
                         qPost.difficulty,
@@ -94,7 +92,7 @@ public class TilPostRepositoryImpl implements TilPostRepositoryCustom {
 
     private long fetchCount(TilPostSearchCondition cond) {
         Long count = queryFactory
-                .select(qPost.postId.count())
+                .select(qPost.id.count())       // Post.id
                 .from(qPost)
                 .join(qPost.member, qMember)
                 .where(buildConditions(cond))
@@ -106,14 +104,14 @@ public class TilPostRepositoryImpl implements TilPostRepositoryCustom {
 
     private Map<Long, List<String>> fetchTagsByPostIds(List<Long> postIds) {
         return queryFactory
-                .select(qPostTag.post.postId, qTag.name)
+                .select(qPostTag.post.id, qTag.name)    // PostTag.post.id
                 .from(qPostTag)
                 .join(qPostTag.tag, qTag)
-                .where(qPostTag.post.postId.in(postIds))
+                .where(qPostTag.post.id.in(postIds))
                 .fetch()
                 .stream()
                 .collect(Collectors.groupingBy(
-                        t -> t.get(qPostTag.post.postId),
+                        t -> t.get(qPostTag.post.id),
                         Collectors.mapping(t -> t.get(qTag.name), Collectors.toList())
                 ));
     }
@@ -123,7 +121,7 @@ public class TilPostRepositoryImpl implements TilPostRepositoryCustom {
     private Predicate[] buildConditions(TilPostSearchCondition cond) {
         return new Predicate[] {
                 qPost.visibility.eq(Visibility.PUBLIC),
-                qPost.deleted.isFalse(),
+                qPost.isDeleted.isFalse(),              // Post.isDeleted
                 keywordContains(cond.getKeyword()),
                 nicknameEq(cond.getNickname()),
                 tagNameExists(cond.getTagName()),
@@ -132,40 +130,32 @@ public class TilPostRepositoryImpl implements TilPostRepositoryCustom {
         };
     }
 
-    /** 1) 제목/본문 키워드 — LIKE %keyword% */
     private BooleanExpression keywordContains(String keyword) {
         if (!StringUtils.hasText(keyword)) return null;
         return qPost.title.containsIgnoreCase(keyword)
                 .or(qPost.content.containsIgnoreCase(keyword));
     }
 
-    /** 2) 작성자 닉네임 — 정확히 일치 */
     private BooleanExpression nicknameEq(String nickname) {
         if (!StringUtils.hasText(nickname)) return null;
         return qMember.nickname.eq(nickname);
     }
 
-    /**
-     * 3) 기술 스택 태그 — EXISTS 서브쿼리
-     *    idx_tilposttag_tag_til (tag_id, post_id) 인덱스 활용
-     */
     private BooleanExpression tagNameExists(String tagName) {
         if (!StringUtils.hasText(tagName)) return null;
         return JPAExpressions
                 .selectOne()
                 .from(qPostTag)
                 .join(qPostTag.tag, qTag)
-                .where(qPostTag.post.postId.eq(qPost.postId),
+                .where(qPostTag.post.id.eq(qPost.id),   // PostTag.post.id
                         qTag.name.eq(tagName))
                 .exists();
     }
 
-    /** 4) 난이도 필터 — idx_til_post_difficulty_created_at 인덱스 활용 */
     private BooleanExpression difficultyEq(Difficulty difficulty) {
         return difficulty != null ? qPost.difficulty.eq(difficulty) : null;
     }
 
-    /** 5) 작성 기간 필터 — idx_til_post_visibility_created_at 인덱스 활용 */
     private BooleanExpression createdAtBetween(LocalDate from, LocalDate to) {
         if (from == null && to == null) return null;
         if (from == null) return qPost.createdAt.loe(to.atTime(23, 59, 59));
@@ -184,7 +174,7 @@ public class TilPostRepositoryImpl implements TilPostRepositoryCustom {
                             (Expression<Long>) JPAExpressions
                                     .select(qLike.postLikeId.count())
                                     .from(qLike)
-                                    .where(qLike.post.postId.eq(qPost.postId))),
+                                    .where(qLike.post.id.eq(qPost.id))),  // Post.id
                     qPost.createdAt.desc()
             };
             case COMMENTS -> new OrderSpecifier[] {
@@ -192,8 +182,8 @@ public class TilPostRepositoryImpl implements TilPostRepositoryCustom {
                             (Expression<Long>) JPAExpressions
                                     .select(qComment.commentId.count())
                                     .from(qComment)
-                                    .where(qComment.post.postId.eq(qPost.postId),
-                                            qComment.deleted.isFalse())),
+                                    .where(qComment.post.id.eq(qPost.id),  // Post.id
+                                            qComment.isDeleted.isFalse())),  // TilComment.isDeleted
                     qPost.createdAt.desc()
             };
             default -> new OrderSpecifier[] { qPost.createdAt.desc() };

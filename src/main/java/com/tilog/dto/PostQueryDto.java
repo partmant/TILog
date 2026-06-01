@@ -4,6 +4,8 @@ import com.tilog.entity.Post;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.List;
+
 // 게시글 로직 처리 서비스
 
 public class PostQueryDto {
@@ -19,8 +21,9 @@ public class PostQueryDto {
         private Integer viewCount;
         private Integer studyTime;
         private String nickname;
+        private List<String> tagNames;
 
-        public static ListResponse from(Post post) {
+        public static ListResponse from(Post post, List<String> tagNames) {
             return ListResponse.builder()
                     .postId(post.getId())
                     .title(post.getTitle())
@@ -29,6 +32,7 @@ public class PostQueryDto {
                     .viewCount(post.getViewCount())
                     .studyTime(post.getStudyTime())
                     .nickname(post.getMember().getNickname())
+                    .tagNames(tagNames)
                     .build();
         }
     }
@@ -45,8 +49,9 @@ public class PostQueryDto {
         private Integer viewCount;
         private Integer studyTime;
         private String nickname;
+        private List<String> tagNames;
 
-        public static DetailResponse from(Post post) {
+        public static DetailResponse from(Post post, List<String> tagNames) {
             return DetailResponse.builder()
                     .postId(post.getId())
                     .title(post.getTitle())
@@ -56,6 +61,7 @@ public class PostQueryDto {
                     .nickname(post.getMember().getNickname())
                     .viewCount(post.getViewCount())
                     .studyTime(post.getStudyTime())
+                    .tagNames(tagNames)
                     .build();
         }
     }

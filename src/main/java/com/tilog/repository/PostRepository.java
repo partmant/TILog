@@ -12,4 +12,5 @@ import java.util.List;
 public interface PostRepository extends JpaRepository<Post, Long> {
     //  삭제 안된 게시글 목록 조회
     List<Post> findByIsDeletedFalse();
+
 }

@@ -2,6 +2,8 @@ package com.tilog.repository;
 
 import com.tilog.entity.PostTag;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -11,8 +13,10 @@ import java.util.List;
 @Repository
 public interface PostTagRepository extends JpaRepository<PostTag, Long> {
     // 게시글 ID로 태그 매핑 목록 조회
-    List<PostTag> findByPostId(Long postId);
+    List<PostTag> findByPost_Id(Long postId);
 
+    @Modifying
+    @Query("delete from PostTag pt where pt.post.id = :postId")
     // 게시글 ID로 기존 태그 매핑 삭제
-    void deleteByPostId(Long postId);
+    void deleteByPost_Id(Long postId);
 }

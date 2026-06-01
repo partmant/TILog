@@ -1,8 +1,8 @@
 package com.tilog.service;
 
-import com.tilog.dto.request.FeedbackRequestDtoRequest;
-import com.tilog.dto.request.FeedbackWriteRequestDto;
-import com.tilog.dto.response.FeedbackDetailResponseDto;
+import com.tilog.dto.feedback.FeedbackRequestDtoRequest;
+import com.tilog.dto.feedback.FeedbackWriteRequestDto;
+import com.tilog.dto.feedback.FeedbackDetailResponseDto;
 import com.tilog.entity.*;
 import com.tilog.repository.MemberRepository;
 import com.tilog.repository.MentorFeedbackRepository;
@@ -10,8 +10,6 @@ import com.tilog.repository.TilPostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,7 +24,7 @@ public class FeedbackService {
         Member member = memberRepository.findById(feedbackRequestDtoRequest.getRequestorId())
                 .orElseThrow(() -> new IllegalArgumentException("회원 정보를 찾을 수 없습니다."));
 
-        if (member.getRole() != Role.PREMIUM) {
+        if (member.getRole() != MemberRole.PREMIUM) {
             throw new IllegalArgumentException("현재 회원 Role로는 접근할 수 없습니다.");
         }
 
@@ -40,7 +38,7 @@ public class FeedbackService {
         Member mentor = memberRepository.findById(feedbackRequestDtoRequest.getMentorId())
                 .orElseThrow(() -> new IllegalArgumentException("회원 정보를 찾을 수 없습니다."));
 
-        if (mentor.getRole() != Role.MENTOR) {
+        if (mentor.getRole() != MemberRole.MENTOR) {
             throw new IllegalArgumentException("현재 회원 Role로는 접근할 수 없습니다.");
         }
 

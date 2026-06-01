@@ -1,8 +1,8 @@
 package com.tilog.controller;
 
-import com.tilog.dto.request.FeedbackRequestDtoRequest;
-import com.tilog.dto.request.FeedbackWriteRequestDto;
-import com.tilog.dto.response.FeedbackDetailResponseDto;
+import com.tilog.dto.feedback.FeedbackRequestDtoRequest;
+import com.tilog.dto.feedback.FeedbackWriteRequestDto;
+import com.tilog.dto.feedback.FeedbackDetailResponseDto;
 import com.tilog.service.FeedbackService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

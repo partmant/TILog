@@ -1,10 +1,10 @@
 package com.tilog.service;
 
-import com.tilog.dto.request.MemberRoleChangeRequest;
-import com.tilog.dto.response.AdminMemberDetailResponse;
-import com.tilog.dto.response.AdminMemberListResponse;
+import com.tilog.dto.admin.MemberRoleChangeRequest;
+import com.tilog.dto.admin.AdminMemberDetailResponse;
+import com.tilog.dto.admin.AdminMemberListResponse;
 import com.tilog.entity.Member;
-import com.tilog.entity.Role;
+import com.tilog.entity.MemberRole;
 import com.tilog.entity.TilPost;
 import com.tilog.repository.MemberRepository;
 import com.tilog.repository.TilPostRepository;
@@ -33,7 +33,7 @@ public class AdminService {
                         member.getEmail(),
                         member.getNickname(),
                         member.getRole().name(),
-                        member.getIsBanned(),
+                        member.isBanned(),
                         member.getCreatedAt()
                 ));
 
@@ -44,7 +44,7 @@ public class AdminService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("회원 정보가 존재하지 않습니다."));
 
-        AdminMemberDetailResponse memberDetail = new AdminMemberDetailResponse(member.getId(), member.getEmail(), member.getNickname(), member.getRole().name(), member.getIsBanned(), member.getBannedUntil(), member.getCreatedAt());
+        AdminMemberDetailResponse memberDetail = new AdminMemberDetailResponse(member.getId(), member.getEmail(), member.getNickname(), member.getRole().name(), member.isBanned(), member.getBannedUntil(), member.getCreatedAt());
 
         return memberDetail;
     }
@@ -54,7 +54,7 @@ public class AdminService {
         Member member = memberRepository.findById(request.getMemberId())
                 .orElseThrow(() -> new IllegalArgumentException("회원 정보가 존재하지 않습니다."));
 
-        Role role = Role.valueOf(request.getRole());
+        MemberRole role = MemberRole.valueOf(request.getRole());
         member.changeRole(role);
     }
 

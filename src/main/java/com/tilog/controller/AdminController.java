@@ -1,8 +1,8 @@
 package com.tilog.controller;
 
-import com.tilog.dto.request.MemberRoleChangeRequest;
-import com.tilog.dto.response.AdminMemberDetailResponse;
-import com.tilog.dto.response.AdminMemberListResponse;
+import com.tilog.dto.admin.MemberRoleChangeRequest;
+import com.tilog.dto.admin.AdminMemberDetailResponse;
+import com.tilog.dto.admin.AdminMemberListResponse;
 import com.tilog.service.AdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

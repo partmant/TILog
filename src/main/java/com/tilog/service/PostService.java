@@ -1,13 +1,9 @@
 package com.tilog.service;
 
-import com.tilog.entity.Member;
-import com.tilog.repository.MemberRepository;
+import com.tilog.entity.*;
+import com.tilog.repository.*;
 import com.tilog.dto.PostCommandDto;
 import com.tilog.dto.PostQueryDto;
-import com.tilog.entity.Post;
-import com.tilog.entity.PostImage;
-import com.tilog.repository.PostImageRepository;
-import com.tilog.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,10 +35,28 @@ public class PostService {
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
     private final PostImageRepository postImageRepository;
+    private final TagRepository tagRepository;
+    private final PostTagRepository postTagRepository;
 
     // 게시글 목록 조회
     public List<PostQueryDto.ListResponse> getPostList(){
-        return postRepository.findByIsDeletedFalse().stream().map(post -> PostQueryDto.ListResponse.from(post)).toList();
+        // TODO: 로그인 기능 병합 후 비공개 게시글 필터링 적용
+        // Long loginMemberId = loginMember.getId();
+        //
+        // .filter(post ->
+        //         post.getVisibility() == Visibility.PUBLIC ||
+        //         post.getMember().getId().equals(loginMemberId)
+        // )
+
+        return postRepository.findByIsDeletedFalse().stream()
+                .map(post -> {
+                    List<String> tagNames = postTagRepository.findByPost_Id(post.getId()).stream()
+                            .map(postTag -> postTag.getTag().getName())
+                            .toList();
+
+                    return PostQueryDto.ListResponse.from(post, tagNames);
+                })
+                .toList();
     }
 
     // 게시글 상세 조회
@@ -54,14 +68,15 @@ public class PostService {
             throw new IllegalArgumentException("삭제된 게시글입니다.");
         }
 
-        // TODO: 로그인 기능 병합 후 주석 해제
-        // Long loginMemberId = 로그인한_회원_ID;
+        // TODO: 로그인 기능 병합 후 비공개 게시글 접근 제어 적용
+        // Long loginMemberId = loginMember.getId();
+        // boolean isOwner = post.getMember().getId().equals(loginMemberId);
         //
-        // if (
-        //     post.getVisibility() == Visibility.PRIVATE &&
-        //     !post.getMember().getId().equals(loginMemberId)
-        // ) {
-        //     throw new IllegalArgumentException("비공개 게시글입니다.");
+        // if (post.getVisibility() == Visibility.PRIVATE && !isOwner) {
+        //     throw new org.springframework.web.server.ResponseStatusException(
+        //             org.springframework.http.HttpStatus.FORBIDDEN,
+        //             "비공개 게시글입니다."
+        //     );
         // }
 
         if (increaseViewCount) {
@@ -69,7 +84,12 @@ public class PostService {
             post.increaseViewCount();
         }
 
-        return PostQueryDto.DetailResponse.from(post);
+        // 게시글에 연결된 태그 이름 목록 조회
+        List<String> tagNames = postTagRepository.findByPost_Id(postId).stream()
+                .map(postTag -> postTag.getTag().getName())
+                .toList();
+
+        return PostQueryDto.DetailResponse.from(post, tagNames);
     }
 
     // 게시글 작성
@@ -78,6 +98,8 @@ public class PostService {
 
         // 임시 회원 ID
         Long memberId = 1L;
+
+        // TODO: 로그인 기능 병합 후 작성자 게시글 작성 적용
         // Long memberId = loginMember.getId();
 
         Member member = memberRepository.findById(memberId)
@@ -93,6 +115,9 @@ public class PostService {
         );
 
         Post savedPost = postRepository.save(post);
+
+        // 게시글 태그 연결
+        connectPostTags(savedPost, request.getTagNames());
 
         // 게시글 이미지 연결
         connectPostImages(savedPost.getId(), request.getContent());
@@ -126,6 +151,11 @@ public class PostService {
                 request.getStudyTime()
         );
 
+        // 게시글 태그 갱신
+        postTagRepository.deleteByPost_Id(post.getId());
+        postTagRepository.flush();
+        connectPostTags(post, request.getTagNames());
+
         // 게시글 이미지 연결
         connectPostImages(post.getId(), request.getContent());
 
@@ -150,6 +180,26 @@ public class PostService {
         // }
 
         post.delete();
+    }
+
+    // 게시글 태그 연결
+    private void connectPostTags(Post post, List<String> tagNames) {
+        if (tagNames == null || tagNames.isEmpty()) {
+            return;
+        }
+
+        for (String tagName : tagNames) {
+            if (tagName == null || tagName.isBlank()) {
+                continue;
+            }
+
+            String normalizedTagName = tagName.trim();
+
+            Tag tag = tagRepository.findByName(normalizedTagName)
+                    .orElseGet(() -> tagRepository.save(Tag.create(normalizedTagName)));
+
+            postTagRepository.save(PostTag.create(post, tag));
+        }
     }
 
     // 게시글 본문에 포함된 이미지와 게시글 연결

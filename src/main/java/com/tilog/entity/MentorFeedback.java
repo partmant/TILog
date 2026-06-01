@@ -1,0 +1,48 @@
+package com.tilog.entity;
+
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class MentorFeedback {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long feedbackId;
+
+    @ManyToOne
+    @JoinColumn(name = "til_id")
+    private TilPost til;
+
+    @ManyToOne
+    @JoinColumn(name = "requester_id")
+    private Member requestor;
+
+    @ManyToOne
+    @JoinColumn(name = "mentor_id")
+    private Member mentor;
+
+    @Enumerated(EnumType.STRING)
+    private Status status;
+
+    private int technicalScore;
+    private int flowScore;
+    private int designScore;
+    private String comment;
+
+    private LocalDateTime requestedAt;
+    private LocalDateTime completedAt;
+
+    public MentorFeedback(TilPost til, Member requestor, Member mentor){
+        this.til = til;
+        this.requestor = requestor;
+        this.mentor = mentor;
+        this.status = Status.PENDING;
+        this.requestedAt = LocalDateTime.now();
+    }
+}

@@ -16,7 +16,7 @@ public interface TilPostRepository extends JpaRepository<TilPost, Long>, TilPost
      */
     @Query("SELECT COUNT(p), COALESCE(SUM(p.studyTime), 0) " +
            "FROM TilPost p " +
-           "WHERE p.member.memberId = :memberId " +
+           "WHERE p.member.id = :memberId " +
            "AND p.createdAt BETWEEN :from AND :to " +
            "AND p.deleted = false")
     List<Object[]> findWeeklySummary(@Param("memberId") Long memberId,
@@ -29,7 +29,7 @@ public interface TilPostRepository extends JpaRepository<TilPost, Long>, TilPost
      */
     @Query("SELECT p.difficulty, COUNT(p) " +
            "FROM TilPost p " +
-           "WHERE p.member.memberId = :memberId " +
+           "WHERE p.member.id = :memberId " +
            "AND p.createdAt BETWEEN :from AND :to " +
            "AND p.deleted = false " +
            "GROUP BY p.difficulty")
@@ -44,7 +44,7 @@ public interface TilPostRepository extends JpaRepository<TilPost, Long>, TilPost
     @Query("SELECT pt.tag.name, COUNT(p) " +
            "FROM TilPost p " +
            "JOIN TilPostTag pt ON pt.post = p " +
-           "WHERE p.member.memberId = :memberId " +
+           "WHERE p.member.id = :memberId " +
            "AND p.createdAt BETWEEN :from AND :to " +
            "AND p.deleted = false " +
            "GROUP BY pt.tag.name")

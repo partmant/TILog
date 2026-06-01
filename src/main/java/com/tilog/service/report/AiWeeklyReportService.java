@@ -33,7 +33,7 @@ public class AiWeeklyReportService {
     @Transactional
     public AiWeeklyReportResponse generateReport(Long memberId, LocalDate weekStartDate) {
         return aiWeeklyReportRepository
-                .findByMemberMemberIdAndWeekStartDate(memberId, weekStartDate)
+                .findByMemberIdAndWeekStartDate(memberId, weekStartDate)
                 .map(this::toResponse)
                 .orElseGet(() -> createAndSave(memberId, weekStartDate));
     }
@@ -50,7 +50,7 @@ public class AiWeeklyReportService {
 
         // 지난주 리포트 (없으면 null — 첫 주)
         AiWeeklyReport lastReport = aiWeeklyReportRepository
-                .findTopByMemberMemberIdAndWeekStartDateBeforeOrderByWeekStartDateDesc(memberId, weekStartDate)
+                .findTopByMemberIdAndWeekStartDateBeforeOrderByWeekStartDateDesc(memberId, weekStartDate)
                 .orElse(null);
 
         WeeklySummaryData lastWeekSummary = lastReport != null

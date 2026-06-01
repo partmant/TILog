@@ -43,9 +43,9 @@ class TilPostRepositoryImplTest {
         em.persist(alice);
         em.persist(bob);
 
-        springTag = new Tag("Spring");
-        reactTag  = new Tag("React");
-        jpaTag    = new Tag("JPA");
+        springTag = Tag.create("Spring");
+        reactTag  = Tag.create("React");
+        jpaTag    = Tag.create("JPA");
         em.persist(springTag);
         em.persist(reactTag);
         em.persist(jpaTag);

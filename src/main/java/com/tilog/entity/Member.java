@@ -114,4 +114,8 @@ public class Member extends BaseTimeEntity {
 //    @UpdateTimestamp
 //    @Column(name = "updated_at")
 //    private LocalDateTime updatedAt;
+
+    public void changeRole(MemberRole newRole){
+        this.role = newRole;
+    }
 }

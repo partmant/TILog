@@ -12,7 +12,8 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tilog.dto.TilPostSearchCondition;
 import com.tilog.dto.TilPostSummaryDto;
 import com.tilog.dto.TilSortType;
-import com.tilog.entity.*;  // Q클래스 포함 (QPost, QMember, QPostTag, QTag, QTilPostLike, QTilComment 등)
+import com.tilog.entity.enums.Difficulty;
+import com.tilog.entity.enums.Visibility;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;

@@ -1,4 +1,4 @@
-package com.tilog.entity;
+package com.tilog.entity.enums;
 
 // 게시글 난이도 Difficulty Enum
 

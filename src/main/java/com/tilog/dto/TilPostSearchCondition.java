@@ -1,6 +1,6 @@
 package com.tilog.dto;
 
-import com.tilog.entity.Difficulty;
+import com.tilog.entity.enums.Difficulty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

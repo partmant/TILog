@@ -5,7 +5,7 @@ import com.tilog.dto.report.TechStackDistributionData;
 import com.tilog.dto.report.WeeklySummaryData;
 import com.tilog.entity.AiWeeklyReport;
 import com.tilog.entity.Member;
-import com.tilog.entity.Difficulty;
+import com.tilog.entity.enums.Difficulty;
 import com.tilog.repository.AiWeeklyReportRepository;
 import com.tilog.repository.PostRepository;
 import jakarta.persistence.EntityManager;

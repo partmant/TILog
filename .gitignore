@@ -34,3 +34,14 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# 데이터베이스 접속 정보 및 보안 키가 담긴 파일들
+application-*.yml
+application-*.properties
+
+# 로그 파일
+*.log
+
+# 런타임에 생성되는 폴더/파일
+out/
+*.class

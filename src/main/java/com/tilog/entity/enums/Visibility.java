@@ -1,4 +1,4 @@
-package com.tilog.entity;
+package com.tilog.entity.enums;
 
 // 게시글 공개 / 비공개 Enum
 

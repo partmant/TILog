@@ -1,7 +1,7 @@
 package com.tilog.dto;
 
-import com.tilog.entity.Difficulty;
-import com.tilog.entity.Visibility;
+import com.tilog.entity.enums.Difficulty;
+import com.tilog.entity.enums.Visibility;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 

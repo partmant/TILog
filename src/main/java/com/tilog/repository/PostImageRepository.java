@@ -1,6 +1,6 @@
-package com.tilog.domain.post.repository;
+package com.tilog.repository;
 
-import com.tilog.domain.post.entity.PostImage;
+import com.tilog.entity.PostImage;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

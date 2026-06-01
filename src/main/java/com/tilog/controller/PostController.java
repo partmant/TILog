@@ -1,8 +1,8 @@
-package com.tilog.domain.post.controller;
+package com.tilog.controller;
 
-import com.tilog.domain.post.dto.PostCommandDto;
-import com.tilog.domain.post.dto.PostQueryDto;
-import com.tilog.domain.post.service.PostService;
+import com.tilog.dto.PostCommandDto;
+import com.tilog.dto.PostQueryDto;
+import com.tilog.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

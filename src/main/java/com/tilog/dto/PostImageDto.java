@@ -1,4 +1,4 @@
-package com.tilog.domain.post.dto;
+package com.tilog.dto;
 
 // 게시글 이미지 DTO
 

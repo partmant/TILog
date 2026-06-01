@@ -1,6 +1,6 @@
-package com.tilog.domain.tag.repository;
+package com.tilog.repository;
 
-import com.tilog.domain.tag.entity.Tag;
+import com.tilog.entity.Tag;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

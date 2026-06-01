@@ -1,6 +1,6 @@
-package com.tilog.domain.member.repository;
+package com.tilog.repository;
 
-import com.tilog.domain.member.entity.Member;
+import com.tilog.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {

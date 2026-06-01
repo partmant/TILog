@@ -1,4 +1,4 @@
-package com.tilog.domain.member.entity;
+package com.tilog.entity;
 
 public enum Role {
     USER, PREMIUM, MENTOR, ADMIN

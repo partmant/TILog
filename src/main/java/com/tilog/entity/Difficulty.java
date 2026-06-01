@@ -1,4 +1,4 @@
-package com.tilog.domain.post.entity;
+package com.tilog.entity;
 
 // 게시글 난이도 Difficulty Enum
 

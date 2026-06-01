@@ -1,6 +1,6 @@
-package com.tilog.domain.post.entity;
+package com.tilog.entity;
 
-import com.tilog.domain.member.entity.Member;
+import com.tilog.entity.Member;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

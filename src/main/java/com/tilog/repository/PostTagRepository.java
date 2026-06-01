@@ -1,6 +1,6 @@
-package com.tilog.domain.post.repository;
+package com.tilog.repository;
 
-import com.tilog.domain.post.entity.PostTag;
+import com.tilog.entity.PostTag;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

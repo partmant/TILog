@@ -1,13 +1,13 @@
-package com.tilog.domain.post.service;
+package com.tilog.service;
 
-import com.tilog.domain.member.entity.Member;
-import com.tilog.domain.member.repository.MemberRepository;
-import com.tilog.domain.post.dto.PostCommandDto;
-import com.tilog.domain.post.dto.PostQueryDto;
-import com.tilog.domain.post.entity.Post;
-import com.tilog.domain.post.entity.PostImage;
-import com.tilog.domain.post.repository.PostImageRepository;
-import com.tilog.domain.post.repository.PostRepository;
+import com.tilog.entity.Member;
+import com.tilog.repository.MemberRepository;
+import com.tilog.dto.PostCommandDto;
+import com.tilog.dto.PostQueryDto;
+import com.tilog.entity.Post;
+import com.tilog.entity.PostImage;
+import com.tilog.repository.PostImageRepository;
+import com.tilog.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

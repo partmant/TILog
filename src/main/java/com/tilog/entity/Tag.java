@@ -1,4 +1,4 @@
-package com.tilog.domain.tag.entity;
+package com.tilog.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

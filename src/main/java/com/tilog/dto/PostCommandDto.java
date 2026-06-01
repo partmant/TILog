@@ -1,7 +1,7 @@
-package com.tilog.domain.post.dto;
+package com.tilog.dto;
 
-import com.tilog.domain.post.entity.Difficulty;
-import com.tilog.domain.post.entity.Visibility;
+import com.tilog.entity.Difficulty;
+import com.tilog.entity.Visibility;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 

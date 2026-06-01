@@ -1,7 +1,7 @@
-package com.tilog.domain.post.controller;
+package com.tilog.controller;
 
-import com.tilog.domain.post.dto.PostImageDto;
-import com.tilog.domain.post.service.PostImageService;
+import com.tilog.dto.PostImageDto;
+import com.tilog.service.PostImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

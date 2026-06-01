@@ -1,4 +1,4 @@
-package com.tilog.domain.member.entity;
+package com.tilog.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

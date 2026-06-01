@@ -1,6 +1,6 @@
-package com.tilog.domain.post.dto;
+package com.tilog.dto;
 
-import com.tilog.domain.post.entity.Post;
+import com.tilog.entity.Post;
 import lombok.Builder;
 import lombok.Getter;
 

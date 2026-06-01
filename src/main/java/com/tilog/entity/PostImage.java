@@ -1,4 +1,4 @@
-package com.tilog.domain.post.entity;
+package com.tilog.entity;
 
 // TIL 게시글 이미지 엔티티
 

@@ -1,8 +1,8 @@
-package com.tilog.domain.post.service;
+package com.tilog.service;
 
-import com.tilog.domain.post.dto.PostImageDto;
-import com.tilog.domain.post.entity.PostImage;
-import com.tilog.domain.post.repository.PostImageRepository;
+import com.tilog.dto.PostImageDto;
+import com.tilog.entity.PostImage;
+import com.tilog.repository.PostImageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

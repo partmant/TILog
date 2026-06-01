@@ -1,6 +1,6 @@
-package com.tilog.domain.post.entity;
+package com.tilog.entity;
 
-import com.tilog.domain.tag.entity.Tag;
+import com.tilog.entity.Tag;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

@@ -2,6 +2,7 @@ package com.tilog.service;
 
 import com.tilog.dto.request.FeedbackRequestDtoRequest;
 import com.tilog.dto.request.FeedbackWriteRequestDto;
+import com.tilog.dto.response.FeedbackDetailResponseDto;
 import com.tilog.entity.*;
 import com.tilog.repository.MemberRepository;
 import com.tilog.repository.MentorFeedbackRepository;
@@ -60,5 +61,15 @@ public class FeedbackService {
         }
 
         findFeedback.updateFeedback(feedbackWriteRequestDto.getTechnicalScore(), feedbackWriteRequestDto.getFlowScore(), feedbackWriteRequestDto.getDesignScore(), feedbackWriteRequestDto.getComment());
+    }
+
+    @Transactional(readOnly = true)
+    public FeedbackDetailResponseDto getFeedbackDetail(Long feedbackId){    // 피드백 상세 조회
+        MentorFeedback findFeedback = mentorFeedbackRepository.findById(feedbackId)
+                .orElseThrow(() -> new IllegalArgumentException("피드백 정보를 찾을 수 없습니다."));
+
+        FeedbackDetailResponseDto feedbackDetail = new FeedbackDetailResponseDto(findFeedback.getFeedbackId(), findFeedback.getTil().getPostId(), findFeedback.getMentor().getId(), findFeedback.getStatus(), findFeedback.getTechnicalScore(), findFeedback.getFlowScore(), findFeedback.getDesignScore(), findFeedback.getComment(), findFeedback.getRequestedAt(), findFeedback.getCompletedAt());
+
+        return feedbackDetail;
     }
 }

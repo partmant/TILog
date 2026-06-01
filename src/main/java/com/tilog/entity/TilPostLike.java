@@ -37,10 +37,17 @@ public class TilPostLike {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    public TilPostLike(Post post, Member member) {
+        this.post = post;
+        this.member = member;
+        this.createdAt = LocalDateTime.now();
+    }
+
     public static TilPostLike create(Post post, Member member) {
         TilPostLike like = new TilPostLike();
         like.post = post;
         like.member = member;
+        like.createdAt = LocalDateTime.now();
         return like;
     }
 }

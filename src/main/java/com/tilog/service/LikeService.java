@@ -2,14 +2,14 @@ package com.tilog.service;
 
 import com.tilog.dto.like.LikeResponse;
 import com.tilog.entity.Member;
-import com.tilog.entity.TilPost;
+import com.tilog.entity.Post;
 import com.tilog.entity.TilPostLike;
 import com.tilog.global.exception.CustomException;
 import com.tilog.global.exception.ErrorCode;
 import com.tilog.global.security.SecurityUtil;
 import com.tilog.repository.MemberRepository;
+import com.tilog.repository.PostRepository;
 import com.tilog.repository.TilPostLikeRepository;
-import com.tilog.repository.TilPostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

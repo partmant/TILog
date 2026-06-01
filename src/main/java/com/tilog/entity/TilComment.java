@@ -24,6 +24,7 @@ public class TilComment {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
+//    private TilPost post;
 
     // 1번 담당자가 정의한 Member 엔티티 참조
     @ManyToOne(fetch = FetchType.LAZY)
@@ -35,17 +36,18 @@ public class TilComment {
     @JoinColumn(name = "parent_comment_id")
     private TilComment parentComment;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @Column(nullable = false)
+    @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;
 
     @CreationTimestamp
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @UpdateTimestamp
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     // 생성 (일반 댓글)
@@ -54,6 +56,7 @@ public class TilComment {
         comment.post = post;
         comment.member = member;
         comment.content = content;
+        comment.isDeleted = false;
         return comment;
     }
 
@@ -64,6 +67,7 @@ public class TilComment {
         comment.member = member;
         comment.content = content;
         comment.parentComment = parentComment;
+        comment.isDeleted = false;
         return comment;
     }
 

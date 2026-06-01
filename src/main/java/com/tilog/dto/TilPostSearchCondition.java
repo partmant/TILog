@@ -5,10 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
 @Getter
+@Setter  // @ModelAttribute 바인딩에 필요 — 없으면 모든 파라미터가 null로 무시됨
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

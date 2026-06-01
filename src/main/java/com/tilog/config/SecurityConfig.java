@@ -8,7 +8,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.web.SecurityFilterChain;
 
 /**
- * [임시] 인증 미구현 기간 동안 전체 허용.
+ * [임시] 인증 미구현 기간 동안 전체 허용
  * 추후 교체될 파일
  */
 @Configuration

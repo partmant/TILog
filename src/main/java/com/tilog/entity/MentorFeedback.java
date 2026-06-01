@@ -45,4 +45,13 @@ public class MentorFeedback {
         this.status = Status.PENDING;
         this.requestedAt = LocalDateTime.now();
     }
+
+    public void updateFeedback(int tech, int flow, int design, String comment){
+        this.technicalScore = tech;
+        this.flowScore = flow;
+        this.designScore = design;
+        this.comment = comment;
+        this.status = Status.COMPLETED;
+        this.completedAt = LocalDateTime.now();
+    }
 }

@@ -1,6 +1,7 @@
 package com.tilog.controller;
 
 import com.tilog.dto.request.FeedbackRequestDtoRequest;
+import com.tilog.dto.request.FeedbackWriteRequestDto;
 import com.tilog.service.FeedbackService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,4 +19,11 @@ public class FeedbackController {
         feedbackService.requestFeedback(feedbackRequestDtoRequest);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
+    @PatchMapping("/{feedbackId}")
+    public ResponseEntity<Void> writeFeedback(@PathVariable Long feedbackId, @RequestBody FeedbackWriteRequestDto feedbackWriteRequestDto){
+        feedbackService.writeFeedback(feedbackId, feedbackWriteRequestDto);
+        return ResponseEntity.ok().build();
+    }
+
 }

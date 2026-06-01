@@ -1,9 +1,6 @@
 import { usePostList } from "../../hooks/post/usePostList";
 
-import {
-    categories,
-    difficultyStyle,
-} from "../../constants/post";
+import { difficultyStyle, difficultyBorderStyle } from "../../constants/post";
 
 // 게시글 목록 페이지
 function PostListPage() {
@@ -36,26 +33,11 @@ function PostListPage() {
                 </button>
             </div>
 
-            {/* 카테고리 영역 */}
-            <div className="mt-8 flex gap-3">
-                {categories.map((category) => (
-                    <button
-                        key={category}
-                        className={`rounded-2xl px-5 py-2 text-sm font-bold ${
-                            category === "전체"
-                                ? "bg-purple-500 text-white"
-                                : "bg-slate-100 text-slate-800"
-                        }`}
-                    >
-                        {category}
-                    </button>
-                ))}
-            </div>
-
             {/* 정렬 영역 */}
             <p className="mt-6 font-bold text-gray-600">
                 정렬: 최신순 ▼
             </p>
+
 
             {/* 게시글 목록 */}
             <div className="mt-7 space-y-5">
@@ -67,7 +49,10 @@ function PostListPage() {
                         // 게시글 상세 페이지 이동
                         onClick={() => handleMoveDetail(post.postId)}
 
-                        className="cursor-pointer rounded-2xl border border-gray-100 border-l-4 border-l-indigo-500 bg-white p-6 shadow-sm transition hover:shadow-md"
+                        // 게시글 난이도별 색상 구분
+                        className={`cursor-pointer rounded-2xl border border-gray-100 border-l-4 bg-white p-6 shadow-sm transition hover:shadow-md ${
+                            difficultyBorderStyle[post.difficulty] || difficultyBorderStyle.NORMAL
+                        }`}
                     >
                         <div className="flex items-center justify-between">
                             <div>
@@ -75,6 +60,20 @@ function PostListPage() {
                                 <h3 className="text-xl font-bold">
                                     {post.title}
                                 </h3>
+
+                                {/* 태그 */}
+                                {post.tagNames?.length > 0 && (
+                                    <div className="mt-2 flex flex-wrap gap-2">
+                                        {post.tagNames.map((tag) => (
+                                            <span
+                                                key={tag}
+                                                className="rounded-full bg-purple-50 px-2.5 py-1 text-xs font-semibold text-purple-600"
+                                            >
+                                                #{tag}
+                                            </span>
+                                        ))}
+                                    </div>
+                                )}
 
                                 {/* 게시글 정보 */}
                                 <p className="mt-3 text-sm text-gray-500">

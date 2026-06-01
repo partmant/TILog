@@ -100,6 +100,26 @@ function PostWritePage() {
                     />
                 </div>
 
+                {/* 태그 */}
+                <div>
+                    <label className="mb-2 block text-sm font-bold text-gray-700">
+                        태그
+                    </label>
+
+                    <input
+                        type="text"
+                        name="tags"
+                        value={form.tags}
+                        onChange={handleChange}
+                        placeholder="예: Spring, JPA, React"
+                        className="w-full rounded-2xl border border-gray-200 px-5 py-4 outline-none"
+                    />
+
+                    <p className="mt-2 text-sm text-gray-400">
+                        쉼표(,)로 구분하여 입력해주세요.
+                    </p>
+                </div>
+
                 {/* 공개 여부 */}
                 <div>
                     <label className="mb-2 block text-sm font-bold text-gray-700">

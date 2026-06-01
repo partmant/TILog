@@ -7,21 +7,18 @@
 // 게시글 기본 공개 여부
 export const defaultVisibility = "PUBLIC";
 
-// 게시글 카테고리 목록
-export const categories = [
-    "전체",
-    "Java",
-    "Spring",
-    "DB",
-    "Algorithm",
-    "React",
-];
-
 // 게시글 난이도 색상 스타일
 export const difficultyStyle = {
     EASY: "bg-[#E8F7E7] text-[#62C15B]",
     NORMAL: "bg-indigo-50 text-indigo-500",
     HARD: "bg-[#FDECEC] text-[#E44343]",
+};
+
+// 게시글 난이도 왼쪽 테두리 스타일
+export const difficultyBorderStyle = {
+    EASY: "border-l-[#62C15B]",
+    NORMAL: "border-l-indigo-500",
+    HARD: "border-l-[#E44343]",
 };
 
 // =========================

@@ -3,11 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import { createPost, getPostDetail, updatePost , uploadPostImage } from "../../api/post";
 
-import {
-    defaultDifficulty,
-    defaultVisibility,
-    postListPath,
-} from "../../constants/post";
+import { defaultDifficulty, defaultVisibility, postListPath } from "../../constants/post";
 
 // 게시글 작성/수정 관련 로직 관리 Hook
 
@@ -28,6 +24,7 @@ export function usePostWriteForm() {
         difficulty: defaultDifficulty,
         studyTime: "",
         visibility: defaultVisibility,
+        tags: "",
     });
 
     // =========================
@@ -53,7 +50,14 @@ export function usePostWriteForm() {
         if (!editor) return;
 
         editor.insertText(`\`\`\`${language}\n\n\`\`\``);
-        editor.focus();
+
+        setTimeout(() => {
+            const currentEditor = editor.getCurrentModeEditor();
+
+            currentEditor.setSelection([2, 1], [2, 1]);
+
+            editor.focus();
+        }, 0);
     };
 
     // 게시글 이미지 업로드
@@ -100,6 +104,7 @@ export function usePostWriteForm() {
                 difficulty: data.difficulty,
                 visibility: data.visibility ?? defaultVisibility,
                 studyTime: data.studyTime ?? "",
+                tags: data.tagNames?.join(", ") ?? "",
             });
 
             const editor = editorRef.current?.getInstance();
@@ -130,10 +135,20 @@ export function usePostWriteForm() {
 
             const content = editor.getMarkdown();
 
+            // 쉼표로 입력한 태그 문자열을 배열로 변환
+            const tagNames = form.tags
+                .split(",")
+                .map((tag) => tag.trim())
+                .filter((tag) => tag.length > 0);
+
+            // 화면 입력용 tags 값은 제외하고 백엔드 요청 데이터 생성
+            const { tags, ...postForm } = form;
+
             const postData = {
-                ...form,
+                ...postForm,
                 content,
                 studyTime: Number(form.studyTime),
+                tagNames,
             };
 
             if (isEditMode) {

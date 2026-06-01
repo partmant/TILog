@@ -62,6 +62,20 @@ function PostDetailPage() {
                 </div>
             </div>
 
+            {/* 태그 */}
+            {post.tagNames?.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-2">
+                    {post.tagNames.map((tag) => (
+                        <span
+                            key={tag}
+                            className="rounded-full bg-purple-50 px-2.5 py-1 text-xs font-semibold text-purple-600"
+                        >
+                            #{tag}
+                        </span>
+                    ))}
+                </div>
+            )}
+
             {/* Markdown 본문 영역 */}
             <section className="mt-8 overflow-hidden rounded-2xl bg-slate-50">
                 {/* Markdown 상단 헤더 */}

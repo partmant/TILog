@@ -1,6 +1,6 @@
 package com.tilog.repository;
 
-import com.tilog.config.QuerydslConfig;
+import com.tilog.global.config.QuerydslConfig;
 import com.tilog.dto.TilPostSearchCondition;
 import com.tilog.dto.TilPostSummaryDto;
 import com.tilog.dto.TilSortType;
@@ -18,7 +18,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

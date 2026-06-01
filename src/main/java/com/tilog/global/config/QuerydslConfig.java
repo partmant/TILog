@@ -1,4 +1,4 @@
-package com.tilog.config;
+package com.tilog.global.config;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;

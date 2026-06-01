@@ -11,7 +11,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: validate   # update nono
+      ddl-auto: update #  validate update
     properties:
       hibernate:
         format_sql: true

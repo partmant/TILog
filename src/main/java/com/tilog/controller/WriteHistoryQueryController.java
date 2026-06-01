@@ -1,6 +1,7 @@
 package com.tilog.controller;
 
 import com.tilog.dto.history.WriteHistoryDailyCountSummaryResponse;
+import com.tilog.dto.history.WriteHistoryHeatmapResponse;
 import com.tilog.global.response.ApiResponse;
 import com.tilog.service.WriteHistoryQueryService;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,18 @@ public class WriteHistoryQueryController {
     ) {
         WriteHistoryDailyCountSummaryResponse response =
                 writeHistoryQueryService.getDailyCounts(memberId, startDate, endDate);
+
+        return ApiResponse.success(response);
+    }
+
+    @GetMapping("/heatmap")
+    public ApiResponse<WriteHistoryHeatmapResponse> getHeatmap(
+            @RequestHeader("X-MEMBER-ID") Long memberId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+    ) {
+        WriteHistoryHeatmapResponse response =
+                writeHistoryQueryService.getHeatmap(memberId, startDate, endDate);
 
         return ApiResponse.success(response);
     }

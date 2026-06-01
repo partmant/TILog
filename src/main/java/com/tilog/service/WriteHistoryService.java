@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 
+// 작성 이력 기록
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)

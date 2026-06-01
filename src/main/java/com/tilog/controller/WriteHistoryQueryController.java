@@ -25,6 +25,6 @@ public class WriteHistoryQueryController {
         WriteHistoryDailyCountSummaryResponse response =
                 writeHistoryQueryService.getDailyCounts(memberId, startDate, endDate);
 
-        return ApiResponse.success(response, "날짜별 작성 개수 조회 성공");
+        return ApiResponse.success(response);
     }
 }

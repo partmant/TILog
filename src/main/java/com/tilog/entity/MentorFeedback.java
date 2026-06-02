@@ -17,7 +17,7 @@ public class MentorFeedback {
 
     @ManyToOne
     @JoinColumn(name = "til_id")
-    private TilPost til;
+    private Post til;
 
     @ManyToOne
     @JoinColumn(name = "requester_id")
@@ -38,7 +38,7 @@ public class MentorFeedback {
     private LocalDateTime requestedAt;
     private LocalDateTime completedAt;
 
-    public MentorFeedback(TilPost til, Member requestor, Member mentor){
+    public MentorFeedback(Post til, Member requestor, Member mentor){
         this.til = til;
         this.requestor = requestor;
         this.mentor = mentor;

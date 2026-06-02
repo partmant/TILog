@@ -23,6 +23,10 @@ public enum ErrorCode {
     FOLLOW_NOT_FOUND(HttpStatus.NOT_FOUND, "팔로우 내역을 찾을 수 없습니다."),
     TARGET_MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "팔로우 대상 회원을 찾을 수 없습니다."),
 
+    // Notification
+    NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "알림을 찾을 수 없습니다."),
+    NOTIFICATION_UNAUTHORIZED(HttpStatus.FORBIDDEN, "알림 접근 권한이 없습니다."),
+
     // Subscription
     SUBSCRIPTION_ALREADY_ACTIVE(HttpStatus.CONFLICT, "이미 활성화된 구독이 존재합니다."),
     SUBSCRIPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "활성 구독 내역을 찾을 수 없습니다."),

@@ -2,6 +2,8 @@ package com.tilog.domain.like.service;
 
 import com.tilog.domain.like.dto.LikeResponse;
 import com.tilog.domain.member.entity.Member;
+import com.tilog.domain.notification.entity.NotificationType;
+import com.tilog.domain.notification.service.NotificationService;
 import com.tilog.domain.post.entity.Post;
 import com.tilog.domain.like.entity.TilPostLike;
 import com.tilog.global.exception.CustomException;
@@ -22,6 +24,7 @@ public class LikeService {
     private final TilPostLikeRepository likeRepository;
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
+    private final NotificationService notificationService;
 
     /** 좋아요 등록 */
     @Transactional
@@ -39,6 +42,15 @@ public class LikeService {
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
         likeRepository.save(TilPostLike.create(post, member));
+
+        // 좋아요 알림 발송 (TIL 작성자에게)
+        notificationService.send(
+                post.getMember().getId(),
+                memberId,
+                NotificationType.LIKE,
+                postId,
+                "TIL_POST"
+        );
 
         long likeCount = likeRepository.countByPost_Id(postId);
         return LikeResponse.of(postId, likeCount, true);
@@ -59,7 +71,7 @@ public class LikeService {
         return LikeResponse.of(postId, likeCount, false);
     }
 
-    /** 좋아요 수 조회 */
+    /** 좋아요 정보 조회 */
     public LikeResponse getLikeInfo(Long postId) {
         Long memberId = SecurityUtil.getCurrentMemberId();
         boolean liked = likeRepository.existsByPost_IdAndMember_Id(postId, memberId);

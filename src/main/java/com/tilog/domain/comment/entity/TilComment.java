@@ -22,18 +22,14 @@ public class TilComment {
     @Column(name = "comment_id")
     private Long commentId;
 
-    // 2번 담당자가 정의한 TilPost 엔티티 참조
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
-//    private TilPost post;
 
-    // 1번 담당자가 정의한 Member 엔티티 참조
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    // 대댓글: NULL이면 일반 댓글, 값이 있으면 대댓글
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_comment_id")
     private TilComment parentComment;

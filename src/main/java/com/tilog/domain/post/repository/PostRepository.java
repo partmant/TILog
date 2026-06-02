@@ -3,12 +3,15 @@ package com.tilog.domain.post.repository;
 import com.tilog.domain.member.entity.Member;
 import com.tilog.domain.post.entity.Post;
 import com.tilog.domain.post.entity.Visibility;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 // 게시글 DB 접근 Repository
@@ -24,6 +27,11 @@ public interface PostRepository extends JpaRepository<Post, Long>, PostRepositor
 
     // 특정 회원의 임시저장 게시글 목록 조회
     List<Post> findByMemberAndVisibilityAndIsDeletedFalse(Member member, Visibility visibility);
+
+    // 팔로잉 피드용
+    Slice<Post> findByMember_IdInAndIsDeletedFalseOrderByCreatedAtDesc(
+            Collection<Long> memberIds, Pageable pageable
+    );
 
     /**
      * 주간 요약 — 총 게시글 수, 총 학습 시간(분)

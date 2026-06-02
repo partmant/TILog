@@ -16,6 +16,27 @@ export const getPostDetail = async (postId, increaseViewCount = true) => {
     return response.data;
 };
 
+// 게시글 검색 API
+export const searchPosts = async ({ keyword, tagName }) => {
+    const response = await api.get("/api/tils", {
+        params: {
+            keyword,
+            tagName,
+        },
+    });
+
+    return response.data.content.map((post) => ({
+        postId: post.postId,
+        title: post.title,
+        nickname: post.authorNickname,
+        difficulty: post.difficulty,
+        tagNames: post.tags,
+        createdAt: post.createdAt,
+        likeCount: post.likeCount,
+        commentCount: post.commentCount,
+    }));
+};
+
 // 게시글 작성 API
 export const createPost = async (postData) => {
     const response = await api.post(`/api/posts`, postData);

@@ -21,10 +21,14 @@ function PostDetailPage() {
 
     const {
         post,
+        comments,
+        commentContent,
         showComments,
         handleEdit,
         handleDelete,
         handleMoveList,
+        handleCommentChange,
+        handleCreateComment,
         handleToggleComments,
     } = usePostDetail();
 
@@ -153,7 +157,7 @@ function PostDetailPage() {
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <h3 className="text-xl font-bold">
-                            댓글 12개
+                            댓글 {comments.length}개
                         </h3>
 
                         <p className="text-sm text-gray-500">
@@ -173,36 +177,42 @@ function PostDetailPage() {
                 {/* 댓글 표시 */}
                 {showComments && (
                     <div className="mt-6 space-y-4">
-                        {/* 댓글 아이템 */}
-                        <div className="rounded-xl bg-slate-50 p-4">
-                            <p className="font-bold">
-                                user02
-                            </p>
+                        {/* 댓글 목록 */}
+                        {comments.length > 0 ? (
+                            comments.map((comment) => (
+                                <div
+                                    key={comment.commentId}
+                                    className="rounded-xl bg-slate-50 p-4"
+                                >
+                                    <p className="font-bold">
+                                        {comment.nickname}
+                                    </p>
 
-                            <p className="mt-2 text-sm text-gray-600">
-                                좋은 정리입니다. JWT 흐름 이해에 도움됐어요.
+                                    <p className="mt-2 text-sm text-gray-600">
+                                        {comment.content}
+                                    </p>
+                                </div>
+                            ))
+                        ) : (
+                            <p className="rounded-xl bg-slate-50 p-4 text-sm text-gray-500">
+                                아직 작성된 댓글이 없습니다.
                             </p>
-                        </div>
-
-                        {/* 댓글 아이템 */}
-                        <div className="rounded-xl bg-slate-50 p-4">
-                            <p className="font-bold">
-                                user03
-                            </p>
-
-                            <p className="mt-2 text-sm text-gray-600">
-                                코드 예시도 같이 있으면 더 좋을 것 같아요.
-                            </p>
-                        </div>
+                        )}
 
                         {/* 댓글 입력 */}
                         <div className="flex gap-3">
                             <input
+                                value={commentContent}
+                                onChange={handleCommentChange}
                                 className="flex-1 rounded-xl border px-4 py-3 outline-none"
                                 placeholder="댓글을 입력하세요"
                             />
 
-                            <button className="rounded-xl bg-slate-900 px-6 py-3 font-bold text-white">
+                            <button
+                                type="button"
+                                onClick={handleCreateComment}
+                                className="rounded-xl bg-slate-900 px-6 py-3 font-bold text-white"
+                            >
                                 등록
                             </button>
                         </div>

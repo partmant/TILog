@@ -7,6 +7,11 @@ import {
 } from "../../api/post";
 
 import {
+    getComments,
+    createComment,
+} from "../../api/comment";
+
+import {
     getPostEditPath,
     postListPath,
 } from "../../constants/post";
@@ -34,6 +39,12 @@ export function usePostDetail() {
     // 댓글 열기/닫기 상태
     const [showComments, setShowComments] = useState(false);
 
+    // 댓글 목록 상태
+    const [comments, setComments] = useState([]);
+
+    // 댓글 입력값 상태
+    const [commentContent, setCommentContent] = useState("");
+
     // =========================
     // 데이터 조회
     // =========================
@@ -46,6 +57,16 @@ export function usePostDetail() {
         };
 
         fetchPostDetail();
+    }, [postId]);
+
+    // 게시글 댓글 목록 조회
+    useEffect(() => {
+        const fetchComments = async () => {
+            const data = await getComments(postId);
+            setComments(data);
+        };
+
+        fetchComments();
     }, [postId]);
 
     // =========================
@@ -65,6 +86,11 @@ export function usePostDetail() {
     // 댓글 열기/닫기 처리
     const handleToggleComments = () => {
         setShowComments((prev) => !prev);
+    };
+
+    // 댓글 입력값 변경 처리
+    const handleCommentChange = (e) => {
+        setCommentContent(e.target.value);
     };
 
     // =========================
@@ -90,12 +116,39 @@ export function usePostDetail() {
         }
     };
 
+    // 댓글 작성 요청
+    const handleCreateComment = async () => {
+        if (!commentContent.trim()) {
+            alert("댓글 내용을 입력해주세요.");
+            return;
+        }
+
+        try {
+            await createComment(postId, commentContent);
+
+            // 댓글 작성 후 목록 재조회
+            const data = await getComments(postId);
+
+            setComments(data);
+            setCommentContent("");
+            setShowComments(true);
+        } catch (error) {
+            console.error(error);
+
+            alert("댓글 작성 실패");
+        }
+    };
+
     return {
         post,
+        comments,
+        commentContent,
         showComments,
         handleEdit,
         handleDelete,
         handleMoveList,
+        handleCommentChange,
+        handleCreateComment,
         handleToggleComments,
     };
 }

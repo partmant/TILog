@@ -8,6 +8,7 @@ function PostListPage() {
         posts,
         handleMoveWrite,
         handleMoveDetail,
+        handleSearchTag,
     } = usePostList();
 
     return (
@@ -62,18 +63,19 @@ function PostListPage() {
                                 </h3>
 
                                 {/* 태그 */}
-                                {post.tagNames?.length > 0 && (
-                                    <div className="mt-2 flex flex-wrap gap-2">
-                                        {post.tagNames.map((tag) => (
-                                            <span
-                                                key={tag}
-                                                className="rounded-full bg-purple-50 px-2.5 py-1 text-xs font-semibold text-purple-600"
-                                            >
-                                                #{tag}
-                                            </span>
-                                        ))}
-                                    </div>
-                                )}
+                                {post.tagNames.map((tag) => (
+                                    <button
+                                        key={tag}
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleSearchTag(tag);
+                                        }}
+                                        className="rounded-full bg-purple-50 px-2.5 py-1 text-xs font-semibold text-purple-600 transition hover:bg-purple-100"
+                                    >
+                                        #{tag}
+                                    </button>
+                                ))}
 
                                 {/* 게시글 정보 */}
                                 <p className="mt-3 text-sm text-gray-500">

@@ -1,5 +1,7 @@
-package com.tilog.entity;
+package com.tilog.entity.comment;
 
+import com.tilog.entity.Member;
+import com.tilog.entity.Post;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -24,14 +26,11 @@ public class TilComment {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
-//    private TilPost post;
 
-    // 1번 담당자가 정의한 Member 엔티티 참조
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    // 대댓글: NULL이면 일반 댓글, 값이 있으면 대댓글
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_comment_id")
     private TilComment parentComment;

@@ -23,6 +23,10 @@ public enum ErrorCode {
     FOLLOW_NOT_FOUND(HttpStatus.NOT_FOUND, "팔로우 내역을 찾을 수 없습니다."),
     TARGET_MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "팔로우 대상 회원을 찾을 수 없습니다."),
 
+    // Notification
+    NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "알림을 찾을 수 없습니다."),
+    NOTIFICATION_UNAUTHORIZED(HttpStatus.FORBIDDEN, "알림 접근 권한이 없습니다."),
+
     // Common
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "게시글을 찾을 수 없습니다."),
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "회원을 찾을 수 없습니다."),

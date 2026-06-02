@@ -1,6 +1,6 @@
 package com.tilog.dto.comment;
 
-import com.tilog.entity.TilComment;
+import com.tilog.entity.comment.TilComment;
 import lombok.Getter;
 
 import java.time.LocalDateTime;

@@ -121,46 +121,65 @@ export function usePostWriteForm() {
     // API 요청
     // =========================
 
+    // 게시글 저장 요청 공통 처리
+    const savePost = async (visibility) => {
+        const editor = editorRef.current?.getInstance();
+
+        if (!editor) {
+            alert("에디터가 준비되지 않았습니다.");
+            return;
+        }
+
+        const content = editor.getMarkdown();
+
+        const tagNames = form.tags
+            .split(",")
+            .map((tag) => tag.trim())
+            .filter((tag) => tag.length > 0);
+
+        const { tags, ...postForm } = form;
+
+        const postData = {
+            ...postForm,
+            visibility,
+            content,
+            studyTime: Number(form.studyTime),
+            tagNames,
+        };
+
+        if (isEditMode) {
+            await updatePost(postId, postData);
+            navigate(`/posts/${postId}`);
+            return;
+        }
+
+        await createPost(postData);
+        navigate(postListPath);
+    };
+
     // 게시글 작성 또는 수정 요청
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
-            const editor = editorRef.current?.getInstance();
-
-            if (!editor) {
-                alert("에디터가 준비되지 않았습니다.");
-                return;
-            }
-
-            const content = editor.getMarkdown();
-
-            // 쉼표로 입력한 태그 문자열을 배열로 변환
-            const tagNames = form.tags
-                .split(",")
-                .map((tag) => tag.trim())
-                .filter((tag) => tag.length > 0);
-
-            // 화면 입력용 tags 값은 제외하고 백엔드 요청 데이터 생성
-            const { tags, ...postForm } = form;
-
-            const postData = {
-                ...postForm,
-                content,
-                studyTime: Number(form.studyTime),
-                tagNames,
-            };
-
-            if (isEditMode) {
-                await updatePost(postId, postData);
-                navigate(`/posts/${postId}`);
-            } else {
-                await createPost(postData);
-                navigate(postListPath);
-            }
+            await savePost(form.visibility);
         } catch (error) {
             console.error(error);
             alert(isEditMode ? "게시글 수정 실패" : "게시글 작성 실패");
+        }
+    };
+
+    // 임시저장 요청
+    const handleTempSave = async () => {
+        try {
+            // 임시저장은 visibility를 DRAFT로 고정
+            await savePost("DRAFT");
+
+            alert("임시저장되었습니다.");
+        } catch (error) {
+            console.error(error);
+
+            alert("임시저장 실패");
         }
     };
 
@@ -179,6 +198,7 @@ export function usePostWriteForm() {
         handleUploadImage,
         handleEditorLoad,
         handleSubmit,
+        handleTempSave,
         handleCancel,
     };
 }

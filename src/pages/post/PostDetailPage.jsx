@@ -8,6 +8,17 @@ import { usePostDetail } from "../../hooks/post/usePostDetail";
 
 // 게시글 상세 페이지
 function PostDetailPage() {
+    // 날짜 포맷
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+
+        return `${year}.${month}.${day}`;
+    };
+
     const {
         post,
         showComments,
@@ -42,7 +53,7 @@ function PostDetailPage() {
                 <div className="flex flex-wrap items-center gap-y-1 text-xs font-semibold">
                     <span className="px-2">
                         조회수&nbsp;
-                        <span className="text-blue-600">{post.viewCount}</span>
+                        <span className="text-blue-600">{post.viewCount}회</span>
                     </span>
 
                     <span className="h-3 w-px bg-gray-300" />
@@ -59,6 +70,12 @@ function PostDetailPage() {
                         난이도&nbsp;
                         <span className="text-blue-600">{post.difficulty}</span>
                     </span>
+
+                    <span className="px-2">
+                        작성일&nbsp;
+                        <span className="text-blue-600">{formatDate(post.createdAt)}</span>
+                    </span>
+
                 </div>
             </div>
 
@@ -78,17 +95,6 @@ function PostDetailPage() {
 
             {/* Markdown 본문 영역 */}
             <section className="mt-8 overflow-hidden rounded-2xl bg-slate-50">
-                {/* Markdown 상단 헤더 */}
-                <div className="flex justify-between bg-indigo-50 px-6 py-4 text-sm font-bold">
-                    <span className="text-indigo-500">
-                        Markdown Preview
-                    </span>
-
-                    <span className="text-gray-500">
-                        긴 본문 스크롤 영역
-                    </span>
-                </div>
-
                 {/* Markdown 렌더링 */}
                 <div className="prose max-w-none p-6">
                     <ReactMarkdown

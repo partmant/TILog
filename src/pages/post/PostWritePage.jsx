@@ -26,6 +26,7 @@ function PostWritePage() {
         handleUploadImage,
         handleEditorLoad,
         handleSubmit,
+        handleTempSave,
         handleCancel,
     } = usePostWriteForm();
 
@@ -195,6 +196,15 @@ function PostWritePage() {
                         className="rounded-2xl border px-7 py-3 font-bold"
                     >
                         취소
+                    </button>
+
+                    {/* 임시 저장 버튼 */}
+                    <button
+                        type="button"
+                        onClick={handleTempSave}
+                        className="rounded-2xl border px-7 py-3 font-bold"
+                    >
+                        임시저장
                     </button>
 
                     {/* 작성 버튼 */}

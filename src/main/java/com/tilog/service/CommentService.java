@@ -3,7 +3,7 @@ package com.tilog.service;
 import com.tilog.dto.comment.CommentCreateRequest;
 import com.tilog.dto.comment.CommentResponse;
 import com.tilog.dto.comment.CommentUpdateRequest;
-import com.tilog.entity.Member;
+import com.tilog.entity.member.Member;
 import com.tilog.entity.notification.NotificationType;
 import com.tilog.entity.Post;
 import com.tilog.entity.comment.TilComment;

@@ -1,6 +1,6 @@
 package com.tilog.entity.comment;
 
-import com.tilog.entity.Member;
+import com.tilog.entity.member.Member;
 import com.tilog.entity.Post;
 import jakarta.persistence.*;
 import lombok.AccessLevel;

@@ -1,7 +1,7 @@
 package com.tilog.service;
 
 import com.tilog.dto.notification.NotificationResponse;
-import com.tilog.entity.Member;
+import com.tilog.entity.member.Member;
 import com.tilog.entity.notification.Notification;
 import com.tilog.entity.notification.NotificationType;
 import com.tilog.global.exception.CustomException;

@@ -1,6 +1,6 @@
 package com.tilog.repository;
 
-import com.tilog.entity.Subscription;
+import com.tilog.entity.subscription.Subscription;
 import com.tilog.entity.enums.SubscriptionStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

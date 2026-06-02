@@ -2,9 +2,9 @@ package com.tilog.service;
 
 import com.tilog.dto.subscription.SubscriptionHistoryResponse;
 import com.tilog.dto.subscription.SubscriptionStatusResponse;
-import com.tilog.entity.Member;
-import com.tilog.entity.MemberRole;
-import com.tilog.entity.Subscription;
+import com.tilog.entity.member.Member;
+import com.tilog.entity.enums.MemberRole;
+import com.tilog.entity.subscription.Subscription;
 import com.tilog.entity.enums.SubscriptionStatus;
 import com.tilog.global.exception.CustomException;
 import com.tilog.global.exception.ErrorCode;

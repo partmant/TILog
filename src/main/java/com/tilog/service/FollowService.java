@@ -3,7 +3,7 @@ package com.tilog.service;
 import com.tilog.dto.follow.FollowMemberResponse;
 import com.tilog.dto.follow.FollowResponse;
 import com.tilog.entity.Follow;
-import com.tilog.entity.Member;
+import com.tilog.entity.member.Member;
 import com.tilog.entity.notification.NotificationType;
 import com.tilog.global.exception.CustomException;
 import com.tilog.global.exception.ErrorCode;

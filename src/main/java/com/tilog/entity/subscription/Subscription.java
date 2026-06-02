@@ -1,5 +1,6 @@
 package com.tilog.entity.subscription;
 
+import com.tilog.entity.member.Member;
 import com.tilog.entity.enums.SubscriptionStatus;
 import jakarta.persistence.*;
 import lombok.AccessLevel;

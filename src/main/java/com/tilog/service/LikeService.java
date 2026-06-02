@@ -1,7 +1,7 @@
 package com.tilog.service;
 
 import com.tilog.dto.like.LikeResponse;
-import com.tilog.entity.Member;
+import com.tilog.entity.member.Member;
 import com.tilog.entity.notification.NotificationType;
 import com.tilog.entity.Post;
 import com.tilog.entity.TilPostLike;

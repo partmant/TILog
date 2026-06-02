@@ -1,6 +1,6 @@
 package com.tilog.repository;
 
-import com.tilog.entity.Member;
+import com.tilog.entity.member.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

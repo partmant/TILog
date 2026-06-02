@@ -1,6 +1,6 @@
 package com.tilog.entity.notification;
 
-import com.tilog.entity.Member;
+import com.tilog.entity.member.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

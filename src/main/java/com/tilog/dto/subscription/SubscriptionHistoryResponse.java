@@ -1,6 +1,6 @@
 package com.tilog.dto.subscription;
 
-import com.tilog.entity.Subscription;
+import com.tilog.entity.subscription.Subscription;
 import com.tilog.entity.enums.SubscriptionStatus;
 
 import java.time.LocalDateTime;

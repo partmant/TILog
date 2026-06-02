@@ -2,6 +2,7 @@ package com.tilog.entity;
 
 import com.tilog.entity.enums.Difficulty;
 import com.tilog.entity.enums.Visibility;
+import com.tilog.entity.member.Member;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

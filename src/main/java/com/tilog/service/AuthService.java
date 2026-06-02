@@ -2,7 +2,7 @@ package com.tilog.service;
 
 import com.tilog.dto.auth.LoginRequest;
 import com.tilog.dto.auth.TokenResponse;
-import com.tilog.entity.Member;
+import com.tilog.entity.member.Member;
 import com.tilog.global.exception.AuthException;
 import com.tilog.global.security.JwtTokenProvider;
 import com.tilog.repository.MemberRepository;

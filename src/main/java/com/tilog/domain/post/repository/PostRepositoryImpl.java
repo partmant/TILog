@@ -80,7 +80,9 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                         qPost.difficulty,
                         qPost.createdAt,
                         likeSubQ,
-                        commentSubQ
+                        commentSubQ,
+                        qPost.viewCount,
+                        qPost.studyTime
                 ))
                 .from(qPost)
                 .join(qPost.member, qMember)

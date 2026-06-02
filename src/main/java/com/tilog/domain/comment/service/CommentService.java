@@ -4,6 +4,8 @@ import com.tilog.domain.comment.dto.CommentCreateRequest;
 import com.tilog.domain.comment.dto.CommentResponse;
 import com.tilog.domain.comment.dto.CommentUpdateRequest;
 import com.tilog.domain.member.entity.Member;
+import com.tilog.domain.notification.entity.NotificationType;
+import com.tilog.domain.notification.service.NotificationService;
 import com.tilog.domain.post.entity.Post;
 import com.tilog.domain.comment.entity.TilComment;
 import com.tilog.global.exception.CustomException;
@@ -25,8 +27,9 @@ import java.util.stream.Collectors;
 public class CommentService {
 
     private final TilCommentRepository commentRepository;
-    private final PostRepository postRepository;       // 2번 담당자 Repository
-    private final MemberRepository memberRepository;        // 1번 담당자 Repository
+    private final PostRepository postRepository;
+    private final MemberRepository memberRepository;
+    private final NotificationService notificationService;
 
     /** 댓글 작성 (대댓글 포함) */
     @Transactional
@@ -42,27 +45,34 @@ public class CommentService {
         TilComment comment;
 
         if (request.getParentCommentId() != null) {
-            // 대댓글: 부모 댓글 검증
             TilComment parentComment = commentRepository.findActiveById(request.getParentCommentId())
                     .orElseThrow(() -> new CustomException(ErrorCode.PARENT_COMMENT_NOT_FOUND));
 
-            // 부모 댓글이 같은 게시글 소속인지 확인
             if (!parentComment.getPost().getId().equals(postId)) {
                 throw new CustomException(ErrorCode.PARENT_COMMENT_POST_MISMATCH);
             }
 
-            // 대댓글에 대한 대댓글 방지 (1단계 깊이만 허용)
             if (parentComment.getParentComment() != null) {
                 throw new CustomException(ErrorCode.PARENT_COMMENT_NOT_FOUND);
             }
 
             comment = TilComment.createReply(post, member, request.getContent(), parentComment);
         } else {
-            // 일반 댓글
             comment = TilComment.create(post, member, request.getContent());
         }
 
-        return CommentResponse.from(commentRepository.save(comment));
+        TilComment saved = commentRepository.save(comment);
+
+        // 댓글 알림 발송 (TIL 작성자에게)
+        notificationService.send(
+                post.getMember().getId(),
+                memberId,
+                NotificationType.COMMENT,
+                postId,
+                "TIL_POST"
+        );
+
+        return CommentResponse.from(saved);
     }
 
     /** 댓글 수정 */
@@ -115,3 +125,4 @@ public class CommentService {
                 .collect(Collectors.toList());
     }
 }
+

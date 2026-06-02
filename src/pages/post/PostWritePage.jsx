@@ -104,7 +104,7 @@ function PostWritePage() {
                                             // 선택 후 초기화
                                             e.target.value = "";
                                         }}
-                                        className="absolute right-3 top-2 z-10 h-8 rounded-md border border-gray-200 bg-white px-2 text-sm outline-none"
+                                        className="absolute right-3 top-12 z-10 h-8 rounded-md border border-gray-200 bg-white px-2 text-sm outline-none"
                                     >
                                         <option value="" disabled>
                                             {codeBlockSelectLabel}

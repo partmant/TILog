@@ -168,16 +168,6 @@ function PostListPage() {
                     </div>
                 </aside>
             </section>
-
-            {/* 하단 응원 문구 */}
-            <section className="rounded-2xl bg-gradient-to-r from-purple-100 to-cyan-100 p-6">
-                <p className="text-lg font-bold">
-                    꾸준함이 최고의 실력입니다!
-                </p>
-                <p className="mt-1 text-sm text-gray-600">
-                    오늘도 기록하는 당신을 응원합니다. 작은 기록이 성장의 증거가 됩니다.
-                </p>
-            </section>
         </main>
     );
 }

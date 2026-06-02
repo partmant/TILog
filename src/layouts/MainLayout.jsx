@@ -1,22 +1,18 @@
 import { Outlet } from "react-router-dom";
+import Header from "../components/common/Header";
+import Footer from "../components/common/Footer";
+import "../styles/mypage/Mypage.css";
 
-import Header from "../components/common/Header.jsx";
-import Sidebar from "../components/common/Sidebar.jsx";
-
-// 공통 레이아웃
-
-function MainLayout() {
+const MainLayout = () => {
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-100 p-6">
-            <Header />
-            <div className="mt-7 flex gap-7">
-                <Sidebar />
-                <main className="flex-1">
-                    <Outlet />
-                </main>
+        <main className="mypage">
+            <div className="mypage-shell">
+                <Header />
+                <Outlet />
+                <Footer />
             </div>
-        </div>
+        </main>
     );
-}
+};
 
 export default MainLayout;

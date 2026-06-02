@@ -5,6 +5,10 @@ import MainLayout from "../layouts/MainLayout.jsx";
 
 // 메인 페이지
 import HomePage from "../pages/HomePage.jsx";
+import FeedPage from "../pages/feed/FeedPage.jsx";
+
+// 마이 페이지
+import MyPage from "../pages/MyPage.jsx";
 
 // 게시글 관련 페이지
 import PostListPage from "../pages/post/PostListPage.jsx";
@@ -18,6 +22,12 @@ const router = createBrowserRouter([
     // 공통 레이아웃
     {element: <MainLayout />,
         children: [
+            // 피드 경로
+            { path: "/feed", element: <FeedPage /> },
+
+            // 마이 페이지 경로
+            { path: "/mypage", element: <MyPage /> },
+
             // 게시글 경로
             {path: "/posts", element: <PostListPage/>,},
             {path: "/posts/:postId", element: <PostDetailPage/>,},

@@ -1,0 +1,97 @@
+.app-footer {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    min-height: 104px;
+    margin-top: 28px;
+    padding: 22px 28px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #ede9fe 0%, #ecfeff 100%);
+}
+
+.app-footer-icon {
+    display: grid;
+    width: 58px;
+    height: 58px;
+    place-items: center;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #8b5cf6 0%, #22d3ee 100%);
+    color: #ffffff;
+    font-size: 24px;
+    font-weight: 900;
+}
+
+.app-footer strong {
+    display: block;
+    margin-bottom: 8px;
+    color: #111827;
+    font-size: 20px;
+    font-weight: 900;
+}
+
+.app-footer p {
+    margin: 0;
+    color: #374151;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.app-footer-flower {
+    position: relative;
+    flex: 0 0 64px;
+    width: 64px;
+    height: 64px;
+    margin-left: auto;
+}
+
+.app-footer-flower span {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    border-radius: 60% 60% 45% 45%;
+    background: linear-gradient(135deg, #a78bfa, #22d3ee);
+}
+
+.app-footer-flower span:nth-child(1) {
+    left: 18px;
+    top: 0;
+}
+
+.app-footer-flower span:nth-child(2) {
+    right: 0;
+    top: 18px;
+    transform: rotate(90deg);
+}
+
+.app-footer-flower span:nth-child(3) {
+    left: 18px;
+    bottom: 0;
+    transform: rotate(180deg);
+}
+
+.app-footer-flower span:nth-child(4) {
+    left: 0;
+    top: 18px;
+    transform: rotate(270deg);
+}
+
+.app-footer-flower i {
+    position: absolute;
+    left: 22px;
+    top: 22px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #facc15;
+    box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.22);
+}
+
+@media (max-width: 760px) {
+    .app-footer {
+        align-items: flex-start;
+    }
+
+    .app-footer-flower {
+        display: none;
+    }
+}

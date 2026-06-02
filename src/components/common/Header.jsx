@@ -1,58 +1,82 @@
-import { useHeader } from "../../hooks/common/useHeader";
+import { NavLink, useNavigate } from "react-router-dom";
+import "../../styles/common/Header.css";
 
-function Header() {
-    const {
-        keyword,
-        setKeyword,
-        handleMoveHome,
-        handleMoveMyPage,
-        handleSearch,
-        handleSearchKeyDown,
-    } = useHeader();
+const Header = () => {
+    const navigate = useNavigate();
 
     return (
-        <header className="flex items-center justify-between rounded-3xl bg-white/90 px-6 py-4 shadow-sm">
-            {/* 로고 */}
-            <div
-                className="flex cursor-pointer items-center gap-3"
-                onClick={handleMoveHome}
+        <header className="app-header">
+            <button
+                type="button"
+                className="app-header-brand"
+                onClick={() => navigate("/mypage")}
             >
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-cyan-400 text-xl font-bold text-white">
-                    T
+                <div className="app-header-logo">T</div>
+
+                <div>
+                    <strong>TILog</strong>
+                    <span>Growth Platform</span>
                 </div>
+            </button>
 
-                <h1 className="text-2xl font-bold">
-                    TILog
-                </h1>
-            </div>
+            <nav className="app-header-nav">
+                <NavLink
+                    to="/feed"
+                    className={({ isActive }) =>
+                        isActive ? "app-header-nav-link active" : "app-header-nav-link"
+                    }
+                >
+                    메인 피드
+                </NavLink>
 
-            {/* 검색창 */}
-            <div className="flex w-[420px] gap-3">
-                <input
-                    value={keyword}
-                    onChange={(e) => setKeyword(e.target.value)}
-                    onKeyDown={handleSearchKeyDown}
-                    className="flex-1 rounded-xl border border-gray-200 px-4 py-2 outline-none"
-                    placeholder="검색어, 기술 스택, 작성자 검색"
-                />
+                <NavLink
+                    to="/posts"
+                    className={({ isActive }) =>
+                        isActive ? "app-header-nav-link active" : "app-header-nav-link"
+                    }
+                >
+                    TIL 목록
+                </NavLink>
+
+                <NavLink
+                    to="/feedback"
+                    className={({ isActive }) =>
+                        isActive ? "app-header-nav-link active" : "app-header-nav-link"
+                    }
+                >
+                    피드백
+                </NavLink>
+
+                <NavLink
+                    to="/mypage"
+                    className={({ isActive }) =>
+                        isActive ? "app-header-nav-link active" : "app-header-nav-link"
+                    }
+                >
+                    마이페이지
+                </NavLink>
+            </nav>
+
+            <div className="app-header-actions">
+                <button
+                    type="button"
+                    className="app-header-write-button"
+                    onClick={() => navigate("/posts/write")}
+                >
+                    TIL 작성하기
+                </button>
 
                 <button
-                    onClick={handleSearch}
-                    className="rounded-xl bg-gradient-to-r from-purple-500 to-cyan-400 px-7 py-2 font-bold text-white"
+                    type="button"
+                    className="app-header-profile-button"
+                    onClick={() => navigate("/mypage")}
+                    aria-label="마이페이지로 이동"
                 >
-                    검색
+                    U
                 </button>
             </div>
-
-            {/* 유저 버튼 */}
-            <button
-                className="rounded-xl border px-8 py-2 font-bold"
-                onClick={handleMoveMyPage}
-            >
-                유저 닉네임 예시
-            </button>
         </header>
     );
-}
+};
 
 export default Header;

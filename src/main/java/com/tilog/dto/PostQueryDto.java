@@ -4,6 +4,7 @@ import com.tilog.entity.Post;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 // 게시글 로직 처리 서비스
@@ -49,6 +50,7 @@ public class PostQueryDto {
         private Integer viewCount;
         private Integer studyTime;
         private String nickname;
+        private LocalDateTime createdAt;
         private List<String> tagNames;
 
         public static DetailResponse from(Post post, List<String> tagNames) {
@@ -59,6 +61,7 @@ public class PostQueryDto {
                     .difficulty(post.getDifficulty() == null ? null : post.getDifficulty().name())
                     .visibility(post.getVisibility().name())
                     .nickname(post.getMember().getNickname())
+                    .createdAt(post.getCreatedAt())
                     .viewCount(post.getViewCount())
                     .studyTime(post.getStudyTime())
                     .tagNames(tagNames)

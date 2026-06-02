@@ -4,5 +4,6 @@ package com.tilog.entity;
 
 public enum Visibility {
     PUBLIC,                 // 공개
-    PRIVATE                 // 비공개
+    PRIVATE,                // 비공개
+    DRAFT                   // 임시저장
 }

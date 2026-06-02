@@ -40,15 +40,7 @@ public class PostService {
 
     // 게시글 목록 조회
     public List<PostQueryDto.ListResponse> getPostList(){
-        // TODO: 로그인 기능 병합 후 비공개 게시글 필터링 적용
-        // Long loginMemberId = loginMember.getId();
-        //
-        // .filter(post ->
-        //         post.getVisibility() == Visibility.PUBLIC ||
-        //         post.getMember().getId().equals(loginMemberId)
-        // )
-
-        return postRepository.findByIsDeletedFalse().stream()
+        return postRepository.findByIsDeletedFalseAndVisibilityNot(Visibility.DRAFT).stream()
                 .map(post -> {
                     List<String> tagNames = postTagRepository.findByPost_Id(post.getId()).stream()
                             .map(postTag -> postTag.getTag().getName())
@@ -59,7 +51,25 @@ public class PostService {
                 .toList();
     }
 
-    // 게시글 상세 조회
+    /*
+    // JWT 인증 필터 적용 후 사용할 게시글 목록 조회
+    public List<PostQueryDto.ListResponse> getPostList(Long loginMemberId) {
+        return postRepository.findByIsDeletedFalseAndVisibilityNot(Visibility.DRAFT).stream()
+                .filter(post ->
+                        post.getVisibility() == Visibility.PUBLIC ||
+                                post.getMember().getId().equals(loginMemberId)
+                )
+                .map(post -> {
+                    List<String> tagNames = postTagRepository.findByPost_Id(post.getId()).stream()
+                            .map(postTag -> postTag.getTag().getName())
+                            .toList();
+
+                    return PostQueryDto.ListResponse.from(post, tagNames);
+                })
+                .toList();
+    }
+    */
+
     @Transactional
     public PostQueryDto.DetailResponse getPostDetail(Long postId, boolean increaseViewCount){
         Post post = postRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
@@ -67,17 +77,6 @@ public class PostService {
         if (post.getIsDeleted()) {
             throw new IllegalArgumentException("삭제된 게시글입니다.");
         }
-
-        // TODO: 로그인 기능 병합 후 비공개 게시글 접근 제어 적용
-        // Long loginMemberId = loginMember.getId();
-        // boolean isOwner = post.getMember().getId().equals(loginMemberId);
-        //
-        // if (post.getVisibility() == Visibility.PRIVATE && !isOwner) {
-        //     throw new org.springframework.web.server.ResponseStatusException(
-        //             org.springframework.http.HttpStatus.FORBIDDEN,
-        //             "비공개 게시글입니다."
-        //     );
-        // }
 
         if (increaseViewCount) {
             // 게시글 조회수 증가
@@ -92,15 +91,43 @@ public class PostService {
         return PostQueryDto.DetailResponse.from(post, tagNames);
     }
 
+    /*
+    // JWT 인증 필터 적용 후 사용할 게시글 상세 조회
+    @Transactional
+    public PostQueryDto.DetailResponse getPostDetail(Long postId, boolean increaseViewCount, Long loginMemberId) {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
+
+        if (post.getIsDeleted()) {
+            throw new IllegalArgumentException("삭제된 게시글입니다.");
+        }
+
+        boolean isOwner = post.getMember().getId().equals(loginMemberId);
+
+        if (post.getVisibility() == Visibility.PRIVATE && !isOwner) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.FORBIDDEN,
+                    "비공개 게시글입니다."
+            );
+        }
+
+        if (increaseViewCount) {
+            post.increaseViewCount();
+        }
+
+        List<String> tagNames = postTagRepository.findByPost_Id(postId).stream()
+                .map(postTag -> postTag.getTag().getName())
+                .toList();
+
+        return PostQueryDto.DetailResponse.from(post, tagNames);
+    }
+    */
+
     // 게시글 작성
     @Transactional
     public Long createPost(PostCommandDto.Create request){
 
         // 임시 회원 ID
         Long memberId = 1L;
-
-        // TODO: 로그인 기능 병합 후 작성자 게시글 작성 적용
-        // Long memberId = loginMember.getId();
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
@@ -125,19 +152,37 @@ public class PostService {
         return savedPost.getId();
     }
 
+    /*
+    // JWT 인증 필터 적용 후 사용할 게시글 작성
+    @Transactional
+    public Long createPost(PostCommandDto.Create request, Long loginMemberId) {
+        Member member = memberRepository.findById(loginMemberId)
+                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+
+        Post post = Post.create(
+                member,
+                request.getTitle(),
+                request.getContent(),
+                request.getDifficulty(),
+                request.getVisibility(),
+                request.getStudyTime()
+        );
+
+        Post savedPost = postRepository.save(post);
+
+        connectPostTags(savedPost, request.getTagNames());
+        connectPostImages(savedPost.getId(), request.getContent());
+
+        return savedPost.getId();
+    }
+    */
+
     // 게시글 수정
     @Transactional
     public Long updatePost(Long postId, PostCommandDto.Update request) {
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
-
-        // TODO: 로그인 기능 병합 후 주석 해제
-        // Long loginMemberId = 로그인한_회원_ID;
-        //
-        // if (!post.getMember().getId().equals(loginMemberId)) {
-        //     throw new IllegalArgumentException("게시글 작성자만 수정할 수 있습니다.");
-        // }
 
         if (post.getIsDeleted()) {
             throw new IllegalArgumentException("삭제된 게시글은 수정할 수 없습니다.");
@@ -162,6 +207,42 @@ public class PostService {
         return post.getId();
     }
 
+    /*
+    // JWT 인증 필터 적용 후 사용할 게시글 수정
+    @Transactional
+    public Long updatePost(Long postId, PostCommandDto.Update request, Long loginMemberId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
+
+        if (post.getIsDeleted()) {
+            throw new IllegalArgumentException("삭제된 게시글은 수정할 수 없습니다.");
+        }
+
+        if (!post.getMember().getId().equals(loginMemberId)) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.FORBIDDEN,
+                    "게시글 작성자만 수정할 수 있습니다."
+            );
+        }
+
+        post.update(
+                request.getTitle(),
+                request.getContent(),
+                request.getDifficulty(),
+                request.getVisibility(),
+                request.getStudyTime()
+        );
+
+        postTagRepository.deleteByPost_Id(post.getId());
+        postTagRepository.flush();
+        connectPostTags(post, request.getTagNames());
+
+        connectPostImages(post.getId(), request.getContent());
+
+        return post.getId();
+    }
+    */
+
     // 게시글 삭제
     @Transactional
     public void deletePost(Long postId) {
@@ -172,15 +253,30 @@ public class PostService {
             throw new IllegalArgumentException("이미 삭제된 게시글입니다.");
         }
 
-        // TODO: 로그인 기능 병합 후 주석 해제
-        // Long loginMemberId = 로그인한_회원_ID;
-        //
-        // if (!post.getMember().getId().equals(loginMemberId)) {
-        //     throw new IllegalArgumentException("게시글 작성자만 삭제할 수 있습니다.");
-        // }
+        post.delete();
+    }
+
+    /*
+    // JWT 인증 필터 적용 후 사용할 게시글 삭제
+    @Transactional
+    public void deletePost(Long postId, Long loginMemberId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
+
+        if (post.getIsDeleted()) {
+            throw new IllegalArgumentException("이미 삭제된 게시글입니다.");
+        }
+
+        if (!post.getMember().getId().equals(loginMemberId)) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.FORBIDDEN,
+                    "게시글 작성자만 삭제할 수 있습니다."
+            );
+        }
 
         post.delete();
     }
+    */
 
     // 게시글 태그 연결
     private void connectPostTags(Post post, List<String> tagNames) {

@@ -18,6 +18,29 @@ import {
 
 // 게시글 상세 페이지 관련 로직 관리 Hook
 
+// 인증 연동 후 작성자 전용 버튼 노출에 사용할 코드
+// const getCurrentNickname = () => {
+//     const storedUser = localStorage.getItem("user");
+//
+//     if (storedUser) {
+//         try {
+//             const parsedUser = JSON.parse(storedUser);
+//
+//             if (parsedUser?.nickname) {
+//                 return parsedUser.nickname;
+//             }
+//         } catch (error) {
+//             console.error(error);
+//         }
+//     }
+//
+//     return (
+//         localStorage.getItem("nickname") ||
+//         localStorage.getItem("currentUserNickname") ||
+//         localStorage.getItem("userNickname")
+//     );
+// };
+
 export function usePostDetail() {
     // =========================
     // 라우팅 관련
@@ -44,6 +67,10 @@ export function usePostDetail() {
 
     // 댓글 입력값 상태
     const [commentContent, setCommentContent] = useState("");
+
+    // 인증 연동 후 작성자 전용 버튼 노출에 사용할 코드
+    // const currentNickname = getCurrentNickname();
+    // const isAuthor = Boolean(post?.nickname && currentNickname && post.nickname === currentNickname);
 
     // =========================
     // 데이터 조회

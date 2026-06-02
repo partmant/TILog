@@ -34,6 +34,8 @@ export const searchPosts = async ({ keyword, tagName }) => {
         createdAt: post.createdAt,
         likeCount: post.likeCount,
         commentCount: post.commentCount,
+        viewCount: post.viewCount,
+        studyTime: post.studyTime,
     }));
 };
 

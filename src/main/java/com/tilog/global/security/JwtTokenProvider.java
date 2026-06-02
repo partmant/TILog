@@ -1,6 +1,6 @@
 package com.tilog.global.security;
 
-import com.tilog.entity.MemberRole;
+import com.tilog.domain.member.entity.MemberRole;
 import com.tilog.global.exception.AuthException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;

@@ -1,12 +1,12 @@
 package com.tilog.service;
 
-import com.tilog.dto.writeHistory.WriteHistoryDailyCountResponse;
-import com.tilog.dto.writeHistory.WriteHistoryDailyCountSummaryResponse;
-import com.tilog.dto.writeHistory.WriteHistoryHeatmapItemResponse;
-import com.tilog.dto.writeHistory.WriteHistoryHeatmapResponse;
-import com.tilog.entity.writeHistory.WriteHistory;
-import com.tilog.repository.writeHistory.WriteHistoryRepository;
-import com.tilog.service.WriteHistory.WriteHistoryQueryService;
+import com.tilog.domain.writeHistory.dto.WriteHistoryDailyCountResponse;
+import com.tilog.domain.writeHistory.dto.WriteHistoryDailyCountSummaryResponse;
+import com.tilog.domain.writeHistory.dto.WriteHistoryHeatmapItemResponse;
+import com.tilog.domain.writeHistory.dto.WriteHistoryHeatmapResponse;
+import com.tilog.domain.writeHistory.entity.WriteHistory;
+import com.tilog.domain.writeHistory.repository.WriteHistoryRepository;
+import com.tilog.domain.writeHistory.service.WriteHistoryQueryService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

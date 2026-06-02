@@ -1,4 +1,4 @@
-package com.tilog.dto.history;
+package com.tilog.dto.writeHistory;
 
 import java.time.LocalDate;
 import java.util.List;

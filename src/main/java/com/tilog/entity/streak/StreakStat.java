@@ -1,10 +1,8 @@
-package com.tilog.entity;
+package com.tilog.entity.streak;
 
+import com.tilog.entity.Member;
 import com.tilog.global.entity.BaseTimeEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,8 +16,12 @@ import java.time.LocalDate;
 public class StreakStat extends BaseTimeEntity {
     @Id
     @Column(name = "member_id")
-    // TODO: Member 엔티티 구현 후 필요하면 @OneToOne 연관관계로 변경 검토
     private Long memberId;
+
+    @MapsId
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member member;
 
     @Column(name = "current_streak", nullable = false)
     private int currentStreak;
@@ -33,16 +35,16 @@ public class StreakStat extends BaseTimeEntity {
     @Column(name = "last_written_date")
     private LocalDate lastWrittenDate;
 
-    private StreakStat(Long memberId, LocalDate writtenDate) {
-        this.memberId = memberId;
+    private StreakStat(Member member, LocalDate writtenDate) {
+        this.member = member;
         this.currentStreak = 1;
         this.longestStreak = 1;
         this.totalWrittenDays = 1;
         this.lastWrittenDate = writtenDate;
     }
 
-    public static StreakStat create(Long memberId, LocalDate writtenDate) {
-        return new StreakStat(memberId, writtenDate);
+    public static StreakStat create(Member member, LocalDate writtenDate) {
+        return new StreakStat(member, writtenDate);
     }
 
     public void update(LocalDate writtenDate) {

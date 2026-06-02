@@ -1,10 +1,6 @@
 package com.tilog.repository;
 
-import com.querydsl.core.types.Expression;
-import com.querydsl.core.types.Order;
-import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.Predicate;
-import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.*;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
@@ -12,6 +8,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tilog.dto.TilPostSearchCondition;
 import com.tilog.dto.TilPostSummaryDto;
 import com.tilog.dto.TilSortType;
+import com.tilog.entity.*;
 import com.tilog.entity.enums.Difficulty;
 import com.tilog.entity.enums.Visibility;
 import lombok.RequiredArgsConstructor;
@@ -32,11 +29,11 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 
     // Q클래스 — mvnw compile 후 target/generated-sources 에 생성됨
     // Post.id (PK 컬럼명 post_id, 필드명 id), Post.isDeleted 주의
-    private static final QPost qPost         = QPost.post;
-    private static final QMember qMember     = QMember.member;
-    private static final QPostTag qPostTag   = QPostTag.postTag;
-    private static final QTag qTag           = QTag.tag;
-    private static final QTilPostLike qLike  = QTilPostLike.tilPostLike;
+    private static final QPost qPost = QPost.post;
+    private static final QMember qMember = QMember.member;
+    private static final QPostTag qPostTag = QPostTag.postTag;
+    private static final QTag qTag = QTag.tag;
+    private static final QTilPostLike qLike = QTilPostLike.tilPostLike;
     private static final QTilComment qComment = QTilComment.tilComment;
 
     // ===== 공개 API =====
@@ -120,7 +117,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     // ===== WHERE 조건 조합 =====
 
     private Predicate[] buildConditions(TilPostSearchCondition cond) {
-        return new Predicate[] {
+        return new Predicate[]{
                 qPost.visibility.eq(Visibility.PUBLIC),
                 qPost.isDeleted.isFalse(),              // Post.isDeleted
                 keywordContains(cond.getKeyword()),
@@ -160,7 +157,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     private BooleanExpression createdAtBetween(LocalDate from, LocalDate to) {
         if (from == null && to == null) return null;
         if (from == null) return qPost.createdAt.loe(to.atTime(23, 59, 59));
-        if (to == null)   return qPost.createdAt.goe(from.atStartOfDay());
+        if (to == null) return qPost.createdAt.goe(from.atStartOfDay());
         return qPost.createdAt.between(from.atStartOfDay(), to.atTime(23, 59, 59));
     }
 
@@ -170,7 +167,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     private OrderSpecifier<?>[] resolveOrderSpecifiers(TilSortType sort) {
         TilSortType resolved = sort != null ? sort : TilSortType.LATEST;
         return switch (resolved) {
-            case LIKES -> new OrderSpecifier[] {
+            case LIKES -> new OrderSpecifier[]{
                     new OrderSpecifier<>(Order.DESC,
                             (Expression<Long>) JPAExpressions
                                     .select(qLike.postLikeId.count())
@@ -178,7 +175,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                                     .where(qLike.post.id.eq(qPost.id))),  // Post.id
                     qPost.createdAt.desc()
             };
-            case COMMENTS -> new OrderSpecifier[] {
+            case COMMENTS -> new OrderSpecifier[]{
                     new OrderSpecifier<>(Order.DESC,
                             (Expression<Long>) JPAExpressions
                                     .select(qComment.commentId.count())
@@ -187,7 +184,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                                             qComment.isDeleted.isFalse())),  // TilComment.isDeleted
                     qPost.createdAt.desc()
             };
-            default -> new OrderSpecifier[] { qPost.createdAt.desc() };
+            default -> new OrderSpecifier[]{qPost.createdAt.desc()};
         };
     }
 }

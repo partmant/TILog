@@ -1,9 +1,9 @@
 package com.tilog.controller;
 
-import com.tilog.dto.history.WriteHistoryRequest;
-import com.tilog.dto.history.WriteHistoryResponse;
+import com.tilog.dto.writeHistory.WriteHistoryRequest;
+import com.tilog.dto.writeHistory.WriteHistoryResponse;
 import com.tilog.global.response.ApiResponse;
-import com.tilog.service.WriteHistoryService;
+import com.tilog.service.WriteHistory.WriteHistoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

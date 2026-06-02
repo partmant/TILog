@@ -1,8 +1,9 @@
-package com.tilog.service;
+package com.tilog.service.streak;
 
 import com.tilog.dto.streak.StreakStatResponse;
-import com.tilog.entity.StreakStat;
-import com.tilog.repository.StreakStatRepository;
+import com.tilog.entity.Member;
+import com.tilog.entity.streak.StreakStat;
+import com.tilog.repository.streak.StreakStatRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,17 +16,16 @@ public class StreakStatService {
     private final StreakStatRepository streakStatRepository;
 
     @Transactional
-    public void updateStreak(Long memberId, LocalDate writtenDate) {
-        streakStatRepository.findById(memberId)
+    public void updateStreak(Member member, LocalDate writtenDate) {
+        streakStatRepository.findById(member.getId())
                 .ifPresentOrElse(
                         streakStat -> streakStat.update(writtenDate),
-                        () -> streakStatRepository.save(StreakStat.create(memberId, writtenDate))
+                        () -> streakStatRepository.save(StreakStat.create(member, writtenDate))
                 );
     }
 
     @Transactional(readOnly = true)
     public StreakStatResponse getStreak(Long memberId) {
-        // TODO: 인증 기능 구현 후 로그인 사용자 ID 기준으로 처리
         return streakStatRepository.findById(memberId)
                 .map(StreakStatResponse::from)
                 .orElseGet(() -> StreakStatResponse.empty(memberId));

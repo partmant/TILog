@@ -1,6 +1,6 @@
 package com.tilog.dto.streak;
 
-import com.tilog.entity.StreakStat;
+import com.tilog.entity.streak.StreakStat;
 
 import java.time.LocalDate;
 

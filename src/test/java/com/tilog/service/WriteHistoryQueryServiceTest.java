@@ -1,11 +1,12 @@
 package com.tilog.service;
 
-import com.tilog.dto.history.WriteHistoryDailyCountResponse;
-import com.tilog.dto.history.WriteHistoryDailyCountSummaryResponse;
-import com.tilog.dto.history.WriteHistoryHeatmapItemResponse;
-import com.tilog.dto.history.WriteHistoryHeatmapResponse;
-import com.tilog.entity.WriteHistory;
-import com.tilog.repository.WriteHistoryRepository;
+import com.tilog.dto.writeHistory.WriteHistoryDailyCountResponse;
+import com.tilog.dto.writeHistory.WriteHistoryDailyCountSummaryResponse;
+import com.tilog.dto.writeHistory.WriteHistoryHeatmapItemResponse;
+import com.tilog.dto.writeHistory.WriteHistoryHeatmapResponse;
+import com.tilog.entity.writeHistory.WriteHistory;
+import com.tilog.repository.writeHistory.WriteHistoryRepository;
+import com.tilog.service.WriteHistory.WriteHistoryQueryService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,7 +37,7 @@ class WriteHistoryQueryServiceTest {
     @DisplayName("기간별 작성 개수를 조회하면 기록이 없는 날짜는 0으로 채워진다")
     void getDailyCounts_fillMissingDatesWithZero() {
         // Given
-        BDDMockito.given(writeHistoryRepository.findAllByMemberIdAndWrittenDateBetweenOrderByWrittenDateAsc(
+        BDDMockito.given(writeHistoryRepository.findAllByMember_IdAndWrittenDateBetweenOrderByWrittenDateAsc(
                 memberId,
                 startDate,
                 endDate
@@ -59,7 +60,7 @@ class WriteHistoryQueryServiceTest {
     @DisplayName("잔디 히트맵을 조회하면 기록이 없는 날짜는 writeCount 0과 level 0으로 채워진다")
     void getHeatmap_fillMissingDatesWithZeroLevel() {
         // Given
-        BDDMockito.given(writeHistoryRepository.findAllByMemberIdAndWrittenDateBetweenOrderByWrittenDateAsc(
+        BDDMockito.given(writeHistoryRepository.findAllByMember_IdAndWrittenDateBetweenOrderByWrittenDateAsc(
                 memberId,
                 startDate,
                 endDate
@@ -86,7 +87,7 @@ class WriteHistoryQueryServiceTest {
     @DisplayName("잔디 히트맵 level은 작성 횟수가 4 이상이면 4로 제한된다")
     void getHeatmap_calculateLevelMaxFour() {
         // Given
-        BDDMockito.given(writeHistoryRepository.findAllByMemberIdAndWrittenDateBetweenOrderByWrittenDateAsc(
+        BDDMockito.given(writeHistoryRepository.findAllByMember_IdAndWrittenDateBetweenOrderByWrittenDateAsc(
                 memberId,
                 startDate,
                 endDate

@@ -1,13 +1,16 @@
 package com.tilog.service;
 
 import com.tilog.dto.streak.StreakStatResponse;
-import com.tilog.entity.StreakStat;
-import com.tilog.repository.StreakStatRepository;
+import com.tilog.entity.Member;
+import com.tilog.entity.streak.StreakStat;
+import com.tilog.repository.streak.StreakStatRepository;
+import com.tilog.service.streak.StreakStatService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -29,13 +32,14 @@ class StreakStatServiceTest {
     void updateStreakWhenStreakStatDoesNotExist() {
         // given
         Long memberId = 1L;
+        Member member = createMember(memberId);
         LocalDate writtenDate = LocalDate.of(2026, 5, 31);
 
         when(streakStatRepository.findById(memberId))
                 .thenReturn(Optional.empty());
 
         // when
-        streakStatService.updateStreak(memberId, writtenDate);
+        streakStatService.updateStreak(member, writtenDate);
 
         // then
         ArgumentCaptor<StreakStat> captor = ArgumentCaptor.forClass(StreakStat.class);
@@ -45,7 +49,7 @@ class StreakStatServiceTest {
 
         StreakStat savedStreakStat = captor.getValue();
 
-        assertThat(savedStreakStat.getMemberId()).isEqualTo(memberId);
+        assertThat(savedStreakStat.getMember()).isEqualTo(member);
         assertThat(savedStreakStat.getCurrentStreak()).isEqualTo(1);
         assertThat(savedStreakStat.getLongestStreak()).isEqualTo(1);
         assertThat(savedStreakStat.getTotalWrittenDays()).isEqualTo(1);
@@ -57,16 +61,17 @@ class StreakStatServiceTest {
     void updateStreakWhenWrittenNextDay() {
         // given
         Long memberId = 1L;
+        Member member = createMember(memberId);
         LocalDate lastWrittenDate = LocalDate.of(2026, 5, 30);
         LocalDate writtenDate = LocalDate.of(2026, 5, 31);
 
-        StreakStat streakStat = StreakStat.create(memberId, lastWrittenDate);
+        StreakStat streakStat = StreakStat.create(member, lastWrittenDate);
 
         when(streakStatRepository.findById(memberId))
                 .thenReturn(Optional.of(streakStat));
 
         // when
-        streakStatService.updateStreak(memberId, writtenDate);
+        streakStatService.updateStreak(member, writtenDate);
 
         // then
         verify(streakStatRepository).findById(memberId);
@@ -83,15 +88,16 @@ class StreakStatServiceTest {
     void updateStreakWhenWrittenSameDay() {
         // given
         Long memberId = 1L;
+        Member member = createMember(memberId);
         LocalDate writtenDate = LocalDate.of(2026, 5, 31);
 
-        StreakStat streakStat = StreakStat.create(memberId, writtenDate);
+        StreakStat streakStat = StreakStat.create(member, writtenDate);
 
         when(streakStatRepository.findById(memberId))
                 .thenReturn(Optional.of(streakStat));
 
         // when
-        streakStatService.updateStreak(memberId, writtenDate);
+        streakStatService.updateStreak(member, writtenDate);
 
         // then
         verify(streakStatRepository).findById(memberId);
@@ -108,16 +114,17 @@ class StreakStatServiceTest {
     void resetCurrentStreakWhenWrittenDateIsNotContinuous() {
         // given
         Long memberId = 1L;
+        Member member = createMember(memberId);
         LocalDate lastWrittenDate = LocalDate.of(2026, 5, 28);
         LocalDate writtenDate = LocalDate.of(2026, 5, 31);
 
-        StreakStat streakStat = StreakStat.create(memberId, lastWrittenDate);
+        StreakStat streakStat = StreakStat.create(member, lastWrittenDate);
 
         when(streakStatRepository.findById(memberId))
                 .thenReturn(Optional.of(streakStat));
 
         // when
-        streakStatService.updateStreak(memberId, writtenDate);
+        streakStatService.updateStreak(member, writtenDate);
 
         // then
         verify(streakStatRepository).findById(memberId);
@@ -134,8 +141,9 @@ class StreakStatServiceTest {
     void keepLongestStreakWhenCurrentStreakIsReset() {
         // given
         Long memberId = 1L;
+        Member member = createMember(memberId);
 
-        StreakStat streakStat = StreakStat.create(memberId, LocalDate.of(2026, 5, 1));
+        StreakStat streakStat = StreakStat.create(member, LocalDate.of(2026, 5, 1));
         streakStat.update(LocalDate.of(2026, 5, 2));
         streakStat.update(LocalDate.of(2026, 5, 3));
 
@@ -143,7 +151,7 @@ class StreakStatServiceTest {
                 .thenReturn(Optional.of(streakStat));
 
         // when
-        streakStatService.updateStreak(memberId, LocalDate.of(2026, 5, 10));
+        streakStatService.updateStreak(member, LocalDate.of(2026, 5, 10));
 
         // then
         verify(streakStatRepository).findById(memberId);
@@ -160,9 +168,11 @@ class StreakStatServiceTest {
     void getStreakWhenStreakStatExists() {
         // given
         Long memberId = 1L;
+        Member member = createMember(memberId);
         LocalDate writtenDate = LocalDate.of(2026, 5, 31);
 
-        StreakStat streakStat = StreakStat.create(memberId, writtenDate);
+        StreakStat streakStat = StreakStat.create(member, writtenDate);
+        setMemberId(streakStat, memberId);
 
         when(streakStatRepository.findById(memberId))
                 .thenReturn(Optional.of(streakStat));
@@ -200,5 +210,37 @@ class StreakStatServiceTest {
         assertThat(response.longestStreak()).isZero();
         assertThat(response.totalWrittenDays()).isZero();
         assertThat(response.lastWrittenDate()).isNull();
+    }
+
+    private Member createMember(Long memberId) {
+        Member member = Member.create(
+                "test" + memberId + "@example.com",
+                "encoded-password",
+                "테스트유저" + memberId
+        );
+
+        setMemberId(member, memberId);
+
+        return member;
+    }
+
+    private void setMemberId(Member member, Long memberId) {
+        try {
+            Field idField = Member.class.getDeclaredField("id");
+            idField.setAccessible(true);
+            idField.set(member, memberId);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void setMemberId(StreakStat streakStat, Long memberId) {
+        try {
+            Field memberIdField = StreakStat.class.getDeclaredField("memberId");
+            memberIdField.setAccessible(true);
+            memberIdField.set(streakStat, memberId);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -1,11 +1,11 @@
-package com.tilog.service;
+package com.tilog.service.WriteHistory;
 
-import com.tilog.dto.history.WriteHistoryDailyCountResponse;
-import com.tilog.dto.history.WriteHistoryDailyCountSummaryResponse;
-import com.tilog.dto.history.WriteHistoryHeatmapItemResponse;
-import com.tilog.dto.history.WriteHistoryHeatmapResponse;
-import com.tilog.entity.WriteHistory;
-import com.tilog.repository.WriteHistoryRepository;
+import com.tilog.dto.writeHistory.WriteHistoryDailyCountResponse;
+import com.tilog.dto.writeHistory.WriteHistoryDailyCountSummaryResponse;
+import com.tilog.dto.writeHistory.WriteHistoryHeatmapItemResponse;
+import com.tilog.dto.writeHistory.WriteHistoryHeatmapResponse;
+import com.tilog.entity.writeHistory.WriteHistory;
+import com.tilog.repository.writeHistory.WriteHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +32,7 @@ public class WriteHistoryQueryService {
         validateDateRange(startDate, endDate);
 
         List<WriteHistory> histories =
-                writeHistoryRepository.findAllByMemberIdAndWrittenDateBetweenOrderByWrittenDateAsc(
+                writeHistoryRepository.findAllByMember_IdAndWrittenDateBetweenOrderByWrittenDateAsc(
                         memberId,
                         startDate,
                         endDate
@@ -64,7 +64,7 @@ public class WriteHistoryQueryService {
         validateDateRange(startDate, endDate);
 
         List<WriteHistory> histories = writeHistoryRepository
-                .findAllByMemberIdAndWrittenDateBetweenOrderByWrittenDateAsc(memberId, startDate, endDate);
+                .findAllByMember_IdAndWrittenDateBetweenOrderByWrittenDateAsc(memberId, startDate, endDate);
 
         Map<LocalDate, Integer> writeCountMap = histories.stream()
                 .collect(Collectors.toMap(

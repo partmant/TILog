@@ -1,9 +1,9 @@
 package com.tilog.controller;
 
-import com.tilog.dto.history.WriteHistoryDailyCountSummaryResponse;
-import com.tilog.dto.history.WriteHistoryHeatmapResponse;
+import com.tilog.dto.writeHistory.WriteHistoryDailyCountSummaryResponse;
+import com.tilog.dto.writeHistory.WriteHistoryHeatmapResponse;
 import com.tilog.global.response.ApiResponse;
-import com.tilog.service.WriteHistoryQueryService;
+import com.tilog.service.WriteHistory.WriteHistoryQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;

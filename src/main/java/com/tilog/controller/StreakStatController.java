@@ -2,7 +2,7 @@ package com.tilog.controller;
 
 import com.tilog.dto.streak.StreakStatResponse;
 import com.tilog.global.response.ApiResponse;
-import com.tilog.service.StreakStatService;
+import com.tilog.service.streak.StreakStatService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;

@@ -1,8 +1,12 @@
 package com.tilog.service;
 
-import com.tilog.dto.history.WriteHistoryRequest;
-import com.tilog.entity.WriteHistory;
-import com.tilog.repository.WriteHistoryRepository;
+import com.tilog.dto.writeHistory.WriteHistoryRequest;
+import com.tilog.entity.Member;
+import com.tilog.entity.writeHistory.WriteHistory;
+import com.tilog.repository.MemberRepository;
+import com.tilog.repository.writeHistory.WriteHistoryRepository;
+import com.tilog.service.WriteHistory.WriteHistoryService;
+import com.tilog.service.streak.StreakStatService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,20 +14,29 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class WriteHistoryServiceTest {
     @Mock
     private WriteHistoryRepository writeHistoryRepository;
+
+    @Mock
+    private MemberRepository memberRepository;
+
+    @Mock
+    private StreakStatService streakStatService;
+
     @InjectMocks
     private WriteHistoryService writeHistoryService;
 
-    // 공통 변수 추출
     private final Long memberId = 1L;
     private final WriteHistoryRequest request = new WriteHistoryRequest(memberId);
     private final LocalDate today = LocalDate.now();
@@ -31,31 +44,72 @@ class WriteHistoryServiceTest {
     @Test
     @DisplayName("오늘 작성 이력이 없으면 새 작성 이력을 생성한다")
     void recordWriteHistory_create() {
-        // Given
-        given(writeHistoryRepository.findByMemberIdAndWrittenDate(memberId, today))
-                .willReturn(Optional.empty());
-        given(writeHistoryRepository.save(any())).willReturn(WriteHistory.create(memberId, today));
+        // given
+        Member member = createMember(memberId);
 
-        // When
+        given(memberRepository.findById(memberId))
+                .willReturn(Optional.of(member));
+
+        given(writeHistoryRepository.findByMember_IdAndWrittenDate(memberId, today))
+                .willReturn(Optional.empty());
+
+        given(writeHistoryRepository.save(any(WriteHistory.class)))
+                .willAnswer(invocation -> invocation.getArgument(0));
+
+        // when
         writeHistoryService.recordWriteHistory(request);
 
-        // Then
-        verify(writeHistoryRepository).save(any());
+        // then
+        verify(memberRepository).findById(memberId);
+        verify(writeHistoryRepository).findByMember_IdAndWrittenDate(memberId, today);
+        verify(writeHistoryRepository).save(any(WriteHistory.class));
+        verify(streakStatService).updateStreak(member, today);
     }
 
     @Test
     @DisplayName("이미 있으면 횟수를 증가시킨다")
     void recordWriteHistory_increaseCount() {
-        // Given
-        WriteHistory history = WriteHistory.create(memberId, today);
-        given(writeHistoryRepository.findByMemberIdAndWrittenDate(memberId, today))
+        // given
+        Member member = createMember(memberId);
+        WriteHistory history = WriteHistory.create(member, today);
+
+        given(memberRepository.findById(memberId))
+                .willReturn(Optional.of(member));
+
+        given(writeHistoryRepository.findByMember_IdAndWrittenDate(memberId, today))
                 .willReturn(Optional.of(history));
 
-        // When
+        // when
         writeHistoryService.recordWriteHistory(request);
 
-        // Then
+        // then
         assertThat(history.getWriteCount()).isEqualTo(2);
-        verify(writeHistoryRepository, never()).save(any());
+
+        verify(memberRepository).findById(memberId);
+        verify(writeHistoryRepository).findByMember_IdAndWrittenDate(memberId, today);
+        verify(writeHistoryRepository, never()).save(any(WriteHistory.class));
+        verify(streakStatService).updateStreak(member, today);
+    }
+
+    private Member createMember(Long memberId) {
+        Member member = Member.create(
+                "test" + memberId + "@example.com",
+                "encoded-password",
+                "테스트유저" + memberId
+        );
+
+        setMemberId(member, memberId);
+
+        return member;
+    }
+
+    private void setMemberId(Member member, Long memberId) {
+        try {
+            Field idField = Member.class.getDeclaredField("id");
+            idField.setAccessible(true);
+            idField.set(member, memberId);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

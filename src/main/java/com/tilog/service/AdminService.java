@@ -5,7 +5,7 @@ import com.tilog.dto.admin.AdminMemberDetailResponse;
 import com.tilog.dto.admin.AdminMemberListResponse;
 import com.tilog.entity.Member;
 import com.tilog.entity.MemberRole;
-import com.tilog.entity.TilPost;
+import com.tilog.entity.Post;
 import com.tilog.repository.MemberRepository;
 import com.tilog.repository.TilPostRepository;
 import org.springframework.data.domain.Page;
@@ -60,9 +60,9 @@ public class AdminService {
 
     @Transactional
     public void forceDeletePost(Long postId) {  // 게시글 강제 삭제(숨김 처리)
-        TilPost tilPost = tilPostRepository.findById(postId)
+        Post tilPost = tilPostRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글 정보가 존재하지 않습니다."));
 
-        tilPost.deletePost();
+        tilPost.delete();
     }
 }

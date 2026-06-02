@@ -25,20 +25,24 @@
 }
 
 .mypage-heatmap-layout {
+    position: relative;
     display: flex;
     gap: 10px;
     align-items: flex-start;
+    overflow: visible;
 }
 
 .mypage-weekday-column {
+    position: relative;
+    z-index: 1;
     display: grid;
-    grid-template-rows: 22px repeat(7, 14px);
+    grid-template-rows: 28px repeat(7, 14px);
     gap: 4px;
     flex: 0 0 16px;
 }
 
 .mypage-weekday-top-space {
-    height: 22px;
+    height: 28px;
 }
 
 .mypage-weekday-column span {
@@ -54,11 +58,13 @@
 }
 
 .mypage-month-heatmap-scroll {
+    position: relative;
+    z-index: 2;
     width: 100%;
     overflow-x: auto;
     overflow-y: hidden;
-    padding-bottom: 58px;
-    margin-bottom: -44px;
+    padding-bottom: 68px;
+    margin-bottom: -54px;
 }
 
 .mypage-month-heatmap-list {
@@ -139,16 +145,16 @@
 }
 
 .mypage-heatmap-cell:hover {
+    z-index: 80;
     outline: 2px solid #111827;
     outline-offset: 1px;
-    z-index: 10;
 }
 
 .mypage-heatmap-tooltip {
     position: absolute;
     left: 50%;
     top: calc(100% + 10px);
-    z-index: 50;
+    z-index: 100;
     min-width: 124px;
     padding: 8px 10px;
     border-radius: 10px;
@@ -180,6 +186,21 @@
 .mypage-heatmap-cell:hover .mypage-heatmap-tooltip {
     opacity: 1;
     visibility: visible;
+}
+
+/* 가장 왼쪽 잔디 칸들은 툴팁을 오른쪽으로 펼쳐서 잘리지 않게 처리 */
+.mypage-month-block:first-child
+.mypage-month-week:nth-child(-n + 2)
+.mypage-heatmap-tooltip {
+    left: 0;
+    transform: none;
+}
+
+.mypage-month-block:first-child
+.mypage-month-week:nth-child(-n + 2)
+.mypage-heatmap-tooltip::after {
+    left: 10px;
+    transform: none;
 }
 
 .mypage-heatmap-bottom {

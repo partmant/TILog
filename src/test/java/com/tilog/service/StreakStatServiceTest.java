@@ -1,10 +1,10 @@
 package com.tilog.service;
 
-import com.tilog.dto.streak.StreakStatResponse;
-import com.tilog.entity.Member;
-import com.tilog.entity.streak.StreakStat;
-import com.tilog.repository.streak.StreakStatRepository;
-import com.tilog.service.streak.StreakStatService;
+import com.tilog.domain.streak.dto.StreakStatResponse;
+import com.tilog.domain.member.entity.Member;
+import com.tilog.domain.streak.entity.StreakStat;
+import com.tilog.domain.streak.repository.StreakStatRepository;
+import com.tilog.domain.streak.service.StreakStatService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -1,6 +1,5 @@
 package com.tilog.domain.member.entity;
 
-import com.tilog.entity.enums.MemberRole;
 import com.tilog.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import jakarta.persistence.Column;

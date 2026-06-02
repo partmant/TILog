@@ -1,4 +1,4 @@
-.mypage-cheer {
+.app-footer {
     display: flex;
     align-items: center;
     gap: 22px;
@@ -9,7 +9,7 @@
     background: linear-gradient(135deg, #ede9fe 0%, #ecfeff 100%);
 }
 
-.mypage-cheer-icon {
+.app-footer-icon {
     display: grid;
     width: 58px;
     height: 58px;
@@ -21,7 +21,7 @@
     font-weight: 900;
 }
 
-.mypage-cheer strong {
+.app-footer strong {
     display: block;
     margin-bottom: 8px;
     color: #111827;
@@ -29,14 +29,14 @@
     font-weight: 900;
 }
 
-.mypage-cheer p {
+.app-footer p {
     margin: 0;
     color: #374151;
     font-size: 14px;
     font-weight: 700;
 }
 
-.mypage-flower {
+.app-footer-flower {
     position: relative;
     flex: 0 0 64px;
     width: 64px;
@@ -44,7 +44,7 @@
     margin-left: auto;
 }
 
-.mypage-flower span {
+.app-footer-flower span {
     position: absolute;
     width: 28px;
     height: 28px;
@@ -52,30 +52,30 @@
     background: linear-gradient(135deg, #a78bfa, #22d3ee);
 }
 
-.mypage-flower span:nth-child(1) {
+.app-footer-flower span:nth-child(1) {
     left: 18px;
     top: 0;
 }
 
-.mypage-flower span:nth-child(2) {
+.app-footer-flower span:nth-child(2) {
     right: 0;
     top: 18px;
     transform: rotate(90deg);
 }
 
-.mypage-flower span:nth-child(3) {
+.app-footer-flower span:nth-child(3) {
     left: 18px;
     bottom: 0;
     transform: rotate(180deg);
 }
 
-.mypage-flower span:nth-child(4) {
+.app-footer-flower span:nth-child(4) {
     left: 0;
     top: 18px;
     transform: rotate(270deg);
 }
 
-.mypage-flower i {
+.app-footer-flower i {
     position: absolute;
     left: 22px;
     top: 22px;
@@ -87,11 +87,11 @@
 }
 
 @media (max-width: 760px) {
-    .mypage-cheer {
+    .app-footer {
         align-items: flex-start;
     }
 
-    .mypage-flower {
+    .app-footer-flower {
         display: none;
     }
 }

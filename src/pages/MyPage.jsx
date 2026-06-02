@@ -2,31 +2,28 @@ import {
     useEffect,
     useMemo,
     useState,
-} from 'react';
+} from "react";
 import {
     getCachedHeatmap,
     getCachedStreak,
     getMyHeatmap,
     getMyStreak,
-} from '../api/myPageApi';
+} from "../api/myPageApi";
 import {
     getCachedRecentTils,
     getRecentTils,
-} from '../api/tilApi';
-import MyPageHeader from '../components/mypage/MyPageHeader';
-import MyPageHero from '../components/mypage/MyPageHero';
-import MyPageStats from '../components/mypage/MyPageStats';
-import HeatmapSection from '../components/mypage/HeatmapSection';
-import RecentTilSection from '../components/mypage/RecentTilSection';
-import CheerCard from '../components/mypage/CheerCard';
+} from "../api/tilApi";
+import MyPageHero from "../components/mypage/MyPageHero";
+import MyPageStats from "../components/mypage/MyPageStats";
+import HeatmapSection from "../components/mypage/HeatmapSection";
+import RecentTilSection from "../components/mypage/RecentTilSection";
 import {
     TEMP_MEMBER_ID,
     buildHeatmapDays,
     getMonthRange,
     normalizeHeatmapItems,
     normalizeTilList,
-} from '../utils/mypageUtils';
-import '../styles/mypage/MyPage.css';
+} from "../utils/mypageUtils";
 
 const DEFAULT_STREAK = {
     currentStreak: 0,
@@ -213,36 +210,30 @@ const MyPage = () => {
     }, []);
 
     return (
-        <main className="mypage">
-            <div className="mypage-shell">
-                <MyPageHeader />
+        <>
+            <MyPageHero />
 
-                <MyPageHero />
+            <MyPageStats
+                streak={streak}
+                totalWriteCount={totalWriteCount}
+                writtenDays={writtenDays}
+                isLoading={isStreakLoading}
+            />
 
-                <MyPageStats
-                    streak={streak}
-                    totalWriteCount={totalWriteCount}
-                    writtenDays={writtenDays}
-                    isLoading={isStreakLoading}
+            <section className="mypage-content-grid">
+                <HeatmapSection
+                    heatmapDays={heatmapDays}
+                    selectedMonthCount={selectedMonthCount}
+                    onChangeMonthCount={setSelectedMonthCount}
+                    isLoading={isHeatmapLoading}
                 />
 
-                <section className="mypage-content-grid">
-                    <HeatmapSection
-                        heatmapDays={heatmapDays}
-                        selectedMonthCount={selectedMonthCount}
-                        onChangeMonthCount={setSelectedMonthCount}
-                        isLoading={isHeatmapLoading}
-                    />
-
-                    <RecentTilSection
-                        recentTils={recentTils}
-                        isLoading={isTilLoading}
-                    />
-                </section>
-
-                <CheerCard />
-            </div>
-        </main>
+                <RecentTilSection
+                    recentTils={recentTils}
+                    isLoading={isTilLoading}
+                />
+            </section>
+        </>
     );
 };
 

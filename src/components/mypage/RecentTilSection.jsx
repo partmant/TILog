@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import {
     getTilCategory,
     getTilDate,
@@ -7,6 +8,8 @@ import {
 import '../../styles/mypage/RecentTilSection.css';
 
 const RecentTilSection = ({ recentTils, isLoading }) => {
+    const navigate = useNavigate();
+
     return (
         <section className="mypage-panel mypage-recent-panel">
             <div className="mypage-panel-header">
@@ -15,7 +18,11 @@ const RecentTilSection = ({ recentTils, isLoading }) => {
                     <p>최신순으로 작성 기록을 확인합니다.</p>
                 </div>
 
-                <button className="mypage-text-button" type="button">
+                <button
+                    className="mypage-text-button"
+                    type="button"
+                    onClick={() => navigate('/tils')}
+                >
                     전체 보기
                 </button>
             </div>
@@ -30,10 +37,14 @@ const RecentTilSection = ({ recentTils, isLoading }) => {
                         <div className="mypage-empty">최근 작성한 TIL이 없습니다.</div>
                     ) : (
                         recentTils.map((til, index) => (
-                            <article className="mypage-recent-item" key={til.postId ?? til.id ?? index}>
-                <span className={`mypage-category category-${index % 4}`}>
-                  {getTilCategory(til)}
-                </span>
+                            <article
+                                className="mypage-recent-item"
+                                key={til.postId ?? til.id ?? index}
+                                onClick={() => navigate(`/tils/${til.postId ?? til.id}`)}
+                            >
+                                <span className={`mypage-category category-${index % 4}`}>
+                                    {getTilCategory(til)}
+                                </span>
 
                                 <div className="mypage-recent-content">
                                     <strong>{getTilTitle(til)}</strong>

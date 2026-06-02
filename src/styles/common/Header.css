@@ -1,4 +1,4 @@
-.mypage-header {
+.app-header {
     display: grid;
     grid-template-columns: 260px 1fr auto;
     align-items: center;
@@ -6,13 +6,18 @@
     height: 76px;
 }
 
-.mypage-brand {
+.app-header-brand {
     display: flex;
     align-items: center;
     gap: 18px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
 }
 
-.mypage-logo {
+.app-header-logo {
     display: grid;
     width: 48px;
     height: 48px;
@@ -24,15 +29,16 @@
     font-weight: 900;
 }
 
-.mypage-brand strong {
+.app-header-brand strong {
     display: block;
+    color: #111827;
     font-size: 24px;
     line-height: 1;
     font-weight: 900;
     letter-spacing: -0.04em;
 }
 
-.mypage-brand span {
+.app-header-brand span {
     display: block;
     margin-top: 6px;
     color: #6b7280;
@@ -40,36 +46,43 @@
     font-weight: 700;
 }
 
-.mypage-nav {
+.app-header-nav {
     display: flex;
     justify-content: center;
     gap: 28px;
 }
 
-.mypage-nav button {
+.app-header-nav-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     height: 44px;
     padding: 0 18px;
-    border: 0;
     border-radius: 999px;
-    background: transparent;
     color: #374151;
     font-size: 15px;
     font-weight: 800;
+    text-decoration: none;
     cursor: pointer;
 }
 
-.mypage-nav button.active {
+.app-header-nav-link:hover {
+    background: rgba(139, 92, 246, 0.08);
+    color: #7c3aed;
+}
+
+.app-header-nav-link.active {
     background: linear-gradient(135deg, rgba(139, 92, 246, 0.18), rgba(34, 211, 238, 0.14));
     color: #7c3aed;
 }
 
-.mypage-actions {
+.app-header-actions {
     display: flex;
     align-items: center;
     gap: 14px;
 }
 
-.mypage-write-button {
+.app-header-write-button {
     height: 46px;
     padding: 0 32px;
     border: 0;
@@ -82,7 +95,7 @@
     cursor: pointer;
 }
 
-.mypage-profile-button {
+.app-header-profile-button {
     display: grid;
     width: 46px;
     height: 46px;
@@ -96,37 +109,37 @@
 }
 
 @media (max-width: 1180px) {
-    .mypage-header {
+    .app-header {
         grid-template-columns: 1fr;
         height: auto;
         gap: 18px;
     }
 
-    .mypage-nav {
+    .app-header-nav {
         justify-content: flex-start;
         overflow-x: auto;
     }
 
-    .mypage-actions {
+    .app-header-actions {
         justify-content: flex-start;
     }
 }
 
 @media (max-width: 760px) {
-    .mypage-nav {
+    .app-header-nav {
         gap: 8px;
     }
 
-    .mypage-nav button {
+    .app-header-nav-link {
         padding: 0 14px;
         white-space: nowrap;
     }
 
-    .mypage-actions {
+    .app-header-actions {
         flex-wrap: wrap;
     }
 
-    .mypage-write-button {
+    .app-header-write-button {
         flex: 1;
     }
 }

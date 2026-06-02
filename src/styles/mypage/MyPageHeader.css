@@ -1,0 +1,132 @@
+.mypage-header {
+    display: grid;
+    grid-template-columns: 260px 1fr auto;
+    align-items: center;
+    gap: 24px;
+    height: 76px;
+}
+
+.mypage-brand {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.mypage-logo {
+    display: grid;
+    width: 48px;
+    height: 48px;
+    place-items: center;
+    border-radius: 13px;
+    background: linear-gradient(135deg, #8b5cf6 0%, #22d3ee 100%);
+    color: #ffffff;
+    font-size: 28px;
+    font-weight: 900;
+}
+
+.mypage-brand strong {
+    display: block;
+    font-size: 24px;
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+}
+
+.mypage-brand span {
+    display: block;
+    margin-top: 6px;
+    color: #6b7280;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.mypage-nav {
+    display: flex;
+    justify-content: center;
+    gap: 28px;
+}
+
+.mypage-nav button {
+    height: 44px;
+    padding: 0 18px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: #374151;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.mypage-nav button.active {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.18), rgba(34, 211, 238, 0.14));
+    color: #7c3aed;
+}
+
+.mypage-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.mypage-write-button {
+    height: 46px;
+    padding: 0 32px;
+    border: 0;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #8b5cf6 0%, #22d3ee 100%);
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 900;
+    box-shadow: 0 10px 24px rgba(124, 58, 237, 0.22);
+    cursor: pointer;
+}
+
+.mypage-profile-button {
+    display: grid;
+    width: 46px;
+    height: 46px;
+    place-items: center;
+    border: 2px solid #e5e7eb;
+    border-radius: 50%;
+    background: #ffffff;
+    color: #7c3aed;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+@media (max-width: 1180px) {
+    .mypage-header {
+        grid-template-columns: 1fr;
+        height: auto;
+        gap: 18px;
+    }
+
+    .mypage-nav {
+        justify-content: flex-start;
+        overflow-x: auto;
+    }
+
+    .mypage-actions {
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 760px) {
+    .mypage-nav {
+        gap: 8px;
+    }
+
+    .mypage-nav button {
+        padding: 0 14px;
+        white-space: nowrap;
+    }
+
+    .mypage-actions {
+        flex-wrap: wrap;
+    }
+
+    .mypage-write-button {
+        flex: 1;
+    }
+}

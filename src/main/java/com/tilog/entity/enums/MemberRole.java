@@ -1,4 +1,4 @@
-package com.tilog.entity;
+package com.tilog.entity.enums;
 
 /**
  * 회원 권한

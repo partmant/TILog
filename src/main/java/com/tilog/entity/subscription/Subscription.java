@@ -1,4 +1,4 @@
-package com.tilog.entity;
+package com.tilog.entity.subscription;
 
 import com.tilog.entity.enums.SubscriptionStatus;
 import jakarta.persistence.*;

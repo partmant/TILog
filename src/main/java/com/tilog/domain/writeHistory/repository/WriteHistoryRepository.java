@@ -15,4 +15,11 @@ public interface WriteHistoryRepository extends JpaRepository<WriteHistory, Long
             LocalDate startDate,
             LocalDate endDate
     );
+
+    int countByMember_IdAndWrittenDateBetweenAndWriteCountGreaterThan(
+            Long memberId,
+            LocalDate startDate,
+            LocalDate endDate,
+            int writeCount
+    );
 }

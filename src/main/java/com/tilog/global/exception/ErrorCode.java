@@ -27,6 +27,10 @@ public enum ErrorCode {
     NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "알림을 찾을 수 없습니다."),
     NOTIFICATION_UNAUTHORIZED(HttpStatus.FORBIDDEN, "알림 접근 권한이 없습니다."),
 
+    // Subscription
+    SUBSCRIPTION_ALREADY_ACTIVE(HttpStatus.CONFLICT, "이미 활성화된 구독이 존재합니다."),
+    SUBSCRIPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "활성 구독 내역을 찾을 수 없습니다."),
+
     // Common
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "게시글을 찾을 수 없습니다."),
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "회원을 찾을 수 없습니다."),

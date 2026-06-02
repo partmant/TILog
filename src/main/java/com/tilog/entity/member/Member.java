@@ -1,4 +1,4 @@
-package com.tilog.entity;
+package com.tilog.entity.member;
 
 import com.tilog.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;

@@ -22,6 +22,7 @@ public class PostQueryDto {
         private Integer viewCount;
         private Integer studyTime;
         private String nickname;
+        private LocalDateTime createdAt;
         private List<String> tagNames;
 
         public static ListResponse from(Post post, List<String> tagNames) {
@@ -33,6 +34,7 @@ public class PostQueryDto {
                     .viewCount(post.getViewCount())
                     .studyTime(post.getStudyTime())
                     .nickname(post.getMember().getNickname())
+                    .createdAt(post.getCreatedAt())
                     .tagNames(tagNames)
                     .build();
         }

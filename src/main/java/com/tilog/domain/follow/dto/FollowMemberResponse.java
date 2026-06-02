@@ -1,6 +1,6 @@
-package com.tilog.dto.follow;
+package com.tilog.domain.follow.dto;
 
-import com.tilog.entity.Follow;
+import com.tilog.domain.follow.entity.Follow;
 import lombok.Getter;
 
 import java.time.LocalDateTime;

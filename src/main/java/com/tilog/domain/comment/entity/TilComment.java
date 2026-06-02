@@ -22,7 +22,6 @@ public class TilComment {
     @Column(name = "comment_id")
     private Long commentId;
 
-    // 2번 담당자가 정의한 TilPost 엔티티 참조
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;

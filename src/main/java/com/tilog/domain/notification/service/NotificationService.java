@@ -1,14 +1,14 @@
-package com.tilog.service;
+package com.tilog.domain.notification.service;
 
-import com.tilog.dto.notification.NotificationResponse;
-import com.tilog.entity.member.Member;
-import com.tilog.entity.notification.Notification;
-import com.tilog.entity.notification.NotificationType;
+import com.tilog.domain.notification.dto.NotificationResponse;
+import com.tilog.domain.member.entity.Member;
+import com.tilog.domain.notification.entity.Notification;
+import com.tilog.domain.notification.entity.NotificationType;
 import com.tilog.global.exception.CustomException;
 import com.tilog.global.exception.ErrorCode;
 import com.tilog.global.security.SecurityUtil;
-import com.tilog.repository.MemberRepository;
-import com.tilog.repository.notification.NotificationRepository;
+import com.tilog.domain.member.repository.MemberRepository;
+import com.tilog.domain.notification.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;

@@ -1,6 +1,6 @@
-package com.tilog.dto.feed;
+package com.tilog.domain.post.dto;
 
-import com.tilog.entity.Post;
+import com.tilog.domain.post.entity.Post;
 import lombok.Getter;
 
 import java.time.LocalDateTime;

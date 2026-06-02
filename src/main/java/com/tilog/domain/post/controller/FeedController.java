@@ -1,8 +1,8 @@
-package com.tilog.controller;
+package com.tilog.domain.post.controller;
 
-import com.tilog.dto.feed.FeedPostResponse;
+import com.tilog.domain.post.dto.FeedPostResponse;
 import com.tilog.global.response.ApiResponse;
-import com.tilog.service.FeedService;
+import com.tilog.domain.post.service.FeedService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

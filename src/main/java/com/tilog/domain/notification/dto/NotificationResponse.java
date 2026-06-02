@@ -1,7 +1,7 @@
-package com.tilog.dto.notification;
+package com.tilog.domain.notification.dto;
 
-import com.tilog.entity.notification.Notification;
-import com.tilog.entity.notification.NotificationType;
+import com.tilog.domain.notification.entity.Notification;
+import com.tilog.domain.notification.entity.NotificationType;
 import lombok.Getter;
 
 import java.time.LocalDateTime;

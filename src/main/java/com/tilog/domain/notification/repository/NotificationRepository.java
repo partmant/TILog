@@ -1,6 +1,6 @@
-package com.tilog.repository.notification;
+package com.tilog.domain.notification.repository;
 
-import com.tilog.entity.notification.Notification;
+import com.tilog.domain.notification.entity.Notification;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;

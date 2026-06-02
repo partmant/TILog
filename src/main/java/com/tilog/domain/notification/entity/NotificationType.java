@@ -1,4 +1,4 @@
-package com.tilog.entity.notification;
+package com.tilog.domain.notification.entity;
 
 public enum NotificationType {
     COMMENT,  // 댓글 알림

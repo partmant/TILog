@@ -1,8 +1,8 @@
-package com.tilog.controller;
+package com.tilog.domain.notification.controller;
 
-import com.tilog.dto.notification.NotificationResponse;
+import com.tilog.domain.notification.dto.NotificationResponse;
 import com.tilog.global.response.ApiResponse;
-import com.tilog.service.NotificationService;
+import com.tilog.domain.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

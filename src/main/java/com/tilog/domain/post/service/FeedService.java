@@ -1,10 +1,10 @@
-package com.tilog.service;
+package com.tilog.domain.post.service;
 
-import com.tilog.dto.feed.FeedPostResponse;
-import com.tilog.entity.Post;
+import com.tilog.domain.post.entity.Post;
+import com.tilog.domain.post.dto.FeedPostResponse;
 import com.tilog.global.security.SecurityUtil;
-import com.tilog.repository.follow.FollowRepository;
-import com.tilog.repository.PostRepository;
+import com.tilog.domain.follow.repository.FollowRepository;
+import com.tilog.domain.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;

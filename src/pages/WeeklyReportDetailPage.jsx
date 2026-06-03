@@ -120,7 +120,7 @@ const WeeklyReportDetailPage = () => {
                             </button>
                         )}
                         {status === 'error' && (
-                            <span className="rd-error-msg">생성 중 오류가 발생했어요. 다시 시도해주세요.</span>
+                            <span className="rd-error-msg">지금은 생성할 수 없어요. 나중에 다시 시도해주세요.</span>
                         )}
                     </div>
                 )}
@@ -234,7 +234,7 @@ const ReportContent = ({ report }) => {
             {/* 규칙 기반 코멘트 */}
             {ruleBasedComment && (
                 <div className="rd-panel">
-                    <h3>💬 AI 코멘트</h3>
+                    <h3>💬 한 줄 코멘트</h3>
                     <blockquote className="rd-rule-comment">{ruleBasedComment}</blockquote>
                 </div>
             )}
@@ -247,7 +247,6 @@ const ReportContent = ({ report }) => {
                 ) : (
                     <div className="rd-ai-placeholder">
                         <p>AI 심층 분석이 곧 제공될 예정이에요. ✨</p>
-                        <span>LLM 연동 완료 후 자동으로 채워집니다.</span>
                     </div>
                 )}
             </div>

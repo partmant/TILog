@@ -102,7 +102,7 @@ const WeeklyReportSection = () => {
 
             {status === 'error' && (
                 <div className="wr-state-box">
-                    <p className="wr-state-desc">리포트 생성 중 오류가 발생했어요.</p>
+                    <p className="wr-state-desc">지금은 리포트를 생성할 수 없어요. 나중에 다시 시도해주세요.</p>
                     <button className="wr-generate-btn" onClick={generateReport}>
                         다시 시도하기
                     </button>

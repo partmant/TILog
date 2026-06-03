@@ -2,12 +2,14 @@ package com.tilog.domain.report.service;
 
 import com.tilog.domain.report.dto.AiWeeklyReportResponse;
 import com.tilog.domain.report.dto.TechStackDistributionData;
+import com.tilog.domain.report.dto.WeeklyReportContext;
 import com.tilog.domain.report.dto.WeeklySummaryData;
 import com.tilog.domain.report.entity.AiWeeklyReport;
 import com.tilog.domain.member.entity.Member;
 import com.tilog.domain.post.entity.Difficulty;
 import com.tilog.domain.report.repository.AiWeeklyReportRepository;
 import com.tilog.domain.post.repository.PostRepository;
+import com.tilog.global.client.GeminiClient;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +28,7 @@ public class AiWeeklyReportService {
     private final PostRepository postRepository;
     private final AiWeeklyReportRepository aiWeeklyReportRepository;
     private final EntityManager entityManager;
+    private final GeminiClient geminiClient;
 
     /** 특정 주 리포트 조회 — 없으면 Optional.empty() */
     public Optional<AiWeeklyReportResponse> findReport(Long memberId, LocalDate weekStartDate) {
@@ -62,30 +66,34 @@ public class AiWeeklyReportService {
         WeeklySummaryData summaryData = buildWeeklySummary(memberId, from, to);
         TechStackDistributionData techData = buildTechStackDistribution(memberId, from, to);
 
-        // 지난주 리포트 (없으면 null — 첫 주)
-        AiWeeklyReport lastReport = aiWeeklyReportRepository
-                .findTopByMemberIdAndWeekStartDateBeforeOrderByWeekStartDateDesc(memberId, weekStartDate)
-                .orElse(null);
+        // 이번 주 이전 전체 리포트 — 최신순 (쿼리 1번으로 직전 리포트 + 역대 누적 태그 모두 처리)
+        List<AiWeeklyReport> pastReports = aiWeeklyReportRepository
+                .findByMemberIdAndWeekStartDateBeforeOrderByWeekStartDateDesc(memberId, weekStartDate);
 
-        WeeklySummaryData lastWeekSummary = lastReport != null
-                ? lastReport.getWeeklySummaryData() : null;
+        AiWeeklyReport lastReport = pastReports.isEmpty() ? null : pastReports.get(0);
+        WeeklySummaryData lastWeekSummary = lastReport != null ? lastReport.getWeeklySummaryData() : null;
 
-        Set<String> lastWeekTags = (lastReport != null
-                && lastReport.getTechStackDistributionData() != null
-                && lastReport.getTechStackDistributionData().getTags() != null)
-                ? lastReport.getTechStackDistributionData().getTags().keySet()
-                : Collections.emptySet();
+        // 역대 모든 리포트에서 한 번이라도 쓴 태그 누적 집합
+        Set<String> allHistoricalTags = pastReports.stream()
+                .filter(r -> r.getTechStackDistributionData() != null
+                          && r.getTechStackDistributionData().getTags() != null)
+                .flatMap(r -> r.getTechStackDistributionData().getTags().keySet().stream())
+                .collect(Collectors.toSet());
 
-        List<String> newTags = findNewTags(techData.getTags(), lastWeekTags);
+        List<String> newTags = findNewTags(techData.getTags(), allHistoricalTags);
 
         String ruleComment = RuleBasedCommentGenerator.generate(
                 summaryData, techData, lastWeekSummary, newTags);
 
-        // Member 프록시 — 추가 SELECT 없이 FK만 사용
+        // Gemini AI 분석 — 실패 시 CustomException 발생하여 저장되지 않음
+        WeeklyReportContext context = buildContext(summaryData, techData, lastWeekSummary, newTags);
+        String aiAnalysis = geminiClient.generateAiAnalysis(context);
+
         Member member = entityManager.getReference(Member.class, memberId);
 
         AiWeeklyReport report = new AiWeeklyReport(
                 member, weekStartDate, weekEndDate, summaryData, techData, ruleComment);
+        report.applyAiAnalysis(aiAnalysis);
 
         return toResponse(aiWeeklyReportRepository.save(report));
     }
@@ -93,12 +101,10 @@ public class AiWeeklyReportService {
     // ===== 집계 =====
 
     private WeeklySummaryData buildWeeklySummary(Long memberId, LocalDateTime from, LocalDateTime to) {
-        // COUNT + SUM — 항상 1행 반환
         Object[] row = postRepository.findWeeklySummary(memberId, from, to).get(0);
         int totalPosts = ((Long) row[0]).intValue();
         int totalTime  = ((Long) row[1]).intValue();
 
-        // 난이도별 분포
         Map<String, Integer> difficultyDist = new LinkedHashMap<>();
         postRepository.findDifficultyDistribution(memberId, from, to).forEach(r -> {
             Difficulty d = (Difficulty) r[0];
@@ -129,7 +135,6 @@ public class AiWeeklyReportService {
             total += count;
         }
 
-        // 카테고리 비율(%) 계산
         Map<String, Integer> categoryPct = new LinkedHashMap<>();
         if (total > 0) {
             final int finalTotal = total;
@@ -140,6 +145,41 @@ public class AiWeeklyReportService {
         return TechStackDistributionData.builder()
                 .categories(categoryPct)
                 .tags(tagCounts)
+                .build();
+    }
+
+    // ===== Gemini 컨텍스트 빌드 =====
+
+    private WeeklyReportContext buildContext(WeeklySummaryData summaryData,
+                                              TechStackDistributionData techData,
+                                              WeeklySummaryData lastWeekSummary,
+                                              List<String> newTags) {
+        int postChange = 0;
+        int timeChange = 0;
+        if (lastWeekSummary != null && lastWeekSummary.getTotalPosts() > 0) {
+            postChange = (int) Math.round(
+                    (double)(summaryData.getTotalPosts() - lastWeekSummary.getTotalPosts())
+                    / lastWeekSummary.getTotalPosts() * 100);
+        }
+        if (lastWeekSummary != null && lastWeekSummary.getTotalLearningTimeMinutes() > 0) {
+            timeChange = (int) Math.round(
+                    (double)(summaryData.getTotalLearningTimeMinutes() - lastWeekSummary.getTotalLearningTimeMinutes())
+                    / lastWeekSummary.getTotalLearningTimeMinutes() * 100);
+        }
+
+        return WeeklyReportContext.builder()
+                .thisWeek(WeeklyReportContext.ThisWeekStats.builder()
+                        .totalPosts(summaryData.getTotalPosts())
+                        .totalLearningTimeMinutes(summaryData.getTotalLearningTimeMinutes())
+                        .categoryDistribution(techData.getCategories())
+                        .tagDistribution(techData.getTags())
+                        .difficultyDistribution(summaryData.getDifficultyDistribution())
+                        .build())
+                .comparedToLastWeek(WeeklyReportContext.WeeklyComparison.builder()
+                        .postCountChangePercent(postChange)
+                        .learningTimeChangePercent(timeChange)
+                        .newTagsTried(newTags)
+                        .build())
                 .build();
     }
 

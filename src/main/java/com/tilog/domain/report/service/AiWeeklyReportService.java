@@ -26,6 +26,20 @@ public class AiWeeklyReportService {
     private final AiWeeklyReportRepository aiWeeklyReportRepository;
     private final EntityManager entityManager;
 
+    /** 특정 주 리포트 조회 — 없으면 Optional.empty() */
+    public Optional<AiWeeklyReportResponse> findReport(Long memberId, LocalDate weekStartDate) {
+        return aiWeeklyReportRepository
+                .findByMemberIdAndWeekStartDate(memberId, weekStartDate)
+                .map(this::toResponse);
+    }
+
+    /** 가장 최근 리포트 조회 — 없으면 Optional.empty() */
+    public Optional<AiWeeklyReportResponse> findLatestReport(Long memberId) {
+        return aiWeeklyReportRepository
+                .findTopByMemberIdOrderByWeekStartDateDesc(memberId)
+                .map(this::toResponse);
+    }
+
     /**
      * 주간 리포트 생성 — 이미 존재하면 캐시된 것을 반환.
      * weekStartDate는 해당 주 월요일 날짜.

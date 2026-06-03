@@ -17,6 +17,7 @@ import MyPageHero from "../components/mypage/MyPageHero";
 import MyPageStats from "../components/mypage/MyPageStats";
 import HeatmapSection from "../components/mypage/HeatmapSection";
 import RecentTilSection from "../components/mypage/RecentTilSection";
+import WeeklyReportSection from "../components/mypage/WeeklyReportSection";
 import {
     TEMP_MEMBER_ID,
     buildHeatmapDays,
@@ -233,6 +234,8 @@ const MyPage = () => {
                     isLoading={isTilLoading}
                 />
             </section>
+
+            <WeeklyReportSection />
         </>
     );
 };

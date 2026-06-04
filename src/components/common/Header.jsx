@@ -1,8 +1,16 @@
 import { NavLink, useNavigate } from "react-router-dom";
+import { getCurrentUser, logout } from "../../utils/authUtils";
 import "../../styles/common/Header.css";
 
 const Header = () => {
     const navigate = useNavigate();
+    const user = getCurrentUser();
+    const initial = user?.nickname?.charAt(0).toUpperCase() ?? 'U';
+
+    const handleLogout = () => {
+        logout();
+        navigate("/login", { replace: true });
+    };
 
     return (
         <header className="app-header">
@@ -72,7 +80,16 @@ const Header = () => {
                     onClick={() => navigate("/mypage")}
                     aria-label="마이페이지로 이동"
                 >
-                    U
+                    {initial}
+                </button>
+
+                <button
+                    type="button"
+                    className="app-header-logout-button"
+                    onClick={handleLogout}
+                    aria-label="로그아웃"
+                >
+                    로그아웃
                 </button>
             </div>
         </header>

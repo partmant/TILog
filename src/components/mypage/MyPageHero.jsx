@@ -1,24 +1,37 @@
+import { getCurrentUser } from '../../utils/authUtils';
 import '../../styles/mypage/MyPageHero.css';
 
+const formatJoinDate = (joinedAt) => {
+    if (!joinedAt) return null;
+    return String(joinedAt).slice(0, 10).replaceAll('-', '.');
+};
+
 const MyPageHero = () => {
+    const user = getCurrentUser();
+
+    const nickname = user?.nickname ?? 'user';
+    const email = user?.email ?? '';
+    const initial = nickname.charAt(0).toUpperCase();
+    const joinDate = formatJoinDate(user?.joinedAt);
+
     return (
         <section className="mypage-hero">
             <div className="mypage-hero-left">
                 <div className="mypage-avatar">
-                    <span>U</span>
+                    <span>{initial}</span>
                 </div>
 
                 <div>
                     <div className="mypage-profile-title">
-                        <h1>user01</h1>
+                        <h1>{nickname}</h1>
                         <span>꾸준한 작성자</span>
                     </div>
 
                     <p>기록으로 성장하는 TIL 작성자</p>
 
                     <div className="mypage-profile-meta">
-                        <span>tilog@example.com</span>
-                        <span>가입일 2026.05.01</span>
+                        {email && <span>{email}</span>}
+                        {joinDate && <span>가입일 {joinDate}</span>}
                     </div>
                 </div>
             </div>

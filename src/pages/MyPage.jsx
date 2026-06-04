@@ -3,6 +3,7 @@ import {
     useMemo,
     useState,
 } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     getCachedHeatmap,
     getCachedStreak,
@@ -25,12 +26,12 @@ import HeatmapSection from '../components/mypage/HeatmapSection';
 import RecentTilSection from '../components/mypage/RecentTilSection';
 import SubscriptionPaybackSection from '../components/mypage/SubscriptionPaybackSection';
 import {
-    TEMP_MEMBER_ID,
     buildHeatmapDays,
     getMonthRange,
     normalizeHeatmapItems,
     normalizeTilList,
 } from '../utils/mypageUtils';
+import { getMemberId, isLoggedIn } from '../utils/authUtils';
 
 const DEFAULT_STREAK = {
     currentStreak: 0,
@@ -59,11 +60,11 @@ const normalizeStreak = (streakResponse) => {
     };
 };
 
-const getInitialHeatmapItems = (monthCount) => {
+const getInitialHeatmapItems = (monthCount, memberId) => {
     const { startDate, endDate } = getMonthRange(monthCount);
 
     const cachedHeatmap = getCachedHeatmap({
-        memberId: TEMP_MEMBER_ID,
+        memberId,
         startDate,
         endDate,
     });
@@ -71,8 +72,8 @@ const getInitialHeatmapItems = (monthCount) => {
     return normalizeHeatmapItems(cachedHeatmap);
 };
 
-const getInitialStreak = () => {
-    return normalizeStreak(getCachedStreak(TEMP_MEMBER_ID));
+const getInitialStreak = (memberId) => {
+    return normalizeStreak(getCachedStreak(memberId));
 };
 
 const getInitialRecentTils = () => {
@@ -86,21 +87,24 @@ const getInitialRecentTils = () => {
 };
 
 const MyPage = () => {
+    const navigate = useNavigate();
+    const memberId = getMemberId();
+
     const [selectedMonthCount, setSelectedMonthCount] = useState(6);
 
-    const [streak, setStreak] = useState(() => getInitialStreak());
-    const [heatmapItems, setHeatmapItems] = useState(() => getInitialHeatmapItems(6));
+    const [streak, setStreak] = useState(() => getInitialStreak(memberId));
+    const [heatmapItems, setHeatmapItems] = useState(() => getInitialHeatmapItems(6, memberId));
     const [recentTils, setRecentTils] = useState(() => getInitialRecentTils());
 
     const [subscription, setSubscription] = useState(null);
     const [payback, setPayback] = useState(null);
 
     const [isStreakLoading, setIsStreakLoading] = useState(() => {
-        return getCachedStreak(TEMP_MEMBER_ID) === null;
+        return getCachedStreak(memberId) === null;
     });
 
     const [isHeatmapLoading, setIsHeatmapLoading] = useState(() => {
-        return getInitialHeatmapItems(6).length === 0;
+        return getInitialHeatmapItems(6, memberId).length === 0;
     });
 
     const [isTilLoading, setIsTilLoading] = useState(() => {
@@ -179,7 +183,7 @@ const MyPage = () => {
 
     useEffect(() => {
         const fetchStreak = async () => {
-            const cachedStreak = getCachedStreak(TEMP_MEMBER_ID);
+            const cachedStreak = getCachedStreak(memberId);
 
             if (cachedStreak) {
                 setStreak(normalizeStreak(cachedStreak));
@@ -191,7 +195,7 @@ const MyPage = () => {
                 setIsStreakLoading(true);
 
                 const streakResponse = await getMyStreak({
-                    memberId: TEMP_MEMBER_ID,
+                    memberId: memberId,
                     useCache: true,
                 });
 
@@ -212,7 +216,7 @@ const MyPage = () => {
             const { startDate, endDate } = getMonthRange(selectedMonthCount);
 
             const cachedHeatmap = getCachedHeatmap({
-                memberId: TEMP_MEMBER_ID,
+                memberId: memberId,
                 startDate,
                 endDate,
             });
@@ -227,7 +231,7 @@ const MyPage = () => {
                 setIsHeatmapLoading(true);
 
                 const heatmapResponse = await getMyHeatmap({
-                    memberId: TEMP_MEMBER_ID,
+                    memberId: memberId,
                     startDate,
                     endDate,
                     useCache: true,
@@ -282,8 +286,12 @@ const MyPage = () => {
     }, []);
 
     useEffect(() => {
+        if (!isLoggedIn()) {
+            navigate('/login', { replace: true });
+            return;
+        }
         fetchSubscriptionAndPayback();
-    }, []);
+    }, [navigate]);
 
     return (
         <>

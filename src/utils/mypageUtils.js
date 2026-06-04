@@ -178,3 +178,70 @@ export const getTilMeta = (til) => {
 
     return `${nickname} · 댓글 ${commentCount} · 좋아요 ${likeCount}`;
 };
+
+export const formatDateText = (dateValue) => {
+    if (!dateValue) return '-';
+
+    return dateValue.toString().slice(0, 10).replaceAll('-', '.');
+};
+
+export const formatMoney = (value) => {
+    const numberValue = Number(value ?? 0);
+
+    return `${numberValue.toLocaleString()}원`;
+};
+
+export const getRemainingDays = (endDateValue) => {
+    if (!endDateValue) return 0;
+
+    const today = new Date();
+    const endDate = new Date(endDateValue);
+
+    today.setHours(0, 0, 0, 0);
+    endDate.setHours(0, 0, 0, 0);
+
+    const diff = endDate.getTime() - today.getTime();
+
+    return Math.max(Math.ceil(diff / (1000 * 60 * 60 * 24)), 0);
+};
+
+export const normalizeProgressRate = (progressRate) => {
+    const numberValue = Number(progressRate ?? 0);
+
+    if (Number.isNaN(numberValue)) {
+        return 0;
+    }
+
+    return Math.min(Math.max(numberValue, 0), 100);
+};
+
+export const getSubscriptionStatusLabel = (status) => {
+    const statusMap = {
+        ACTIVE: '구독 중',
+        EXPIRED: '만료됨',
+        CANCELED: '취소됨',
+    };
+
+    return statusMap[status] ?? '구독 없음';
+};
+
+export const getPaybackResultStatusLabel = (status) => {
+    const statusMap = {
+        IN_PROGRESS: '진행 중',
+        SUCCESS: '성공',
+        FAILED: '실패',
+    };
+
+    return statusMap[status] ?? '대기 중';
+};
+
+export const getRefundStatusLabel = (status) => {
+    const statusMap = {
+        NONE: '환급 전',
+        ELIGIBLE: '환급 가능',
+        COMPLETED: '환급 완료',
+        FAILED: '환급 실패',
+    };
+
+    return statusMap[status] ?? '환급 전';
+};

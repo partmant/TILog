@@ -2,28 +2,35 @@ import {
     useEffect,
     useMemo,
     useState,
-} from "react";
+} from 'react';
 import {
     getCachedHeatmap,
     getCachedStreak,
     getMyHeatmap,
     getMyStreak,
-} from "../api/myPageApi";
+} from '../api/myPageApi';
 import {
     getCachedRecentTils,
     getRecentTils,
-} from "../api/tilApi";
-import MyPageHero from "../components/mypage/MyPageHero";
-import MyPageStats from "../components/mypage/MyPageStats";
-import HeatmapSection from "../components/mypage/HeatmapSection";
-import RecentTilSection from "../components/mypage/RecentTilSection";
+} from '../api/tilApi';
+import {
+    cancelSubscription,
+    getCurrentPaybackParticipation,
+    getMySubscriptionStatus,
+    subscribePremium,
+} from '../api/subscriptionPaybackApi';
+import MyPageHero from '../components/mypage/MyPageHero';
+import MyPageStats from '../components/mypage/MyPageStats';
+import HeatmapSection from '../components/mypage/HeatmapSection';
+import RecentTilSection from '../components/mypage/RecentTilSection';
+import SubscriptionPaybackSection from '../components/mypage/SubscriptionPaybackSection';
 import {
     TEMP_MEMBER_ID,
     buildHeatmapDays,
     getMonthRange,
     normalizeHeatmapItems,
     normalizeTilList,
-} from "../utils/mypageUtils";
+} from '../utils/mypageUtils';
 
 const DEFAULT_STREAK = {
     currentStreak: 0,
@@ -85,6 +92,9 @@ const MyPage = () => {
     const [heatmapItems, setHeatmapItems] = useState(() => getInitialHeatmapItems(6));
     const [recentTils, setRecentTils] = useState(() => getInitialRecentTils());
 
+    const [subscription, setSubscription] = useState(null);
+    const [payback, setPayback] = useState(null);
+
     const [isStreakLoading, setIsStreakLoading] = useState(() => {
         return getCachedStreak(TEMP_MEMBER_ID) === null;
     });
@@ -97,6 +107,9 @@ const MyPage = () => {
         return getInitialRecentTils().length === 0;
     });
 
+    const [isSubscriptionLoading, setIsSubscriptionLoading] = useState(true);
+    const [isSubscriptionActionLoading, setIsSubscriptionActionLoading] = useState(false);
+
     const heatmapDays = useMemo(
         () => buildHeatmapDays(heatmapItems, selectedMonthCount),
         [heatmapItems, selectedMonthCount]
@@ -104,6 +117,65 @@ const MyPage = () => {
 
     const totalWriteCount = heatmapDays.reduce((sum, day) => sum + day.writeCount, 0);
     const writtenDays = heatmapDays.filter((day) => day.writeCount > 0).length;
+
+    const fetchSubscriptionAndPayback = async () => {
+        try {
+            setIsSubscriptionLoading(true);
+
+            const subscriptionResponse = await getMySubscriptionStatus();
+            setSubscription(subscriptionResponse);
+
+            if (subscriptionResponse?.isActive) {
+                try {
+                    const paybackResponse = await getCurrentPaybackParticipation();
+                    setPayback(paybackResponse);
+                } catch (error) {
+                    console.error('[PAYBACK API ERROR]', error);
+                    setPayback(null);
+                }
+            } else {
+                setPayback(null);
+            }
+        } catch (error) {
+            console.error('[SUBSCRIPTION API ERROR]', error);
+            setSubscription(null);
+            setPayback(null);
+        } finally {
+            setIsSubscriptionLoading(false);
+        }
+    };
+
+    const handleSubscribe = async () => {
+        try {
+            setIsSubscriptionActionLoading(true);
+            await subscribePremium();
+            await fetchSubscriptionAndPayback();
+        } catch (error) {
+            console.error('[SUBSCRIBE API ERROR]', error);
+            alert(error.message ?? '구독 신청에 실패했습니다.');
+        } finally {
+            setIsSubscriptionActionLoading(false);
+        }
+    };
+
+    const handleCancelSubscription = async () => {
+        const isConfirmed = window.confirm('구독을 취소하시겠습니까?');
+
+        if (!isConfirmed) {
+            return;
+        }
+
+        try {
+            setIsSubscriptionActionLoading(true);
+            await cancelSubscription();
+            await fetchSubscriptionAndPayback();
+        } catch (error) {
+            console.error('[SUBSCRIPTION CANCEL API ERROR]', error);
+            alert(error.message ?? '구독 취소에 실패했습니다.');
+        } finally {
+            setIsSubscriptionActionLoading(false);
+        }
+    };
 
     useEffect(() => {
         const fetchStreak = async () => {
@@ -209,6 +281,10 @@ const MyPage = () => {
         fetchRecentTils();
     }, []);
 
+    useEffect(() => {
+        fetchSubscriptionAndPayback();
+    }, []);
+
     return (
         <>
             <MyPageHero />
@@ -228,10 +304,21 @@ const MyPage = () => {
                     isLoading={isHeatmapLoading}
                 />
 
-                <RecentTilSection
-                    recentTils={recentTils}
-                    isLoading={isTilLoading}
-                />
+                <div className="mypage-side-column">
+                    <SubscriptionPaybackSection
+                        subscription={subscription}
+                        payback={payback}
+                        isLoading={isSubscriptionLoading}
+                        isActionLoading={isSubscriptionActionLoading}
+                        onSubscribe={handleSubscribe}
+                        onCancel={handleCancelSubscription}
+                    />
+
+                    <RecentTilSection
+                        recentTils={recentTils}
+                        isLoading={isTilLoading}
+                    />
+                </div>
             </section>
         </>
     );

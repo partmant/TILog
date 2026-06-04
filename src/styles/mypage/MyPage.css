@@ -13,10 +13,9 @@ button {
 .mypage {
     min-height: 100vh;
     padding: 14px 16px;
-    background:
-            radial-gradient(circle at 8% 4%, rgba(139, 92, 246, 0.2), transparent 32%),
-            radial-gradient(circle at 88% 14%, rgba(34, 211, 238, 0.2), transparent 30%),
-            linear-gradient(135deg, #faf7ff 0%, #effcff 100%);
+    background: radial-gradient(circle at 8% 4%, rgba(139, 92, 246, 0.2), transparent 32%),
+    radial-gradient(circle at 88% 14%, rgba(34, 211, 238, 0.2), transparent 30%),
+    linear-gradient(135deg, #faf7ff 0%, #effcff 100%);
     color: #111827;
 }
 
@@ -36,6 +35,23 @@ button {
     display: grid;
     grid-template-columns: minmax(0, 1.48fr) minmax(380px, 0.92fr);
     gap: 22px;
+    align-items: start;
+}
+
+.mypage-content-grid > * {
+    align-self: start;
+}
+
+.mypage-heatmap-panel {
+    align-self: start;
+    height: fit-content;
+}
+
+.mypage-side-column {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    align-self: start;
 }
 
 .mypage-panel {

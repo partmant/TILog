@@ -1,0 +1,296 @@
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+
+import { getPostDetail, deletePost, } from "../../api/post";
+
+import { getComments, createComment, getReplies, } from "../../api/comment";
+
+import { getLikeInfo, likePost, unlikePost, } from "../../api/like";
+
+import { getPostEditPath, postListPath, } from "../../constants/post";
+
+// 게시글 상세 페이지 관련 로직 관리 Hook
+
+export function usePostDetail() {
+    // =========================
+    // 라우팅 관련
+    // =========================
+
+    // URL 게시글 ID 조회
+    const { postId } = useParams();
+
+    // 페이지 이동 객체
+    const navigate = useNavigate();
+
+    // =========================
+    // 상태 관리
+    // =========================
+
+    // 게시글 상태
+    const [post, setPost] = useState(null);
+
+    // 댓글 열기/닫기 상태
+    const [showComments, setShowComments] = useState(false);
+
+    // 댓글 목록 상태
+    const [comments, setComments] = useState([]);
+
+    // 댓글 입력값 상태
+    const [commentContent, setCommentContent] = useState("");
+
+    // 대댓글 목록 상태
+    const [repliesMap, setRepliesMap] = useState({});
+
+    // 대댓글 작성 대상 댓글 ID
+    const [replyTargetId, setReplyTargetId] = useState(null);
+
+    // 대댓글 입력값 상태
+    const [replyContent, setReplyContent] = useState("");
+
+    // 댓글 현재 페이지 상태
+    const [commentPage, setCommentPage] = useState(0);
+
+    // 현재 페이지 댓글 목록 상태
+    const [pagedComments, setPagedComments] = useState([]);
+
+    // 댓글 페이지 정보 상태
+    const [commentPageInfo, setCommentPageInfo] = useState({
+        totalPages: 0,
+        totalElements: 0,
+        first: true,
+        last: true,
+    });
+
+    // 댓글 작성 폼 열기/닫기 상태
+    const [showCommentForm, setShowCommentForm] = useState(false);
+
+    // 좋아요 정보 상태
+    const [likeInfo, setLikeInfo] = useState({
+        likeCount: 0,
+        liked: false,
+    });
+
+    // =========================
+    // 데이터 조회
+    // =========================
+
+    // 게시글 상세 조회
+    useEffect(() => {
+        const fetchPostDetail = async () => {
+            const data = await getPostDetail(postId);
+            setPost(data);
+        };
+
+        fetchPostDetail();
+    }, [postId]);
+
+    // 게시글 댓글 및 대댓글 목록 재조회
+    const refreshCommentsWithReplies = async (targetPage = commentPage) => {
+        const commentData = await getComments(postId);
+
+        const pageSize = 5;
+
+        const currentComments = commentData.slice(
+            targetPage * pageSize,
+            targetPage * pageSize + pageSize
+        );
+
+        setComments(commentData);
+        setPagedComments(currentComments);
+
+        setCommentPageInfo({
+            totalPages: Math.ceil(commentData.length / pageSize),
+            totalElements: commentData.length,
+            first: targetPage === 0,
+            last: targetPage >= Math.ceil(commentData.length / pageSize) - 1,
+        });
+
+        const repliesEntries = await Promise.all(
+            currentComments.map(async (comment) => {
+                const replies = await getReplies(comment.commentId);
+                return [comment.commentId, replies];
+            })
+        );
+
+        setRepliesMap(Object.fromEntries(repliesEntries));
+    };
+
+    // 게시글 댓글 및 대댓글 목록 조회
+    useEffect(() => {
+        refreshCommentsWithReplies();
+    }, [postId, commentPage]);
+
+    // 게시글 좋아요 정보 조회
+    useEffect(() => {
+        const fetchLikeInfo = async () => {
+            const data = await getLikeInfo(postId);
+            setLikeInfo(data);
+        };
+
+        fetchLikeInfo();
+    }, [postId]);
+
+    // =========================
+    // 이벤트 처리
+    // =========================
+
+    // 게시글 수정 페이지 이동
+    const handleEdit = () => {
+        navigate(getPostEditPath(postId));
+    };
+
+    // 게시글 목록 페이지 이동
+    const handleMoveList = () => {
+        navigate(postListPath);
+    };
+
+    // 댓글 열기/닫기 처리
+    const handleToggleComments = () => {
+        setShowComments((prev) => !prev);
+    };
+
+    // 댓글 입력값 변경 처리
+    const handleCommentChange = (e) => {
+        setCommentContent(e.target.value);
+    };
+
+    // 대댓글 입력값 변경 처리
+    const handleReplyChange = (e) => {
+        setReplyContent(e.target.value);
+    };
+
+    // 대댓글 작성창 열기
+    const handleOpenReplyForm = (commentId) => {
+        setReplyTargetId(commentId);
+        setReplyContent("");
+    };
+
+    // 대댓글 작성창 닫기
+    const handleCloseReplyForm = () => {
+        setReplyTargetId(null);
+        setReplyContent("");
+    };
+
+    // =========================
+    // API 요청
+    // =========================
+
+    // 게시글 삭제 요청
+    const handleDelete = async () => {
+        const confirmed = window.confirm("게시글을 삭제하시겠습니까?");
+
+        if (!confirmed) return;
+
+        try {
+            await deletePost(postId);
+
+            alert("게시글이 삭제되었습니다.");
+
+            navigate(postListPath);
+        } catch (error) {
+            console.error(error);
+
+            alert("게시글 삭제 실패");
+        }
+    };
+
+    // 게시글 좋아요 토글 요청
+    const handleToggleLike = async () => {
+        try {
+            const data = likeInfo.liked
+                ? await unlikePost(postId)
+                : await likePost(postId);
+
+            setLikeInfo(data);
+        } catch (error) {
+            console.error(error);
+
+            alert("좋아요 처리 실패");
+        }
+    };
+
+    // 댓글 작성 요청
+    const handleCreateComment = async () => {
+        if (!commentContent.trim()) {
+            alert("댓글 내용을 입력해주세요.");
+            return;
+        }
+
+        try {
+            await createComment(postId, commentContent);
+
+            // 댓글 작성 후 현재 페이지 기준으로 재조회
+            await refreshCommentsWithReplies(commentPage);
+
+            setCommentContent("");
+            setShowCommentForm(false);
+            setShowComments(true);
+        } catch (error) {
+            console.error(error);
+
+            alert("댓글 작성 실패");
+        }
+    };
+
+    // 대댓글 작성 요청
+    const handleCreateReply = async (parentCommentId) => {
+        if (!replyContent.trim()) {
+            alert("대댓글 내용을 입력해주세요.");
+            return;
+        }
+
+        try {
+            await createComment(postId, replyContent, parentCommentId);
+
+            await refreshCommentsWithReplies(commentPage);
+
+            setReplyTargetId(null);
+            setReplyContent("");
+            setShowComments(true);
+        } catch (error) {
+            console.error(error);
+
+            alert("대댓글 작성 실패");
+        }
+    };
+
+    // 댓글 작성창 열기
+    const handleOpenCommentForm = () => {
+        setShowCommentForm(true);
+    };
+
+    // 댓글 작성창 닫기
+    const handleCloseCommentForm = () => {
+        setShowCommentForm(false);
+        setCommentContent("");
+    };
+
+    return {
+        post,
+        comments,
+        repliesMap,
+        likeInfo,
+        commentContent,
+        commentPage,
+        commentPageInfo,
+        setCommentPage,
+        replyTargetId,
+        replyContent,
+        showComments,
+        showCommentForm,
+        handleEdit,
+        handleDelete,
+        handleToggleLike,
+        handleMoveList,
+        handleCommentChange,
+        handleReplyChange,
+        handleOpenReplyForm,
+        handleCloseReplyForm,
+        handleCreateComment,
+        handleCreateReply,
+        handleToggleComments,
+        handleOpenCommentForm,
+        handleCloseCommentForm,
+        pagedComments,
+    };
+}

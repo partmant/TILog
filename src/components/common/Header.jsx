@@ -1,11 +1,13 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { getCurrentUser, logout } from "../../utils/authUtils";
+import { getCurrentUser, isLoggedIn, logout } from "../../utils/authUtils";
 import "../../styles/common/Header.css";
 
 const Header = () => {
     const navigate = useNavigate();
+
+    const loggedIn = isLoggedIn();
     const user = getCurrentUser();
-    const initial = user?.nickname?.charAt(0).toUpperCase() ?? 'U';
+    const initial = user?.nickname?.charAt(0).toUpperCase() ?? "U";
 
     const handleLogout = () => {
         logout();
@@ -17,7 +19,7 @@ const Header = () => {
             <button
                 type="button"
                 className="app-header-brand"
-                onClick={() => navigate("/mypage")}
+                onClick={() => navigate(loggedIn ? "/mypage" : "/feed")}
             >
                 <div className="app-header-logo">T</div>
 
@@ -38,7 +40,7 @@ const Header = () => {
                 </NavLink>
 
                 <NavLink
-                    to="/tils"
+                    to="/posts"
                     className={({ isActive }) =>
                         isActive ? "app-header-nav-link active" : "app-header-nav-link"
                     }
@@ -55,42 +57,66 @@ const Header = () => {
                     피드백
                 </NavLink>
 
-                <NavLink
-                    to="/mypage"
-                    className={({ isActive }) =>
-                        isActive ? "app-header-nav-link active" : "app-header-nav-link"
-                    }
-                >
-                    마이페이지
-                </NavLink>
+                {loggedIn && (
+                    <NavLink
+                        to="/mypage"
+                        className={({ isActive }) =>
+                            isActive ? "app-header-nav-link active" : "app-header-nav-link"
+                        }
+                    >
+                        마이페이지
+                    </NavLink>
+                )}
             </nav>
 
             <div className="app-header-actions">
-                <button
-                    type="button"
-                    className="app-header-write-button"
-                    onClick={() => navigate("/posts/write")}
-                >
-                    TIL 작성하기
-                </button>
+                {loggedIn ? (
+                    <>
+                        <button
+                            type="button"
+                            className="app-header-write-button"
+                            onClick={() => navigate("/posts/write")}
+                        >
+                            TIL 작성하기
+                        </button>
 
-                <button
-                    type="button"
-                    className="app-header-profile-button"
-                    onClick={() => navigate("/mypage")}
-                    aria-label="마이페이지로 이동"
-                >
-                    {initial}
-                </button>
+                        <button
+                            type="button"
+                            className="app-header-profile-button"
+                            onClick={() => navigate("/mypage")}
+                            aria-label="마이페이지로 이동"
+                        >
+                            {initial}
+                        </button>
 
-                <button
-                    type="button"
-                    className="app-header-logout-button"
-                    onClick={handleLogout}
-                    aria-label="로그아웃"
-                >
-                    로그아웃
-                </button>
+                        <button
+                            type="button"
+                            className="app-header-logout-button"
+                            onClick={handleLogout}
+                            aria-label="로그아웃"
+                        >
+                            로그아웃
+                        </button>
+                    </>
+                ) : (
+                    <>
+                        <button
+                            type="button"
+                            className="app-header-logout-button"
+                            onClick={() => navigate("/login")}
+                        >
+                            로그인
+                        </button>
+
+                        <button
+                            type="button"
+                            className="app-header-write-button"
+                            onClick={() => navigate("/signup")}
+                        >
+                            회원가입
+                        </button>
+                    </>
+                )}
             </div>
         </header>
     );

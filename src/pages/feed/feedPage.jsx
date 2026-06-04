@@ -118,7 +118,7 @@ function FeedPage() {
                     <button
                         type="button"
                         onClick={() => navigate("/posts/write")}
-                        className="rounded-xl bg-white/20 px-8 py-3 font-bold text-white backdrop-blur transition hover:bg-white/30"
+                        className="rounded-xl border border-white/60 bg-gradient-to-r from-purple-500 to-cyan-400 px-8 py-3 font-bold text-white shadow-lg shadow-purple-500/25 transition hover:-translate-y-0.5 hover:from-purple-600 hover:to-cyan-500 hover:shadow-xl hover:shadow-purple-500/35"
                     >
                         TIL 작성하기
                     </button>

@@ -15,40 +15,52 @@ import java.time.LocalDateTime;
 public class MentorFeedback {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "feedback_id")
     private Long feedbackId;
 
-    @ManyToOne
-    @JoinColumn(name = "til_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "til_id", nullable = false)
     private Post til;
 
-    @ManyToOne
-    @JoinColumn(name = "requester_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "requester_id", nullable = false)
     private Member requestor;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mentor_id")
     private Member mentor;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
     private Status status;
 
-    private int technicalScore;
-    private int flowScore;
-    private int designScore;
+    @Column(name = "technical_score", nullable = true)
+    private Integer technicalScore;
+
+    @Column(name = "flow_score", nullable = true)
+    private Integer flowScore;
+
+    @Column(name = "design_score", nullable = true)
+    private Integer designScore;
+
+    @Column(name = "comment", columnDefinition = "TEXT")
     private String comment;
 
+    @Column(name = "requested_at", nullable = false)
     private LocalDateTime requestedAt;
+
+    @Column(name = "completed_at")
     private LocalDateTime completedAt;
 
-    public MentorFeedback(Post til, Member requestor, Member mentor){
+    public MentorFeedback(Post til, Member requestor, Member mentor) {
         this.til = til;
         this.requestor = requestor;
         this.mentor = mentor;
-        this.status = Status.PENDING;
+        this.status = Status.REQUESTED;
         this.requestedAt = LocalDateTime.now();
     }
 
-    public void updateFeedback(int tech, int flow, int design, String comment){
+    public void updateFeedback(int tech, int flow, int design, String comment) {
         this.technicalScore = tech;
         this.flowScore = flow;
         this.designScore = design;

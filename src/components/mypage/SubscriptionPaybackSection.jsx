@@ -97,29 +97,18 @@ const SubscriptionPaybackSection = ({
                     </strong>
                     {isCancelReserved
                         ? <em>만료 후 자동 갱신 없음 · 남은 기간 {remainingDays}일</em>
-                        : <em>남은 기간 {remainingDays}일</em>
+                        : <em>자동 갱신 · 남은 기간 {remainingDays}일</em>
                     }
                 </div>
 
-                {isCancelReserved ? (
-                    <button
-                        type="button"
-                        className="mypage-subscription-primary-button"
-                        onClick={onSubscribe}
-                        disabled={isActionLoading}
-                    >
-                        {isActionLoading ? '처리 중...' : '구독 연장'}
-                    </button>
-                ) : (
-                    <button
-                        type="button"
-                        className="mypage-subscription-cancel-button"
-                        onClick={onCancel}
-                        disabled={isActionLoading}
-                    >
-                        {isActionLoading ? '처리 중...' : '구독 취소'}
-                    </button>
-                )}
+                <button
+                    type="button"
+                    className="mypage-subscription-cancel-button"
+                    onClick={isCancelReserved ? undefined : onCancel}
+                    disabled={isCancelReserved || isActionLoading}
+                >
+                    {isActionLoading ? '처리 중...' : isCancelReserved ? '취소됨' : '구독 취소'}
+                </button>
             </div>
 
             <div className={`mypage-payback-card ${isPaybackOpen ? 'open' : ''}`}>

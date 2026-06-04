@@ -1,27 +1,84 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { getPostList } from "../../api/post";
+import { getMyHeatmap, getMyStreak } from "../../api/myPageApi";
+import { getPopularTags, searchPosts } from "../../api/post";
 import { difficultyStyle } from "../../constants/post";
+import {
+    DEFAULT_GROWTH_SUMMARY,
+    getCurrentStreak,
+    getMonthWriteCount,
+} from "../../utils/growthStats";
+import {
+    getMonthRange,
+    TEMP_MEMBER_ID,
+} from "../../utils/mypageUtils";
 
 // 메인 피드 페이지
 function FeedPage() {
     const navigate = useNavigate();
 
     const [feedPosts, setFeedPosts] = useState([]);
+    const [popularTags, setPopularTags] = useState([]);
+    const [growthSummary, setGrowthSummary] = useState(DEFAULT_GROWTH_SUMMARY);
+    const [isGrowthSummaryLoading, setIsGrowthSummaryLoading] = useState(true);
 
     useEffect(() => {
         const fetchFeedPosts = async () => {
-            const posts = await getPostList();
-
-            const sortedPosts = [...posts].sort(
-                (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-            );
-
-            setFeedPosts(sortedPosts.slice(0, 5));
+            const posts = await searchPosts({ sort: "LATEST", size: 5 });
+            setFeedPosts(posts);
         };
 
         fetchFeedPosts();
+    }, []);
+
+    useEffect(() => {
+        const fetchPopularTags = async () => {
+            try {
+                const tags = await getPopularTags({ limit: 4 });
+                setPopularTags(tags);
+            } catch (error) {
+                console.error(error);
+                setPopularTags([]);
+            }
+        };
+
+        fetchPopularTags();
+    }, []);
+
+    useEffect(() => {
+        const fetchGrowthSummary = async () => {
+            const { startDate, endDate } = getMonthRange(1);
+
+            try {
+                setIsGrowthSummaryLoading(true);
+
+                const [streakResponse, heatmapResponse] = await Promise.all([
+                    getMyStreak({
+                        memberId: TEMP_MEMBER_ID,
+                        useCache: true,
+                    }),
+                    getMyHeatmap({
+                        memberId: TEMP_MEMBER_ID,
+                        startDate,
+                        endDate,
+                        useCache: true,
+                    }),
+                ]);
+
+                setGrowthSummary({
+                    currentStreak: getCurrentStreak(streakResponse),
+                    monthWriteCount: getMonthWriteCount(heatmapResponse),
+                });
+            } catch (error) {
+                console.error("[GROWTH SUMMARY API ERROR]", error);
+                setGrowthSummary(DEFAULT_GROWTH_SUMMARY);
+            } finally {
+                setIsGrowthSummaryLoading(false);
+            }
+        };
+
+        fetchGrowthSummary();
     }, []);
 
     return (
@@ -69,7 +126,8 @@ function FeedPage() {
                                         현재 스트릭
                                     </p>
                                     <p className="text-3xl font-bold">
-                                        7<span className="text-base">일</span>
+                                        {isGrowthSummaryLoading ? "..." : growthSummary.currentStreak}
+                                        <span className="text-base">일</span>
                                     </p>
                                 </div>
                             </div>
@@ -90,7 +148,8 @@ function FeedPage() {
                                         이번 달 작성
                                     </p>
                                     <p className="text-3xl font-bold">
-                                        18<span className="text-base">개</span>
+                                        {isGrowthSummaryLoading ? "..." : growthSummary.monthWriteCount}
+                                        <span className="text-base">개</span>
                                     </p>
                                 </div>
                             </div>
@@ -108,14 +167,27 @@ function FeedPage() {
                         </h4>
 
                         <div className="mt-4 flex flex-wrap gap-2">
-                            {["Spring", "React", "JPA", "Algorithm"].map((tag) => (
-                                <span
-                                    key={tag}
-                                    className="rounded-full bg-gradient-to-r from-purple-500 to-cyan-400 px-4 py-2 text-xs font-bold text-white"
-                                >
-                                    {tag}
-                                </span>
-                            ))}
+                            {popularTags.length > 0 ? (
+                                popularTags.map((tag) => (
+                                    <button
+                                        key={tag.tagName}
+                                        type="button"
+                                        onClick={() => navigate(`/posts?tagName=${encodeURIComponent(tag.tagName)}`)}
+                                        className="rounded-full bg-gradient-to-r from-purple-500 to-cyan-400 px-4 py-2 text-xs font-bold text-white"
+                                    >
+                                        #{tag.tagName}
+                                        {tag.count > 0 && (
+                                            <span className="ml-1 text-white/80">
+                                                {tag.count}
+                                            </span>
+                                        )}
+                                    </button>
+                                ))
+                            ) : (
+                                <p className="text-sm font-semibold text-gray-400">
+                                    표시할 인기 태그가 없습니다.
+                                </p>
+                            )}
                         </div>
                     </div>
                 </aside>

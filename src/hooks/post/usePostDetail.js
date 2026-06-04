@@ -1,45 +1,15 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import {
-    getPostDetail,
-    deletePost,
-} from "../../api/post";
+import { getPostDetail, deletePost, } from "../../api/post";
 
-import {
-    getComments,
-    createComment,
-} from "../../api/comment";
+import { getComments, createComment, getReplies, } from "../../api/comment";
 
-import {
-    getPostEditPath,
-    postListPath,
-} from "../../constants/post";
+import { getLikeInfo, likePost, unlikePost, } from "../../api/like";
+
+import { getPostEditPath, postListPath, } from "../../constants/post";
 
 // 게시글 상세 페이지 관련 로직 관리 Hook
-
-// 인증 연동 후 작성자 전용 버튼 노출에 사용할 코드
-// const getCurrentNickname = () => {
-//     const storedUser = localStorage.getItem("user");
-//
-//     if (storedUser) {
-//         try {
-//             const parsedUser = JSON.parse(storedUser);
-//
-//             if (parsedUser?.nickname) {
-//                 return parsedUser.nickname;
-//             }
-//         } catch (error) {
-//             console.error(error);
-//         }
-//     }
-//
-//     return (
-//         localStorage.getItem("nickname") ||
-//         localStorage.getItem("currentUserNickname") ||
-//         localStorage.getItem("userNickname")
-//     );
-// };
 
 export function usePostDetail() {
     // =========================
@@ -68,9 +38,34 @@ export function usePostDetail() {
     // 댓글 입력값 상태
     const [commentContent, setCommentContent] = useState("");
 
-    // 인증 연동 후 작성자 전용 버튼 노출에 사용할 코드
-    // const currentNickname = getCurrentNickname();
-    // const isAuthor = Boolean(post?.nickname && currentNickname && post.nickname === currentNickname);
+    // 대댓글 목록 상태
+    const [repliesMap, setRepliesMap] = useState({});
+
+    // 대댓글 작성 대상 댓글 ID
+    const [replyTargetId, setReplyTargetId] = useState(null);
+
+    // 대댓글 입력값 상태
+    const [replyContent, setReplyContent] = useState("");
+
+    // 댓글 현재 페이지 상태
+    const [commentPage, setCommentPage] = useState(0);
+
+    // 현재 페이지 댓글 목록 상태
+    const [pagedComments, setPagedComments] = useState([]);
+
+    // 댓글 페이지 정보 상태
+    const [commentPageInfo, setCommentPageInfo] = useState({
+        totalPages: 0,
+        totalElements: 0,
+        first: true,
+        last: true,
+    });
+
+    // 좋아요 정보 상태
+    const [likeInfo, setLikeInfo] = useState({
+        likeCount: 0,
+        liked: false,
+    });
 
     // =========================
     // 데이터 조회
@@ -86,14 +81,50 @@ export function usePostDetail() {
         fetchPostDetail();
     }, [postId]);
 
-    // 게시글 댓글 목록 조회
+    // 게시글 댓글 및 대댓글 목록 재조회
+    const refreshCommentsWithReplies = async (targetPage = commentPage) => {
+        const commentData = await getComments(postId);
+
+        const pageSize = 5;
+
+        const currentComments = commentData.slice(
+            targetPage * pageSize,
+            targetPage * pageSize + pageSize
+        );
+
+        setComments(commentData);
+        setPagedComments(currentComments);
+
+        setCommentPageInfo({
+            totalPages: Math.ceil(commentData.length / pageSize),
+            totalElements: commentData.length,
+            first: targetPage === 0,
+            last: targetPage >= Math.ceil(commentData.length / pageSize) - 1,
+        });
+
+        const repliesEntries = await Promise.all(
+            currentComments.map(async (comment) => {
+                const replies = await getReplies(comment.commentId);
+                return [comment.commentId, replies];
+            })
+        );
+
+        setRepliesMap(Object.fromEntries(repliesEntries));
+    };
+
+    // 게시글 댓글 및 대댓글 목록 조회
     useEffect(() => {
-        const fetchComments = async () => {
-            const data = await getComments(postId);
-            setComments(data);
+        refreshCommentsWithReplies();
+    }, [postId, commentPage]);
+
+    // 게시글 좋아요 정보 조회
+    useEffect(() => {
+        const fetchLikeInfo = async () => {
+            const data = await getLikeInfo(postId);
+            setLikeInfo(data);
         };
 
-        fetchComments();
+        fetchLikeInfo();
     }, [postId]);
 
     // =========================
@@ -120,6 +151,23 @@ export function usePostDetail() {
         setCommentContent(e.target.value);
     };
 
+    // 대댓글 입력값 변경 처리
+    const handleReplyChange = (e) => {
+        setReplyContent(e.target.value);
+    };
+
+    // 대댓글 작성창 열기
+    const handleOpenReplyForm = (commentId) => {
+        setReplyTargetId(commentId);
+        setReplyContent("");
+    };
+
+    // 대댓글 작성창 닫기
+    const handleCloseReplyForm = () => {
+        setReplyTargetId(null);
+        setReplyContent("");
+    };
+
     // =========================
     // API 요청
     // =========================
@@ -143,6 +191,21 @@ export function usePostDetail() {
         }
     };
 
+    // 게시글 좋아요 토글 요청
+    const handleToggleLike = async () => {
+        try {
+            const data = likeInfo.liked
+                ? await unlikePost(postId)
+                : await likePost(postId);
+
+            setLikeInfo(data);
+        } catch (error) {
+            console.error(error);
+
+            alert("좋아요 처리 실패");
+        }
+    };
+
     // 댓글 작성 요청
     const handleCreateComment = async () => {
         if (!commentContent.trim()) {
@@ -153,10 +216,9 @@ export function usePostDetail() {
         try {
             await createComment(postId, commentContent);
 
-            // 댓글 작성 후 목록 재조회
-            const data = await getComments(postId);
+            // 댓글 작성 후 현재 페이지 기준으로 재조회
+            await refreshCommentsWithReplies(commentPage);
 
-            setComments(data);
             setCommentContent("");
             setShowComments(true);
         } catch (error) {
@@ -166,16 +228,51 @@ export function usePostDetail() {
         }
     };
 
+    // 대댓글 작성 요청
+    const handleCreateReply = async (parentCommentId) => {
+        if (!replyContent.trim()) {
+            alert("대댓글 내용을 입력해주세요.");
+            return;
+        }
+
+        try {
+            await createComment(postId, replyContent, parentCommentId);
+
+            await refreshCommentsWithReplies(commentPage);
+
+            setReplyTargetId(null);
+            setReplyContent("");
+            setShowComments(true);
+        } catch (error) {
+            console.error(error);
+
+            alert("대댓글 작성 실패");
+        }
+    };
+
     return {
         post,
         comments,
+        repliesMap,
+        likeInfo,
         commentContent,
+        commentPage,
+        commentPageInfo,
+        setCommentPage,
+        replyTargetId,
+        replyContent,
         showComments,
         handleEdit,
         handleDelete,
+        handleToggleLike,
         handleMoveList,
         handleCommentChange,
+        handleReplyChange,
+        handleOpenReplyForm,
+        handleCloseReplyForm,
         handleCreateComment,
+        handleCreateReply,
         handleToggleComments,
+        pagedComments,
     };
 }

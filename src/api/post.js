@@ -1,5 +1,7 @@
 import api from "./axios";
 
+// 게시글 관련 API 요청 모음
+
 // 게시글 목록 조회 API
 export const getPostList = async () => {
     const response = await api.get("/api/posts");
@@ -17,25 +19,70 @@ export const getPostDetail = async (postId, increaseViewCount = true) => {
 };
 
 // 게시글 검색 API
-export const searchPosts = async ({ keyword, tagName }) => {
+const mapPostSummary = (post) => ({
+    postId: post.postId,
+    title: post.title,
+    nickname: post.authorNickname,
+    difficulty: post.difficulty,
+    tagNames: post.tags,
+    createdAt: post.createdAt,
+    likeCount: post.likeCount,
+    commentCount: post.commentCount,
+    viewCount: post.viewCount,
+    studyTime: post.studyTime,
+});
+
+// 게시글 검색 및 페이징 조회 API
+export const searchPostPage = async ({
+    keyword,
+    tagName,
+    difficulty,
+    sort = "LATEST",
+    page = 0,
+    size = 10,
+} = {}) => {
     const response = await api.get("/api/tils", {
         params: {
             keyword,
             tagName,
+            difficulty,
+            sort,
+            page,
+            size,
         },
     });
 
-    return response.data.content.map((post) => ({
-        postId: post.postId,
-        title: post.title,
-        nickname: post.authorNickname,
-        difficulty: post.difficulty,
-        tagNames: post.tags,
-        createdAt: post.createdAt,
-        likeCount: post.likeCount,
-        commentCount: post.commentCount,
-        viewCount: post.viewCount,
-        studyTime: post.studyTime,
+    const pageData = response.data;
+
+    return {
+        posts: pageData.content.map(mapPostSummary),
+        page: pageData.number,
+        size: pageData.size,
+        totalPages: pageData.totalPages,
+        totalElements: pageData.totalElements,
+        first: pageData.first,
+        last: pageData.last,
+    };
+};
+
+// 게시글 검색 목록 조회 API
+export const searchPosts = async (params = {}) => {
+    const pageData = await searchPostPage(params);
+    return pageData.posts;
+};
+
+// 인기 태그 조회 API
+export const getPopularTags = async ({ limit = 10 } = {}) => {
+    const response = await api.get("/api/tags/popular", {
+        params: {
+            limit,
+        },
+    });
+    const tags = response.data.data ?? response.data;
+
+    return tags.map((tag) => ({
+        tagName: tag.tagName ?? tag.name,
+        count: tag.count ?? tag.postCount ?? 0,
     }));
 };
 

@@ -1,4 +1,4 @@
-import { usePostList } from "../../hooks/post/usePostList";
+import { usePostList, } from "../../hooks/post";
 
 import { difficultyStyle, difficultyBorderStyle } from "../../constants/post";
 
@@ -6,10 +6,30 @@ import { difficultyStyle, difficultyBorderStyle } from "../../constants/post";
 function PostListPage() {
     const {
         posts,
-        handleMoveWrite,
+        pageInfo,
+        currentPage,
+        searchKeyword,
+        setSearchKeyword,
         handleMoveDetail,
+        handleSearchKeyword,
         handleSearchTag,
+        selectedDifficulty,
+        setSelectedDifficulty,
+        sortType,
+        setSortType,
+        setPage,
     } = usePostList();
+
+    const totalPages = pageInfo.totalPages || 0;
+    const pageWindowSize = 5;
+    const pageWindowStart = Math.max(
+        0,
+        Math.min(currentPage - 2, Math.max(totalPages - pageWindowSize, 0))
+    );
+    const pageNumbers = Array.from(
+        { length: Math.min(totalPages, pageWindowSize) },
+        (_, index) => pageWindowStart + index
+    );
 
     return (
         <main className="space-y-7">
@@ -29,11 +49,22 @@ function PostListPage() {
                     <div className="flex items-center gap-3">
                         <input
                             type="text"
+                            value={searchKeyword}
+                            onChange={(e) => setSearchKeyword(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                    handleSearchKeyword();
+                                }
+                            }}
                             placeholder="검색어를 입력하세요"
                             className="w-72 rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm outline-none"
                         />
 
-                        <button className="rounded-xl bg-gradient-to-r from-purple-500 to-cyan-400 px-6 py-3 font-bold text-white">
+                        <button
+                            type="button"
+                            onClick={handleSearchKeyword}
+                            className="rounded-xl bg-gradient-to-r from-purple-500 to-cyan-400 px-6 py-3 font-bold text-white"
+                        >
                             검색
                         </button>
                     </div>
@@ -42,12 +73,18 @@ function PostListPage() {
 
             {/* 난이도 필터 */}
             <div className="flex gap-3">
-                {["전체", "EASY", "NORMAL", "HARD"].map((difficulty) => (
+                {["ALL", "EASY", "NORMAL", "HARD"].map((difficulty) => (
                     <button
                         key={difficulty}
-                        className="rounded-full bg-gray-100 px-6 py-2 text-sm font-bold text-gray-600 transition hover:bg-purple-500 hover:text-white"
+                        type="button"
+                        onClick={() => setSelectedDifficulty(difficulty)}
+                        className={`rounded-full px-6 py-2 text-sm font-bold transition ${
+                            selectedDifficulty === difficulty
+                                ? "bg-purple-500 text-white"
+                                : "bg-gray-100 text-gray-600 hover:bg-purple-500 hover:text-white"
+                        }`}
                     >
-                        {difficulty}
+                        {difficulty === "ALL" ? "전체" : difficulty}
                     </button>
                 ))}
             </div>
@@ -56,7 +93,7 @@ function PostListPage() {
                 {/* 게시글 목록 영역 */}
                 <div className="rounded-3xl bg-white p-8 shadow-sm">
                     <h3 className="mb-6 text-xl font-bold">
-                        전체 게시글 {posts.length}개
+                        전체 게시글 {pageInfo.totalElements}개
                     </h3>
 
                     <div className="space-y-4">
@@ -71,7 +108,7 @@ function PostListPage() {
                                 <div className="flex items-center justify-between gap-5">
                                     <div className="min-w-0">
                                         <div className="mb-2 flex flex-wrap gap-2">
-                                            {post.tagNames.map((tag) => (
+                                            {(post.tagNames || []).map((tag) => (
                                                 <button
                                                     key={tag}
                                                     type="button"
@@ -95,6 +132,7 @@ function PostListPage() {
                                             · 작성자 {post.nickname}
                                             · 조회수 {post.viewCount}회
                                             · 학습시간 {post.studyTime}분
+                                            · 좋아요 {post.likeCount}개
                                         </p>
                                     </div>
 
@@ -110,9 +148,42 @@ function PostListPage() {
                         ))}
                     </div>
 
-                    <div className="mt-16 text-center font-bold text-gray-500">
-                        ‹ 이전 1 2 3 4 5 다음 ›
-                    </div>
+                    {totalPages > 0 && (
+                        <div className="mt-16 flex items-center justify-center gap-2 font-bold">
+                            <button
+                                type="button"
+                                disabled={pageInfo.first}
+                                onClick={() => setPage(currentPage - 1)}
+                                className="rounded-full bg-gray-100 px-4 py-2 text-sm text-gray-600 disabled:cursor-not-allowed disabled:opacity-40"
+                            >
+                                이전
+                            </button>
+
+                            {pageNumbers.map((pageNumber) => (
+                                <button
+                                    key={pageNumber}
+                                    type="button"
+                                    onClick={() => setPage(pageNumber)}
+                                    className={`h-10 w-10 rounded-full text-sm ${
+                                        currentPage === pageNumber
+                                            ? "bg-purple-500 text-white"
+                                            : "bg-gray-100 text-gray-600"
+                                    }`}
+                                >
+                                    {pageNumber + 1}
+                                </button>
+                            ))}
+
+                            <button
+                                type="button"
+                                disabled={pageInfo.last}
+                                onClick={() => setPage(currentPage + 1)}
+                                className="rounded-full bg-gray-100 px-4 py-2 text-sm text-gray-600 disabled:cursor-not-allowed disabled:opacity-40"
+                            >
+                                다음
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 {/* 우측 보조 정보 */}
@@ -127,7 +198,7 @@ function PostListPage() {
                                 현재 조회 게시글
                             </p>
                             <p className="mt-2 text-3xl font-bold">
-                                {posts.length}개
+                                {pageInfo.totalElements}개
                             </p>
                         </div>
 
@@ -146,24 +217,31 @@ function PostListPage() {
                         </div>
                     </div>
 
+                    {/* 정렬 */}
                     <div className="mt-8">
                         <p className="mb-3 font-bold">
                             정렬 옵션
                         </p>
 
-                        <div className="grid grid-cols-2 gap-3">
-                            <button className="rounded-full bg-gray-100 py-2 text-sm font-bold text-gray-600">
-                                최신순
-                            </button>
-                            <button className="rounded-full bg-gray-100 py-2 text-sm font-bold text-gray-600">
-                                조회순
-                            </button>
-                            <button className="rounded-full bg-gray-100 py-2 text-sm font-bold text-gray-600">
-                                학습시간순
-                            </button>
-                            <button className="rounded-full bg-gray-100 py-2 text-sm font-bold text-gray-600">
-                                난이도순
-                            </button>
+                        <div className="grid grid-cols-1 gap-3">
+                            {[
+                                { value: "LATEST", label: "최신순" },
+                                { value: "LIKES", label: "좋아요순" },
+                                { value: "COMMENTS", label: "댓글순" },
+                            ].map((option) => (
+                                <button
+                                    key={option.value}
+                                    type="button"
+                                    onClick={() => setSortType(option.value)}
+                                    className={`rounded-full py-2 text-sm font-bold ${
+                                        sortType === option.value
+                                            ? "bg-purple-500 text-white"
+                                            : "bg-gray-100 text-gray-600"
+                                    }`}
+                                >
+                                    {option.label}
+                                </button>
+                            ))}
                         </div>
                     </div>
                 </aside>

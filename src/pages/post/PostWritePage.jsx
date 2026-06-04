@@ -1,8 +1,12 @@
+import { useEffect, useState } from "react";
 import { Editor } from "@toast-ui/react-editor";
 import "@toast-ui/editor/dist/toastui-editor.css";
 import "@toast-ui/editor/dist/i18n/ko-kr";
 
-import { usePostWriteForm } from "../../hooks/post/usePostWriteForm";
+import { getMyStreak } from "../../api/myPageApi";
+import { usePostWriteForm } from "../../hooks/post";
+import { getCurrentStreak } from "../../utils/growthStats";
+import { TEMP_MEMBER_ID } from "../../utils/mypageUtils";
 
 import {
     difficultyOptions,
@@ -16,6 +20,9 @@ import {
 
 // 게시글 작성 페이지
 function PostWritePage() {
+    const [currentStreak, setCurrentStreak] = useState(0);
+    const [isStreakLoading, setIsStreakLoading] = useState(true);
+
     const {
         form,
         editorRef,
@@ -29,6 +36,28 @@ function PostWritePage() {
         handleTempSave,
         handleCancel,
     } = usePostWriteForm();
+
+    useEffect(() => {
+        const fetchCurrentStreak = async () => {
+            try {
+                setIsStreakLoading(true);
+
+                const streakResponse = await getMyStreak({
+                    memberId: TEMP_MEMBER_ID,
+                    useCache: true,
+                });
+
+                setCurrentStreak(getCurrentStreak(streakResponse));
+            } catch (error) {
+                console.error("[STREAK API ERROR]", error);
+                setCurrentStreak(0);
+            } finally {
+                setIsStreakLoading(false);
+            }
+        };
+
+        fetchCurrentStreak();
+    }, []);
 
     return (
         <main className="rounded-3xl bg-white/90 p-8 shadow-sm">
@@ -201,14 +230,15 @@ function PostWritePage() {
                                 </select>
                             </div>
 
-                            {/* 스트릭 카드 - 현재는 UI용 표시 */}
+                            {/* 스트릭 카드 */}
                             <div className="mt-7 rounded-2xl border border-gray-100 bg-gradient-to-r from-purple-50 to-cyan-50 p-5">
                                 <p className="text-sm font-bold text-gray-600">
                                     현재 스트릭
                                 </p>
 
                                 <p className="mt-2 text-3xl font-bold">
-                                    8일
+                                    {isStreakLoading ? "..." : currentStreak}
+                                    <span className="text-base">일</span>
                                 </p>
 
                                 <p className="mt-1 text-xs text-gray-500">

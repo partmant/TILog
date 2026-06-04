@@ -50,9 +50,6 @@ export const visibilityOptions = [
 // 게시글 작성 완료 후 이동 경로
 export const postListPath = "/posts";
 
-// 게시글 작성 페이지 경로
-export const postWritePath = "/posts/write";
-
 // 게시글 상세 페이지 경로 생성
 export const getPostDetailPath = (postId) => `/posts/${postId}`;
 

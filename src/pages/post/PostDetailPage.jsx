@@ -4,7 +4,7 @@ import rehypeHighlight from "rehype-highlight";
 
 import "highlight.js/styles/github-dark.css";
 
-import { usePostDetail } from "../../hooks/post/usePostDetail";
+import { usePostDetail } from "../../hooks/post";
 import { difficultyStyle } from "../../constants/post";
 
 // 게시글 상세 페이지
@@ -22,13 +22,25 @@ function PostDetailPage() {
 
     const {
         post,
-        comments,
+        pagedComments,
+        repliesMap,
+        likeInfo,
         commentContent,
+        commentPage,
+        commentPageInfo,
+        setCommentPage,
+        replyTargetId,
+        replyContent,
         handleEdit,
         handleDelete,
+        handleToggleLike,
         handleMoveList,
         handleCommentChange,
+        handleReplyChange,
+        handleOpenReplyForm,
+        handleCloseReplyForm,
         handleCreateComment,
+        handleCreateReply,
     } = usePostDetail();
 
     // 게시글 로딩 상태
@@ -68,7 +80,9 @@ function PostDetailPage() {
                         {" · "}
                         조회수 {post.viewCount}회
                         {" · "}
-                        댓글 {comments.length}개
+                        좋아요 {likeInfo.likeCount}개
+                        {" · "}
+                        댓글 {commentPageInfo.totalElements}개
                         {" · "}
                         학습시간 {post.studyTime}분
                     </p>
@@ -123,22 +137,26 @@ function PostDetailPage() {
                     )}
 
                     {/* 게시글 기능 버튼 */}
-                    <div className="mt-10 flex gap-4">
-                        {/* 게시글 수정 */}
-                        <button
-                            onClick={handleEdit}
-                            className="rounded-2xl bg-slate-900 px-8 py-3 font-bold text-white transition hover:bg-slate-700"
-                        >
-                            수정하기
-                        </button>
+                    <div className="mt-10 flex flex-wrap gap-4">
+                        {post.owner && (
+                            <>
+                                {/* 게시글 수정 */}
+                                <button
+                                    onClick={handleEdit}
+                                    className="rounded-2xl bg-slate-900 px-8 py-3 font-bold text-white transition hover:bg-slate-700"
+                                >
+                                    수정하기
+                                </button>
 
-                        {/* 게시글 삭제 */}
-                        <button
-                            onClick={handleDelete}
-                            className="rounded-2xl border border-red-100 bg-red-50 px-8 py-3 font-bold text-red-500 transition hover:bg-red-100"
-                        >
-                            삭제하기
-                        </button>
+                                {/* 게시글 삭제 */}
+                                <button
+                                    onClick={handleDelete}
+                                    className="rounded-2xl border border-red-100 bg-red-50 px-8 py-3 font-bold text-red-500 transition hover:bg-red-100"
+                                >
+                                    삭제하기
+                                </button>
+                            </>
+                        )}
 
                         {/* 게시글 목록 이동 */}
                         <button
@@ -146,6 +164,19 @@ function PostDetailPage() {
                             className="rounded-2xl bg-gray-100 px-8 py-3 font-bold text-gray-600 transition hover:bg-gray-200"
                         >
                             목록으로
+                        </button>
+
+                        {/* 게시글 좋아요 */}
+                        <button
+                            type="button"
+                            onClick={handleToggleLike}
+                            className={`rounded-2xl px-8 py-3 font-bold transition ${
+                                likeInfo.liked
+                                    ? "bg-pink-500 text-white hover:bg-pink-600"
+                                    : "bg-pink-50 text-pink-500 hover:bg-pink-100"
+                            }`}
+                        >
+                            좋아요 {likeInfo.likeCount}
                         </button>
                     </div>
                 </article>
@@ -159,25 +190,82 @@ function PostDetailPage() {
                         </h3>
 
                         <span className="text-sm font-bold text-purple-500">
-                            {comments.length}개
+                            {commentPageInfo.totalElements}개
                         </span>
                     </div>
 
                     {/* 댓글 목록 */}
                     <div className="mt-5 space-y-4">
-                        {comments.length > 0 ? (
-                            comments.map((comment) => (
+                        {pagedComments.length > 0 ? (
+                            pagedComments.map((comment) => (
                                 <div
                                     key={comment.commentId}
                                     className="rounded-2xl border border-gray-100 bg-slate-50 p-4"
                                 >
+                                    {/* 작성자 */}
                                     <p className="text-sm font-bold text-slate-700">
+                                        {comment.nickname}
+                                    </p>
+
+                                    {/* 댓글 내용 */}
+                                    <p className="mt-2 text-sm text-slate-600">
                                         {comment.content}
                                     </p>
 
-                                    <p className="mt-3 text-xs text-gray-400">
-                                        {comment.nickname}
-                                    </p>
+                                    {/* 대댓글 작성 버튼 */}
+                                    <button
+                                        type="button"
+                                        onClick={() => handleOpenReplyForm(comment.commentId)}
+                                        className="mt-3 text-xs font-bold text-purple-500"
+                                    >
+                                        답글 작성
+                                    </button>
+
+                                    {/* 대댓글 목록 */}
+                                    {(repliesMap[comment.commentId] || []).map((reply) => (
+                                        <div
+                                            key={reply.commentId}
+                                            className="mt-3 ml-5 rounded-xl border border-purple-100 bg-white p-3"
+                                        >
+                                            <p className="text-xs font-bold text-slate-700">
+                                                {reply.nickname}
+                                            </p>
+
+                                            <p className="mt-2 text-sm text-slate-600">
+                                                {reply.content}
+                                            </p>
+                                        </div>
+                                    ))}
+
+                                    {/* 대댓글 작성창 */}
+                                    {replyTargetId === comment.commentId && (
+                                        <div className="mt-4 ml-5">
+                                            <textarea
+                                                value={replyContent}
+                                                onChange={handleReplyChange}
+                                                placeholder="대댓글을 입력하세요..."
+                                                className="h-20 w-full resize-none rounded-xl border border-purple-100 bg-white p-3 text-sm outline-none"
+                                            />
+
+                                            <div className="mt-2 flex gap-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleCreateReply(comment.commentId)}
+                                                    className="rounded-lg bg-purple-500 px-4 py-2 text-sm font-bold text-white"
+                                                >
+                                                    등록
+                                                </button>
+
+                                                <button
+                                                    type="button"
+                                                    onClick={handleCloseReplyForm}
+                                                    className="rounded-lg bg-gray-200 px-4 py-2 text-sm font-bold text-gray-600"
+                                                >
+                                                    취소
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             ))
                         ) : (
@@ -186,6 +274,44 @@ function PostDetailPage() {
                             </p>
                         )}
                     </div>
+
+                    {/* 댓글 페이징 */}
+                    {commentPageInfo.totalPages > 0 && (
+                        <div className="mt-5 flex items-center justify-center gap-2">
+                            <button
+                                type="button"
+                                disabled={commentPageInfo.first}
+                                onClick={() => setCommentPage(commentPage - 1)}
+                                className="rounded-full bg-gray-100 px-3 py-2 text-xs font-bold text-gray-600 disabled:cursor-not-allowed disabled:opacity-40"
+                            >
+                                이전
+                            </button>
+
+                            {Array.from({ length: commentPageInfo.totalPages }, (_, index) => (
+                                <button
+                                    key={index}
+                                    type="button"
+                                    onClick={() => setCommentPage(index)}
+                                    className={`h-8 w-8 rounded-full text-xs font-bold ${
+                                        commentPage === index
+                                            ? "bg-purple-500 text-white"
+                                            : "bg-gray-100 text-gray-600"
+                                    }`}
+                                >
+                                    {index + 1}
+                                </button>
+                            ))}
+
+                            <button
+                                type="button"
+                                disabled={commentPageInfo.last}
+                                onClick={() => setCommentPage(commentPage + 1)}
+                                className="rounded-full bg-gray-100 px-3 py-2 text-xs font-bold text-gray-600 disabled:cursor-not-allowed disabled:opacity-40"
+                            >
+                                다음
+                            </button>
+                        </div>
+                    )}
 
                     {/* 댓글 작성 */}
                     <section className="mt-6 rounded-2xl border border-purple-100 bg-purple-50 p-5">

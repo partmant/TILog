@@ -1,5 +1,7 @@
 import api from "./axios";
 
+// 게시글 댓글 관련 API 요청 모음
+
 // 게시글 댓글 목록 조회
 export const getComments = async (postId) => {
     const response = await api.get(`/api/posts/${postId}/comments`);

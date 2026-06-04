@@ -1,40 +1,40 @@
 import { useState } from 'react';
 
-const styles = {
-  wrapper: { display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 },
-  input: { flex: 1, padding: '8px 12px', fontSize: 15, border: '1px solid #ccc', borderRadius: 6 },
-  btn: { padding: '8px 16px', cursor: 'pointer', borderRadius: 6, border: '1px solid #ccc' },
-  searchBtn: { background: '#3b82f6', color: '#fff', border: 'none' },
-};
-
 // 키워드 입력창 + 검색 버튼 + 상세검색 토글
 // props:
-//   keyword       string   — 현재 키워드 값
-//   advanced      boolean  — 상세검색 패널 열림 여부
-//   onSearch      (keyword) => void  — 검색 실행 (Enter 또는 버튼)
-//   onToggleAdvanced () => void      — 상세검색 토글
+//   keyword           string   — 현재 키워드 값
+//   advanced          boolean  — 상세검색 패널 열림 여부
+//   onSearch          (keyword) => void
+//   onToggleAdvanced  () => void
 const SearchBar = ({ keyword, advanced, onSearch, onToggleAdvanced }) => {
-  // 로컬 입력 상태 (Enter/버튼 클릭 시에만 실제 검색 실행)
-  const [input, setInput] = useState(keyword);
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') onSearch(input);
-  };
+  const [input, setInput] = useState(keyword ?? '');
 
   return (
-    <div style={styles.wrapper}>
+    <div className="flex items-center gap-2">
       <input
-        style={styles.input}
         type="text"
+        className="w-64 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100"
         placeholder="제목 또는 본문 키워드 검색"
         value={input}
         onChange={(e) => setInput(e.target.value)}
-        onKeyDown={handleKeyDown}
+        onKeyDown={(e) => e.key === 'Enter' && onSearch(input)}
       />
-      <button style={{ ...styles.btn, ...styles.searchBtn }} onClick={() => onSearch(input)}>
+      <button
+        type="button"
+        className="rounded-xl bg-gradient-to-r from-purple-500 to-cyan-400 px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
+        onClick={() => onSearch(input)}
+      >
         검색
       </button>
-      <button style={styles.btn} onClick={onToggleAdvanced}>
+      <button
+        type="button"
+        className={`rounded-xl border px-4 py-2.5 text-sm font-bold transition ${
+          advanced
+            ? 'border-purple-400 bg-purple-50 text-purple-600'
+            : 'border-gray-200 bg-white text-gray-600 hover:border-purple-300 hover:text-purple-500'
+        }`}
+        onClick={onToggleAdvanced}
+      >
         상세검색 {advanced ? '▲' : '▼'}
       </button>
     </div>

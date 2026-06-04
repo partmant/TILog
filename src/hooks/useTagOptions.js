@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 
 // 앱 생명주기 동안 1회만 fetch — 이후 호출은 이 캐시 반환
 let cache = null;
@@ -13,7 +13,7 @@ export function useTagOptions() {
   useEffect(() => {
     if (cache) return;
 
-    axios.get('/api/tags')
+    api.get('/api/tags')
       .then(({ data }) => {
         cache = data.map(name => ({ value: name, label: name }));
         setTagOptions(cache);

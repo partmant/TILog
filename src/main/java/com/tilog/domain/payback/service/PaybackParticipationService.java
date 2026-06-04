@@ -7,12 +7,15 @@ import com.tilog.domain.payback.entity.PaybackPolicy;
 import com.tilog.domain.payback.repository.PaybackParticipationRepository;
 import com.tilog.domain.payback.repository.PaybackPolicyRepository;
 import com.tilog.domain.writeHistory.repository.WriteHistoryRepository;
+import com.tilog.global.exception.CustomException;
+import com.tilog.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.format.DateTimeParseException;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +30,7 @@ public class PaybackParticipationService {
         YearMonth participationMonth = parseYearMonth(request.participationMonth());
 
         PaybackPolicy policy = paybackPolicyRepository.findById(request.paybackPolicyId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 페이백 정책입니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.PAYBACK_POLICY_NOT_FOUND));
 
         validateActivePolicy(policy);
         validatePolicyPeriod(policy, participationMonth);
@@ -39,34 +42,29 @@ public class PaybackParticipationService {
         return PaybackParticipationResponse.from(savedParticipation);
     }
 
-    @Transactional
     public PaybackParticipationResponse getMyParticipation(Long memberId, String month) {
         YearMonth participationMonth = parseYearMonth(month);
 
         PaybackParticipation participation = paybackParticipationRepository
                 .findByMemberIdAndParticipationMonth(memberId, participationMonth.toString())
-                .orElseThrow(() -> new IllegalArgumentException("해당 월의 페이백 참여 내역이 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.PAYBACK_PARTICIPATION_NOT_FOUND));
 
         int achievedWriteDays = countAchievedWriteDays(memberId, participationMonth);
-        participation.updateProgress(
-                achievedWriteDays,
-                participation.getPaybackPolicy().getRequiredWriteDays()
-        );
 
-        return PaybackParticipationResponse.from(participation);
+        return PaybackParticipationResponse.from(participation, achievedWriteDays);
     }
 
     private YearMonth parseYearMonth(String month) {
         try {
             return YearMonth.parse(month);
-        } catch (Exception e) {
-            throw new IllegalArgumentException("참여 월은 yyyy-MM 형식이어야 합니다.");
+        } catch (DateTimeParseException e) {
+            throw new CustomException(ErrorCode.INVALID_PAYBACK_MONTH);
         }
     }
 
     private void validateActivePolicy(PaybackPolicy policy) {
         if (!policy.isActive()) {
-            throw new IllegalArgumentException("비활성화된 페이백 정책입니다.");
+            throw new CustomException(ErrorCode.INACTIVE_PAYBACK_POLICY);
         }
     }
 
@@ -78,20 +76,19 @@ public class PaybackParticipationService {
         boolean isAfterPolicy = monthStartDate.isAfter(policy.getEndDate());
 
         if (isBeforePolicy || isAfterPolicy) {
-            throw new IllegalArgumentException("페이백 정책 기간에 포함되지 않는 참여 월입니다.");
+            throw new CustomException(ErrorCode.PAYBACK_POLICY_PERIOD_MISMATCH);
         }
     }
 
     private void validateDuplicatedParticipation(Long memberId, Long paybackPolicyId, YearMonth participationMonth) {
-        boolean duplicated = paybackParticipationRepository
-                .existsByMemberIdAndPaybackPolicyPaybackPolicyIdAndParticipationMonth(
-                        memberId,
-                        paybackPolicyId,
-                        participationMonth.toString()
-                );
+        boolean duplicated = paybackParticipationRepository.existsByMemberPolicyMonth(
+                memberId,
+                paybackPolicyId,
+                participationMonth.toString()
+        );
 
         if (duplicated) {
-            throw new IllegalArgumentException("이미 해당 월 페이백 챌린지에 참여했습니다.");
+            throw new CustomException(ErrorCode.PAYBACK_ALREADY_PARTICIPATED);
         }
     }
 

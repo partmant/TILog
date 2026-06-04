@@ -6,14 +6,16 @@ import com.tilog.domain.payback.service.PaybackParticipationService;
 import com.tilog.global.response.ApiResponse;
 import com.tilog.global.security.SecurityUtil;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/payback-participations")
 @RequiredArgsConstructor
+@Validated
 public class PaybackParticipationController {
-
     private final PaybackParticipationService paybackParticipationService;
 
     @PostMapping
@@ -28,7 +30,9 @@ public class PaybackParticipationController {
 
     @GetMapping("/me")
     public ApiResponse<PaybackParticipationResponse> getMyParticipation(
-            @RequestParam String month
+            @RequestParam
+            @Pattern(regexp = "^\\d{4}-\\d{2}$", message = "조회 월은 yyyy-MM 형식이어야 합니다.")
+            String month
     ) {
         Long memberId = SecurityUtil.getCurrentMemberId();
 

@@ -6,6 +6,7 @@ import com.tilog.domain.payback.repository.PaybackPolicyRepository;
 import com.tilog.global.exception.CustomException;
 import com.tilog.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,12 +19,15 @@ public class PaybackPolicyService {
     private final PaybackPolicyRepository paybackPolicyRepository;
 
     public PaybackPolicyResponse getActivePolicy() {
-        LocalDate today = LocalDate.now();
-
-        PaybackPolicy policy = paybackPolicyRepository
-                .findFirstByActiveTrueAndStartDateLessThanEqualAndEndDateGreaterThanEqualOrderByStartDateDesc(today, today)
-                .orElseThrow(() -> new CustomException(ErrorCode.ACTIVE_PAYBACK_POLICY_NOT_FOUND));
+        PaybackPolicy policy = getCurrentActivePolicy(LocalDate.now());
 
         return PaybackPolicyResponse.from(policy);
+    }
+
+    public PaybackPolicy getCurrentActivePolicy(LocalDate today) {
+        return paybackPolicyRepository.findActivePolicies(today, PageRequest.of(0, 1))
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new CustomException(ErrorCode.ACTIVE_PAYBACK_POLICY_NOT_FOUND));
     }
 }

@@ -1,21 +1,28 @@
 package com.tilog.domain.payback.entity;
 
+import com.tilog.domain.subscription.entity.Subscription;
 import com.tilog.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.YearMonth;
 
 @Entity
 @Table(
         name = "payback_participation",
         uniqueConstraints = {
                 @UniqueConstraint(
-                        name = "uk_payback_participation_member_policy_month",
-                        columnNames = {"member_id", "payback_policy_id", "participation_month"}
+                        name = "uk_payback_participation_subscription",
+                        columnNames = {"subscription_id"}
+                ),
+                @UniqueConstraint(
+                        name = "uk_payback_participation_member_period",
+                        columnNames = {"member_id", "period_start_date", "period_end_date"}
                 )
         }
 )
@@ -31,11 +38,18 @@ public class PaybackParticipation extends BaseTimeEntity {
     private Long memberId;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "subscription_id", nullable = false)
+    private Subscription subscription;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "payback_policy_id", nullable = false)
     private PaybackPolicy paybackPolicy;
 
-    @Column(name = "participation_month", nullable = false, length = 7)
-    private String participationMonth;
+    @Column(name = "period_start_date", nullable = false)
+    private LocalDate periodStartDate;
+
+    @Column(name = "period_end_date", nullable = false)
+    private LocalDate periodEndDate;
 
     @Column(name = "joined_at", nullable = false)
     private LocalDateTime joinedAt;
@@ -47,8 +61,8 @@ public class PaybackParticipation extends BaseTimeEntity {
     @Column(name = "achieved_write_days", nullable = false)
     private int achievedWriteDays;
 
-    @Column(name = "progress_rate", nullable = false)
-    private int progressRate;
+    @Column(name = "progress_rate", nullable = false, precision = 5, scale = 2)
+    private BigDecimal progressRate;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "result_status", nullable = false)
@@ -66,16 +80,20 @@ public class PaybackParticipation extends BaseTimeEntity {
 
     private PaybackParticipation(
             Long memberId,
+            Subscription subscription,
             PaybackPolicy paybackPolicy,
-            String participationMonth
+            LocalDate periodStartDate,
+            LocalDate periodEndDate
     ) {
         this.memberId = memberId;
+        this.subscription = subscription;
         this.paybackPolicy = paybackPolicy;
-        this.participationMonth = participationMonth;
+        this.periodStartDate = periodStartDate;
+        this.periodEndDate = periodEndDate;
         this.joinedAt = LocalDateTime.now();
         this.mockPaymentStatus = MockPaymentStatus.PAID;
         this.achievedWriteDays = 0;
-        this.progressRate = 0;
+        this.progressRate = BigDecimal.ZERO;
         this.resultStatus = PaybackResultStatus.IN_PROGRESS;
         this.refundStatus = RefundStatus.NONE;
         this.refundAmount = paybackPolicy.getRefundAmount();
@@ -83,13 +101,15 @@ public class PaybackParticipation extends BaseTimeEntity {
 
     public static PaybackParticipation create(
             Long memberId,
-            PaybackPolicy paybackPolicy,
-            YearMonth participationMonth
+            Subscription subscription,
+            PaybackPolicy paybackPolicy
     ) {
         return new PaybackParticipation(
                 memberId,
+                subscription,
                 paybackPolicy,
-                participationMonth.toString()
+                subscription.getStartedAt().toLocalDate(),
+                subscription.getEndedAt().toLocalDate()
         );
     }
 
@@ -98,12 +118,15 @@ public class PaybackParticipation extends BaseTimeEntity {
         this.progressRate = calculateProgressRate(achievedWriteDays, requiredWriteDays);
     }
 
-    private int calculateProgressRate(int achievedWriteDays, int requiredWriteDays) {
+    private BigDecimal calculateProgressRate(int achievedWriteDays, int requiredWriteDays) {
         if (requiredWriteDays <= 0) {
-            return 0;
+            return BigDecimal.ZERO;
         }
 
-        int rate = (int) Math.floor((double) achievedWriteDays / requiredWriteDays * 100);
-        return Math.min(rate, 100);
+        BigDecimal rate = BigDecimal.valueOf(achievedWriteDays)
+                .multiply(BigDecimal.valueOf(100))
+                .divide(BigDecimal.valueOf(requiredWriteDays), 2, RoundingMode.DOWN);
+
+        return rate.min(BigDecimal.valueOf(100));
     }
 }

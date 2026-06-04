@@ -5,16 +5,22 @@ import com.tilog.domain.payback.entity.PaybackParticipation;
 import com.tilog.domain.payback.entity.PaybackResultStatus;
 import com.tilog.domain.payback.entity.RefundStatus;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+
 public record PaybackParticipationResponse(
         Long paybackParticipationId,
         Long memberId,
+        Long subscriptionId,
         Long paybackPolicyId,
         String policyName,
-        String participationMonth,
+        LocalDate periodStartDate,
+        LocalDate periodEndDate,
         MockPaymentStatus mockPaymentStatus,
         int requiredWriteDays,
         int achievedWriteDays,
-        int progressRate,
+        BigDecimal progressRate,
         PaybackResultStatus resultStatus,
         RefundStatus refundStatus,
         int refundAmount
@@ -23,9 +29,11 @@ public record PaybackParticipationResponse(
         return new PaybackParticipationResponse(
                 participation.getPaybackParticipationId(),
                 participation.getMemberId(),
+                participation.getSubscription().getId(),
                 participation.getPaybackPolicy().getPaybackPolicyId(),
                 participation.getPaybackPolicy().getName(),
-                participation.getParticipationMonth(),
+                participation.getPeriodStartDate(),
+                participation.getPeriodEndDate(),
                 participation.getMockPaymentStatus(),
                 participation.getPaybackPolicy().getRequiredWriteDays(),
                 participation.getAchievedWriteDays(),
@@ -41,14 +49,16 @@ public record PaybackParticipationResponse(
             int achievedWriteDays
     ) {
         int requiredWriteDays = participation.getPaybackPolicy().getRequiredWriteDays();
-        int progressRate = calculateProgressRate(achievedWriteDays, requiredWriteDays);
+        BigDecimal progressRate = calculateProgressRate(achievedWriteDays, requiredWriteDays);
 
         return new PaybackParticipationResponse(
                 participation.getPaybackParticipationId(),
                 participation.getMemberId(),
+                participation.getSubscription().getId(),
                 participation.getPaybackPolicy().getPaybackPolicyId(),
                 participation.getPaybackPolicy().getName(),
-                participation.getParticipationMonth(),
+                participation.getPeriodStartDate(),
+                participation.getPeriodEndDate(),
                 participation.getMockPaymentStatus(),
                 requiredWriteDays,
                 achievedWriteDays,
@@ -59,12 +69,15 @@ public record PaybackParticipationResponse(
         );
     }
 
-    private static int calculateProgressRate(int achievedWriteDays, int requiredWriteDays) {
+    private static BigDecimal calculateProgressRate(int achievedWriteDays, int requiredWriteDays) {
         if (requiredWriteDays <= 0) {
-            return 0;
+            return BigDecimal.ZERO;
         }
 
-        int rate = (int) Math.floor((double) achievedWriteDays / requiredWriteDays * 100);
-        return Math.min(rate, 100);
+        BigDecimal rate = BigDecimal.valueOf(achievedWriteDays)
+                .multiply(BigDecimal.valueOf(100))
+                .divide(BigDecimal.valueOf(requiredWriteDays), 2, RoundingMode.DOWN);
+
+        return rate.min(BigDecimal.valueOf(100));
     }
 }

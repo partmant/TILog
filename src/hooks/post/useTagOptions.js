@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import api from '../api/axios';
+import api from '../../api/axios.js';
 
 // 앱 생명주기 동안 1회만 fetch — 이후 호출은 이 캐시 반환
 let cache = null;

@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useWeeklyReport } from '../../hooks/useWeeklyReport';
+import { useWeeklyReport } from '../../hooks/report/useWeeklyReport.js';
 import '../../styles/mypage/WeeklyReportSection.css';
 import {isPremiumUser} from "../../utils/authUtils.js";
 

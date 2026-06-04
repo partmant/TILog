@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import Select from 'react-select';
-import { useTagOptions } from '../../hooks/useTagOptions';
+import { useTagOptions } from '../../hooks/post/useTagOptions.js';
 
 // 상세검색 패널 — 닉네임 / 태그 / 기간
 // props:

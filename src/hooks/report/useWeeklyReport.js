@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getWeeklyReport, generateWeeklyReport } from '../api/weeklyReportApi';
-import { toDateString } from '../utils/mypageUtils';
-import {getMemberId} from "../utils/authUtils.js";
+import { getWeeklyReport, generateWeeklyReport } from '../../api/weeklyReportApi.js';
+import { toDateString } from '../../utils/mypageUtils.js';
+import {getMemberId} from "../../utils/authUtils.js";
 
 const memberId = getMemberId();
 const getLastMonday = () => {

@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
+import { recordWriteHistory } from "../../api/myPageApi";
 import { createPost, getPostDetail, updatePost , uploadPostImage } from "../../api/post";
+import { getMemberId } from "../../utils/authUtils";
 
 import { defaultDifficulty, defaultVisibility, postListPath } from "../../constants/post";
 
@@ -154,6 +156,19 @@ export function usePostWriteForm() {
         }
 
         await createPost(postData);
+
+        if (visibility !== "DRAFT") {
+            const memberId = getMemberId();
+
+            if (memberId) {
+                try {
+                    await recordWriteHistory(memberId);
+                } catch (error) {
+                    console.error("[WRITE HISTORY API ERROR]", error);
+                }
+            }
+        }
+
         navigate(postListPath);
     };
 

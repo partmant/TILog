@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { request } from "../api/apiClient";
+import { clearAuthStorage } from "../utils/authUtils";
 import "../styles/auth/Auth.css";
 
 export default function LoginPage() {
@@ -24,6 +25,7 @@ export default function LoginPage() {
             });
             // apiClient가 data.data / data.result 자동 언래핑
             const token = res?.accessToken ?? res;
+            clearAuthStorage();
             localStorage.setItem("accessToken", token);
             navigate("/mypage");
         } catch (err) {

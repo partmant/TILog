@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { request } from "../api/apiClient";
+import { clearAuthStorage } from "../utils/authUtils";
 import "../styles/auth/Auth.css";
 
 export default function SignupPage() {
@@ -35,6 +36,7 @@ export default function SignupPage() {
                     password: form.password,
                 }),
             });
+            clearAuthStorage();
             navigate("/login");
         } catch (err) {
             setError(err.message || "회원가입에 실패했습니다.");

@@ -4,9 +4,20 @@ import { useNavigate } from "react-router-dom";
 import { getMyHeatmap, getMyStreak } from "../../api/myPageApi";
 import { getPopularTags, searchPosts } from "../../api/post";
 import { difficultyStyle } from "../../constants/post";
-import { DEFAULT_GROWTH_SUMMARY, getCurrentStreak, getMonthWriteCount, } from "../../utils/growthStats";
+import {
+    DEFAULT_GROWTH_SUMMARY,
+    getChallengeProgressRate,
+    getCurrentStreak,
+    getMonthActiveDays,
+    getMonthWriteCount,
+    getCurrentMonthDayCount,
+    getMonthlyTilChallengeTitle,
+} from "../../utils/growthStats";
 import { getMonthRange, } from "../../utils/mypageUtils";
-import { getMemberId } from "../../utils/authUtils";
+import {
+    getMemberId,
+    isPremiumUser,
+} from "../../utils/authUtils";
 
 // 메인 피드 페이지
 function FeedPage() {
@@ -16,6 +27,12 @@ function FeedPage() {
     const [popularTags, setPopularTags] = useState([]);
     const [growthSummary, setGrowthSummary] = useState(DEFAULT_GROWTH_SUMMARY);
     const [isGrowthSummaryLoading, setIsGrowthSummaryLoading] = useState(true);
+    const canViewChallenge = isPremiumUser();
+    const challengeGoal = getCurrentMonthDayCount();
+    const challengeProgressRate = getChallengeProgressRate(
+        growthSummary.monthActiveDays,
+        challengeGoal
+    );
 
     useEffect(() => {
         const fetchFeedPosts = async () => {
@@ -70,6 +87,7 @@ function FeedPage() {
                 setGrowthSummary({
                     currentStreak: getCurrentStreak(streakResponse),
                     monthWriteCount: getMonthWriteCount(heatmapResponse),
+                    monthActiveDays: getMonthActiveDays(heatmapResponse),
                 });
             } catch (error) {
                 console.error("[GROWTH SUMMARY API ERROR]", error);
@@ -108,7 +126,12 @@ function FeedPage() {
             </section>
 
             {/* 본문 3단 영역 */}
-            <section className="grid grid-cols-[230px_1fr_260px] gap-6">
+            <section className={`grid gap-6 ${
+                    canViewChallenge
+                        ? "grid-cols-[230px_1fr_260px]"
+                        : "grid-cols-[230px_1fr]"
+                }`}
+            >
                 {/* 왼쪽 성장 요약 */}
                 <aside className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
                     <h3 className="text-xl font-bold">
@@ -243,39 +266,47 @@ function FeedPage() {
                     </div>
                 </section>
 
-                {/* 오른쪽 챌린지 */}
-                <aside className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
-                    <h3 className="text-xl font-bold">
-                        오늘의 챌린지
-                    </h3>
+                {canViewChallenge && (
+                    /* 오른쪽 챌린지 */
+                    <aside className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+                        <h3 className="text-xl font-bold">
+                            오늘의 챌린지
+                        </h3>
 
-                    <div className="mt-5">
-                        <p className="font-bold text-purple-600">
-                            6월 TIL 챌린지
-                        </p>
+                        <div className="mt-5">
+                            <p className="font-bold text-purple-600">
+                                {getMonthlyTilChallengeTitle()}
+                            </p>
 
-                        <p className="mt-2 text-sm text-gray-500">
-                            목표 20일 중 12일 달성
-                        </p>
+                            <p className="mt-2 text-sm text-gray-500">
+                                목표 {challengeGoal}일 중{" "}
+                                {isGrowthSummaryLoading ? "..." : growthSummary.monthActiveDays}일 달성
+                            </p>
 
-                        <div className="mt-5 h-3 rounded-full bg-gray-200">
-                            <div className="h-3 w-3/5 rounded-full bg-gradient-to-r from-purple-500 to-cyan-400" />
+                            <div className="mt-5 h-3 rounded-full bg-gray-200">
+                                <div
+                                    className="h-3 rounded-full bg-gradient-to-r from-purple-500 to-cyan-400 transition-all"
+                                    style={{
+                                        width: `${isGrowthSummaryLoading ? 0 : challengeProgressRate}%`,
+                                    }}
+                                />
+                            </div>
                         </div>
-                    </div>
 
-                    <div className="mt-8">
-                        <h4 className="font-bold">
-                            추천 학습 주제
-                        </h4>
+                        <div className="mt-8">
+                            <h4 className="font-bold">
+                                추천 학습 주제
+                            </h4>
 
-                        <ul className="mt-4 space-y-4 text-sm font-semibold text-gray-700">
-                            <li># JWT 인증 흐름</li>
-                            <li># JPA 연관관계</li>
-                            <li># React Hook</li>
-                            <li># 쿼리 최적화</li>
-                        </ul>
-                    </div>
-                </aside>
+                            <ul className="mt-4 space-y-4 text-sm font-semibold text-gray-700">
+                                <li># JWT 인증 흐름</li>
+                                <li># JPA 연관관계</li>
+                                <li># React Hook</li>
+                                <li># 쿼리 최적화</li>
+                            </ul>
+                        </div>
+                    </aside>
+                )}
             </section>
         </main>
     );

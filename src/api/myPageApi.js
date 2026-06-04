@@ -30,7 +30,7 @@ const safeParseCache = (cacheKey) => {
 
     try {
         return JSON.parse(cached);
-    } catch (error) {
+    } catch {
         localStorage.removeItem(cacheKey);
         return null;
     }

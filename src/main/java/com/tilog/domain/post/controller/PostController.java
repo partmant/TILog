@@ -3,6 +3,7 @@ package com.tilog.domain.post.controller;
 import com.tilog.domain.post.dto.PostCommandDto;
 import com.tilog.domain.post.dto.PostQueryDto;
 import com.tilog.domain.post.service.PostService;
+import com.tilog.global.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +20,8 @@ public class PostController {
     // 게시글 목록 조회
     @GetMapping
     public List<PostQueryDto.ListResponse> getPostList() {
-        return postService.getPostList();
+        Long loginMemberId = SecurityUtil.getCurrentMemberId();
+        return postService.getPostList(loginMemberId);
     }
 
     // 게시글 상세 조회
@@ -28,24 +30,28 @@ public class PostController {
             @PathVariable("postId") Long postId,
             @RequestParam(value = "increaseViewCount", defaultValue = "true") boolean increaseViewCount
     ) {
-        return postService.getPostDetail(postId, increaseViewCount);
+        Long loginMemberId = SecurityUtil.getCurrentMemberId();
+        return postService.getPostDetail(postId, increaseViewCount, loginMemberId);
     }
 
     // 게시글 작성
     @PostMapping
     public Long createPost(@RequestBody PostCommandDto.Create request) {
-        return postService.createPost(request);
+        Long loginMemberId = SecurityUtil.getCurrentMemberId();
+        return postService.createPost(request, loginMemberId);
     }
 
     // 게시글 수정
     @PutMapping("/{postId}")
     public Long updatePost(@PathVariable("postId") Long postId, @RequestBody PostCommandDto.Update request) {
-        return postService.updatePost(postId, request);
+        Long loginMemberId = SecurityUtil.getCurrentMemberId();
+        return postService.updatePost(postId, request, loginMemberId);
     }
 
     // 게시글 삭제
     @DeleteMapping("/{postId}")
     public void deletePost(@PathVariable("postId") Long postId) {
-        postService.deletePost(postId);
+        Long loginMemberId = SecurityUtil.getCurrentMemberId();
+        postService.deletePost(postId, loginMemberId);
     }
 }

@@ -1,18 +1,13 @@
 import { getCurrentUser } from '../../utils/authUtils';
 import '../../styles/mypage/MyPageHero.css';
 
-const formatJoinDate = (joinedAt) => {
-    if (!joinedAt) return null;
-    return String(joinedAt).slice(0, 10).replaceAll('-', '.');
-};
-
 const MyPageHero = () => {
     const user = getCurrentUser();
 
     const nickname = user?.nickname ?? 'user';
     const email = user?.email ?? '';
     const initial = nickname.charAt(0).toUpperCase();
-    const joinDate = formatJoinDate(user?.joinedAt);
+    const joinDate = user?.createdAt ? user.createdAt.replaceAll('-', '.') : null;
 
     return (
         <section className="mypage-hero">

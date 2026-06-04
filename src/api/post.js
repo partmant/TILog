@@ -36,6 +36,9 @@ const mapPostSummary = (post) => ({
 export const searchPostPage = async ({
     keyword,
     tagName,
+    nickname,
+    from,
+    to,
     difficulty,
     sort = "LATEST",
     page = 0,
@@ -45,6 +48,9 @@ export const searchPostPage = async ({
         params: {
             keyword,
             tagName,
+            nickname,
+            from,
+            to,
             difficulty,
             sort,
             page,

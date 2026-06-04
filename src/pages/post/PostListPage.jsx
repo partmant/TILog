@@ -1,6 +1,7 @@
 import { usePostList, } from "../../hooks/post";
-
 import { difficultyStyle, difficultyBorderStyle } from "../../constants/post";
+import SearchBar from "../../components/search/SearchBar.jsx";
+import AdvancedSearchPanel from "../../components/search/AdvancedSearchPanel.jsx";
 
 // 게시글 목록 페이지
 function PostListPage() {
@@ -8,16 +9,17 @@ function PostListPage() {
         posts,
         pageInfo,
         currentPage,
-        searchKeyword,
-        setSearchKeyword,
         handleMoveDetail,
-        handleSearchKeyword,
         handleSearchTag,
         selectedDifficulty,
         setSelectedDifficulty,
         sortType,
         setSortType,
         setPage,
+        conditions,
+        setCondition,
+        toggleAdvanced,
+        resetConditions,
     } = usePostList();
 
     const totalPages = pageInfo.totalPages || 0;
@@ -46,27 +48,23 @@ function PostListPage() {
                         </p>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                        <input
-                            type="text"
-                            value={searchKeyword}
-                            onChange={(e) => setSearchKeyword(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === "Enter") {
-                                    handleSearchKeyword();
-                                }
-                            }}
-                            placeholder="검색어를 입력하세요"
-                            className="w-72 rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm outline-none"
+                    {/* 검색바 + 상세검색 패널 드롭다운 */}
+                    <div className="relative">
+                        <SearchBar
+                            keyword={conditions.keyword}
+                            advanced={conditions.advanced}
+                            onSearch={(keyword) => setCondition('keyword', keyword)}
+                            onToggleAdvanced={toggleAdvanced}
                         />
-
-                        <button
-                            type="button"
-                            onClick={handleSearchKeyword}
-                            className="rounded-xl bg-gradient-to-r from-purple-500 to-cyan-400 px-6 py-3 font-bold text-white"
-                        >
-                            검색
-                        </button>
+                        {conditions.advanced && (
+                            <div className="absolute right-0 top-full z-20 mt-2 w-[460px]">
+                                <AdvancedSearchPanel
+                                    conditions={conditions}
+                                    onChange={setCondition}
+                                    onReset={resetConditions}
+                                />
+                            </div>
+                        )}
                     </div>
                 </div>
             </section>

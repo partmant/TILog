@@ -47,6 +47,13 @@ button {
     height: fit-content;
 }
 
+.mypage-main-column {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    min-width: 0;
+}
+
 .mypage-side-column {
     display: flex;
     flex-direction: column;

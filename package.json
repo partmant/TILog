@@ -16,14 +16,17 @@
     "@toast-ui/react-editor": "^3.2.3",
     "axios": "^1.16.1",
     "highlight.js": "^11.11.1",
+    "chart.js": "^4.5.1",
     "react": "^19.2.6",
+    "react-chartjs-2": "^5.3.1",
     "react-dom": "^19.2.6",
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.15.1",
     "rehype-highlight": "^7.0.2",
     "remark-gfm": "^4.0.1",
     "tailwindcss": "^4.3.0",
-    "zustand": "^5.0.13"
+    "zustand": "^5.0.13",
+    "react-select": "^5.10.2"
   },
   "devDependencies": {
     "@babel/core": "^7.29.0",

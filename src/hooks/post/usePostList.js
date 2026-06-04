@@ -40,6 +40,9 @@ export function usePostList() {
     // 검색어 조회
     const keyword = searchParams.get("keyword");
     const tagName = searchParams.get("tagName");
+    const nickname = searchParams.get("nickname");
+    const from = searchParams.get("from");
+    const to = searchParams.get("to");
 
     // 선택한 난이도 필터 조회
     const selectedDifficulty = searchParams.get("difficulty") || "ALL";
@@ -63,6 +66,9 @@ export function usePostList() {
             const data = await searchPostPage({
                 keyword,
                 tagName,
+                nickname,
+                from,
+                to,
                 difficulty: selectedDifficulty === "ALL" ? undefined : selectedDifficulty,
                 sort: sortType,
                 page: currentPage,
@@ -81,7 +87,7 @@ export function usePostList() {
         };
 
         fetchPosts();
-    }, [keyword, tagName, selectedDifficulty, sortType, currentPage, pageSize]);
+    }, [keyword, tagName, nickname, from, to, selectedDifficulty, sortType, currentPage, pageSize]);
 
     // URL 검색어 변경 시 input 상태 동기화
     useEffect(() => {
@@ -156,6 +162,31 @@ export function usePostList() {
         navigate(getPostDetailPath(postId));
     };
 
+    // AdvancedSearchPanel / SearchBar 호환용
+    const conditions = {
+        keyword: keyword || '',
+        nickname: nickname || '',
+        tagName: tagName || '',
+        difficulty: selectedDifficulty === 'ALL' ? '' : selectedDifficulty,
+        from: from || '',
+        to: to || '',
+        advanced: searchParams.get('advanced') === 'true',
+    };
+
+    const setCondition = (key, value) => {
+        if (key === 'keyword') setSearchKeyword(value);
+        updatePostListParams({ [key]: value || null, page: 0 });
+    };
+
+    const toggleAdvanced = () => {
+        updatePostListParams({ advanced: conditions.advanced ? null : 'true' });
+    };
+
+    const resetConditions = () => {
+        setSearchParams(new URLSearchParams({ advanced: 'true' }));
+        setSearchKeyword('');
+    };
+
     return {
         posts,
         pageInfo,
@@ -171,5 +202,9 @@ export function usePostList() {
         sortType,
         setSortType: handleChangeSort,
         setPage: handleChangePage,
+        conditions,
+        setCondition,
+        toggleAdvanced,
+        resetConditions,
     };
 }

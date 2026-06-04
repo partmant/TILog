@@ -1,0 +1,470 @@
+.rd-page {
+    min-height: 100vh;
+    padding: 14px 16px;
+    background:
+        radial-gradient(circle at 8% 4%, rgba(139, 92, 246, 0.2), transparent 32%),
+        radial-gradient(circle at 88% 14%, rgba(34, 211, 238, 0.2), transparent 30%),
+        linear-gradient(135deg, #faf7ff 0%, #effcff 100%);
+}
+
+.rd-shell {
+    width: min(900px, 100%);
+    margin: 0 auto;
+    padding: 24px 30px 40px;
+    border: 1px solid #e5e7eb;
+    border-radius: 28px;
+    background: rgba(255, 255, 255, 0.72);
+    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.08);
+    backdrop-filter: blur(16px);
+}
+
+/* 헤더 */
+.rd-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 28px;
+}
+
+.rd-back-btn {
+    padding: 8px 16px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 10px;
+    background: transparent;
+    color: #374151;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color 0.15s, color 0.15s;
+}
+
+.rd-back-btn:hover {
+    border-color: #8b5cf6;
+    color: #8b5cf6;
+}
+
+.rd-week-nav {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.rd-nav-btn {
+    padding: 8px 16px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 10px;
+    background: transparent;
+    color: #374151;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+}
+
+.rd-nav-btn:hover:not(:disabled) {
+    border-color: #8b5cf6;
+    color: #8b5cf6;
+}
+
+.rd-nav-btn:disabled {
+    color: #d1d5db;
+    border-color: #f3f4f6;
+    cursor: default;
+}
+
+.rd-week-label {
+    font-size: 16px;
+    font-weight: 900;
+    color: #111827;
+    letter-spacing: -0.03em;
+}
+
+/* 로딩 / 빈 상태 */
+.rd-center-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 60px 0;
+    text-align: center;
+    color: #6b7280;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.rd-empty-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 900;
+    color: #111827;
+}
+
+.rd-error-msg {
+    font-size: 13px;
+    color: #ef4444;
+}
+
+.rd-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #e5e7eb;
+    border-top-color: #8b5cf6;
+    border-radius: 50%;
+    animation: rd-spin 0.8s linear infinite;
+}
+
+@keyframes rd-spin {
+    to { transform: rotate(360deg); }
+}
+
+.rd-generate-btn {
+    padding: 11px 32px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 900;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+
+.rd-generate-btn:hover {
+    opacity: 0.88;
+}
+
+/* 콘텐츠 */
+.rd-content {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+/* 1행: stat 카드 */
+.rd-stat-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+}
+
+.rd-stat-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 20px 12px 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+}
+
+.rd-stat-label-top {
+    font-size: 12px;
+    font-weight: 700;
+    color: #9ca3af;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.rd-stat-value {
+    font-size: 30px;
+    font-weight: 900;
+    color: #111827;
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+}
+
+.rd-stat-unit {
+    font-size: 14px;
+    font-weight: 700;
+    color: #6b7280;
+    margin-left: 2px;
+}
+
+.rd-stat-category {
+    font-size: 20px;
+}
+
+.rd-stat-sub {
+    font-size: 12px;
+    font-weight: 600;
+    color: #8b5cf6;
+}
+
+.rd-stat-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #6b7280;
+}
+
+/* 패널 공통 */
+.rd-panel {
+    padding: 22px 24px;
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+}
+
+.rd-panel h3 {
+    margin: 0 0 16px;
+    font-size: 16px;
+    font-weight: 900;
+    color: #111827;
+    letter-spacing: -0.03em;
+}
+
+/* 난이도 스택 바 */
+.rd-bar-stacked {
+    display: flex;
+    height: 14px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #e5e7eb;
+    margin-bottom: 10px;
+}
+
+.rd-bar-stacked > div {
+    height: 100%;
+    transition: width 0.4s ease;
+}
+
+.rd-bar-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+}
+
+.rd-bar-legend span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #374151;
+}
+
+.rd-bar-legend i {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+}
+
+/* 기술 스택 카테고리 바 */
+.rd-category-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.rd-category-row {
+    display: grid;
+    grid-template-columns: 90px 1fr 44px;
+    align-items: center;
+    gap: 10px;
+}
+
+.rd-category-label {
+    font-size: 13px;
+    font-weight: 900;
+    color: #374151;
+    text-align: right;
+}
+
+.rd-category-track {
+    height: 10px;
+    border-radius: 6px;
+    background: #e5e7eb;
+    overflow: hidden;
+}
+
+.rd-category-fill {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 0.4s ease;
+}
+
+.rd-category-pct {
+    font-size: 13px;
+    font-weight: 900;
+    color: #6b7280;
+    text-align: right;
+}
+
+/* 상위 태그 */
+.rd-top-tags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.rd-top-tags-label {
+    font-size: 13px;
+    font-weight: 900;
+    color: #6b7280;
+}
+
+.rd-tag-chip {
+    padding: 4px 12px;
+    border-radius: 20px;
+    background: #f5f3ff;
+    color: #7c3aed;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+/* 2행: 3열 차트 행 */
+.rd-charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 18px;
+    align-items: stretch;
+}
+
+.rd-chart-third {
+    min-width: 0;
+}
+
+.rd-chart-container {
+    max-width: 220px;
+    margin: 0 auto;
+}
+
+/* Top3 태그 카드 */
+.rd-top3-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 4px 0;
+}
+
+.rd-top3-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.rd-top3-medal {
+    font-size: 22px;
+    flex-shrink: 0;
+}
+
+.rd-top3-name {
+    flex: 1;
+    font-size: 15px;
+    font-weight: 900;
+    color: #111827;
+}
+
+.rd-top3-count {
+    font-size: 13px;
+    font-weight: 700;
+    color: #8b5cf6;
+    white-space: nowrap;
+}
+
+.rd-top3-empty {
+    margin: 0;
+    font-size: 14px;
+    color: #9ca3af;
+    text-align: center;
+    padding: 24px 0;
+}
+
+/* 기술 스택 차트 */
+.rd-techstack-chart {
+    width: 100%;
+    height: 160px;
+    position: relative;
+}
+
+.rd-chart-hint {
+    margin: -10px 0 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #9ca3af;
+}
+
+/* 규칙 코멘트 */
+.rd-rule-comment {
+    margin: 0;
+    padding: 14px 18px;
+    border-left: 3px solid #8b5cf6;
+    border-radius: 0 10px 10px 0;
+    background: #f5f3ff;
+    color: #374151;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.7;
+}
+
+/* AI 심층 분석 */
+.rd-ai-panel {
+    border: 1.5px dashed #c4b5fd;
+    background: #faf5ff;
+}
+
+.rd-ai-comment {
+    margin: 0;
+    color: #374151;
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+.rd-ai-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 20px 0;
+    text-align: center;
+    color: #6b7280;
+}
+
+.rd-ai-placeholder p {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 900;
+    color: #7c3aed;
+}
+
+.rd-ai-placeholder span {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+/* 반응형 */
+@media (max-width: 640px) {
+    .rd-shell {
+        padding: 16px;
+        border-radius: 22px;
+    }
+
+    .rd-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .rd-stat-cards {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .rd-stat-cards > :last-child {
+        grid-column: 1 / -1;
+    }
+
+    .rd-charts-row {
+        grid-template-columns: 1fr;
+    }
+
+    .rd-stat-value {
+        font-size: 24px;
+    }
+}

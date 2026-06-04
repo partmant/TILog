@@ -3,6 +3,7 @@ package com.tilog.domain.admin.controller;
 import com.tilog.domain.admin.dto.MemberRoleChangeRequest;
 import com.tilog.domain.admin.dto.AdminMemberDetailResponse;
 import com.tilog.domain.admin.dto.AdminMemberListResponse;
+import com.tilog.domain.admin.dto.MemberSanctionRequestDto;
 import com.tilog.domain.admin.service.AdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -39,5 +40,11 @@ public class AdminController {
     public ResponseEntity<Void> forceDeletePost(@PathVariable Long postId){ // 게시글 강제 삭제
         adminService.forceDeletePost(postId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/reports/{reportId}/sanction")
+    public ResponseEntity<Void> doSanction(@PathVariable Long reportId, @RequestBody MemberSanctionRequestDto memberSanctionRequestDto){ // 제재
+        adminService.doSanction(reportId, memberSanctionRequestDto);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

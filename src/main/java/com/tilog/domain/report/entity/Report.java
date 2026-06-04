@@ -33,5 +33,9 @@ public class Report {
 
     private LocalDateTime createdAt;
     private LocalDateTime processedAt;
+
+    public void completeReport(){
+        this.status = Status.PROCESSED;
+    }
 }
 

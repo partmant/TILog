@@ -92,4 +92,16 @@ public class PaybackParticipationService {
                 .ifPresent(p -> p.extendPeriod(newEndDate));
     }
 
-    private 
+    private int countAchievedWriteDays(
+            Long memberId,
+            LocalDate periodStartDate,
+            LocalDate periodEndDate
+    ) {
+        return writeHistoryRepository.countByMember_IdAndWrittenDateBetweenAndWriteCountGreaterThan(
+                memberId,
+                periodStartDate,
+                periodEndDate,
+                0
+        );
+    }
+}

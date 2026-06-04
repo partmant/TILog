@@ -145,4 +145,9 @@ public class PaybackParticipation extends BaseTimeEntity {
         }
 
         BigDecimal rate = BigDecimal.valueOf(achievedWriteDays)
-                .multiply(BigDecimal.val
+                .multiply(BigDecimal.valueOf(100))
+                .divide(BigDecimal.valueOf(requiredWriteDays), 2, RoundingMode.DOWN);
+
+        return rate.min(BigDecimal.valueOf(100));
+    }
+}

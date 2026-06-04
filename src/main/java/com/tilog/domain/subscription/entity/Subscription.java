@@ -78,4 +78,14 @@ public class Subscription {
         this.status = SubscriptionStatus.EXPIRED;
     }
 
-    // 현재 구독이 유효한지 확인 (ACTIVE 또는 CANC
+    // 현재 구독이 유효한지 확인 (ACTIVE 또는 CANCEL_RESERVED 모두 유효)
+    public boolean isActive() {
+        if (this.status != SubscriptionStatus.ACTIVE && this.status != SubscriptionStatus.CANCEL_RESERVED) {
+            return false;
+        }
+        if (this.endedAt == null) {
+            return true;
+        }
+        return this.endedAt.isAfter(LocalDateTime.now());
+    }
+}

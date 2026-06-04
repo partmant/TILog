@@ -2,29 +2,38 @@ import {
     useEffect,
     useMemo,
     useState,
-} from "react";
+} from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     getCachedHeatmap,
     getCachedStreak,
     getMyHeatmap,
     getMyStreak,
-} from "../api/myPageApi";
+} from '../api/myPageApi';
 import {
     getCachedRecentTils,
     getRecentTils,
-} from "../api/tilApi";
-import MyPageHero from "../components/mypage/MyPageHero";
-import MyPageStats from "../components/mypage/MyPageStats";
-import HeatmapSection from "../components/mypage/HeatmapSection";
-import RecentTilSection from "../components/mypage/RecentTilSection";
-import WeeklyReportSection from "../components/mypage/WeeklyReportSection";
+} from '../api/tilApi';
 import {
-    TEMP_MEMBER_ID,
+    cancelSubscription,
+    getCurrentPaybackParticipation,
+    getMySubscriptionStatus,
+    subscribePremium,
+} from '../api/subscriptionPaybackApi';
+import MyPageHero from '../components/mypage/MyPageHero';
+import MyPageStats from '../components/mypage/MyPageStats';
+import HeatmapSection from '../components/mypage/HeatmapSection';
+import RecentTilSection from '../components/mypage/RecentTilSection';
+import SubscriptionPaybackSection from '../components/mypage/SubscriptionPaybackSection';
+import WeeklyReportSection from "../components/mypage/WeeklyReportSection";
+
+import {
     buildHeatmapDays,
     getMonthRange,
     normalizeHeatmapItems,
     normalizeTilList,
-} from "../utils/mypageUtils";
+} from '../utils/mypageUtils';
+import { getMemberId, isLoggedIn } from '../utils/authUtils';
 
 const DEFAULT_STREAK = {
     currentStreak: 0,
@@ -53,11 +62,11 @@ const normalizeStreak = (streakResponse) => {
     };
 };
 
-const getInitialHeatmapItems = (monthCount) => {
+const getInitialHeatmapItems = (monthCount, memberId) => {
     const { startDate, endDate } = getMonthRange(monthCount);
 
     const cachedHeatmap = getCachedHeatmap({
-        memberId: TEMP_MEMBER_ID,
+        memberId,
         startDate,
         endDate,
     });
@@ -65,8 +74,8 @@ const getInitialHeatmapItems = (monthCount) => {
     return normalizeHeatmapItems(cachedHeatmap);
 };
 
-const getInitialStreak = () => {
-    return normalizeStreak(getCachedStreak(TEMP_MEMBER_ID));
+const getInitialStreak = (memberId) => {
+    return normalizeStreak(getCachedStreak(memberId));
 };
 
 const getInitialRecentTils = () => {
@@ -80,23 +89,32 @@ const getInitialRecentTils = () => {
 };
 
 const MyPage = () => {
+    const navigate = useNavigate();
+    const memberId = getMemberId();
+
     const [selectedMonthCount, setSelectedMonthCount] = useState(6);
 
-    const [streak, setStreak] = useState(() => getInitialStreak());
-    const [heatmapItems, setHeatmapItems] = useState(() => getInitialHeatmapItems(6));
+    const [streak, setStreak] = useState(() => getInitialStreak(memberId));
+    const [heatmapItems, setHeatmapItems] = useState(() => getInitialHeatmapItems(6, memberId));
     const [recentTils, setRecentTils] = useState(() => getInitialRecentTils());
 
+    const [subscription, setSubscription] = useState(null);
+    const [payback, setPayback] = useState(null);
+
     const [isStreakLoading, setIsStreakLoading] = useState(() => {
-        return getCachedStreak(TEMP_MEMBER_ID) === null;
+        return getCachedStreak(memberId) === null;
     });
 
     const [isHeatmapLoading, setIsHeatmapLoading] = useState(() => {
-        return getInitialHeatmapItems(6).length === 0;
+        return getInitialHeatmapItems(6, memberId).length === 0;
     });
 
     const [isTilLoading, setIsTilLoading] = useState(() => {
         return getInitialRecentTils().length === 0;
     });
+
+    const [isSubscriptionLoading, setIsSubscriptionLoading] = useState(true);
+    const [isSubscriptionActionLoading, setIsSubscriptionActionLoading] = useState(false);
 
     const heatmapDays = useMemo(
         () => buildHeatmapDays(heatmapItems, selectedMonthCount),
@@ -106,9 +124,68 @@ const MyPage = () => {
     const totalWriteCount = heatmapDays.reduce((sum, day) => sum + day.writeCount, 0);
     const writtenDays = heatmapDays.filter((day) => day.writeCount > 0).length;
 
+    const fetchSubscriptionAndPayback = async () => {
+        try {
+            setIsSubscriptionLoading(true);
+
+            const subscriptionResponse = await getMySubscriptionStatus();
+            setSubscription(subscriptionResponse);
+
+            if (subscriptionResponse?.isActive) {
+                try {
+                    const paybackResponse = await getCurrentPaybackParticipation();
+                    setPayback(paybackResponse);
+                } catch (error) {
+                    console.error('[PAYBACK API ERROR]', error);
+                    setPayback(null);
+                }
+            } else {
+                setPayback(null);
+            }
+        } catch (error) {
+            console.error('[SUBSCRIPTION API ERROR]', error);
+            setSubscription(null);
+            setPayback(null);
+        } finally {
+            setIsSubscriptionLoading(false);
+        }
+    };
+
+    const handleSubscribe = async () => {
+        try {
+            setIsSubscriptionActionLoading(true);
+            await subscribePremium();
+            await fetchSubscriptionAndPayback();
+        } catch (error) {
+            console.error('[SUBSCRIBE API ERROR]', error);
+            alert(error.message ?? '구독 신청에 실패했습니다.');
+        } finally {
+            setIsSubscriptionActionLoading(false);
+        }
+    };
+
+    const handleCancelSubscription = async () => {
+        const isConfirmed = window.confirm('구독을 취소하시겠습니까?');
+
+        if (!isConfirmed) {
+            return;
+        }
+
+        try {
+            setIsSubscriptionActionLoading(true);
+            await cancelSubscription();
+            await fetchSubscriptionAndPayback();
+        } catch (error) {
+            console.error('[SUBSCRIPTION CANCEL API ERROR]', error);
+            alert(error.message ?? '구독 취소에 실패했습니다.');
+        } finally {
+            setIsSubscriptionActionLoading(false);
+        }
+    };
+
     useEffect(() => {
         const fetchStreak = async () => {
-            const cachedStreak = getCachedStreak(TEMP_MEMBER_ID);
+            const cachedStreak = getCachedStreak(memberId);
 
             if (cachedStreak) {
                 setStreak(normalizeStreak(cachedStreak));
@@ -120,7 +197,7 @@ const MyPage = () => {
                 setIsStreakLoading(true);
 
                 const streakResponse = await getMyStreak({
-                    memberId: TEMP_MEMBER_ID,
+                    memberId: memberId,
                     useCache: true,
                 });
 
@@ -141,7 +218,7 @@ const MyPage = () => {
             const { startDate, endDate } = getMonthRange(selectedMonthCount);
 
             const cachedHeatmap = getCachedHeatmap({
-                memberId: TEMP_MEMBER_ID,
+                memberId: memberId,
                 startDate,
                 endDate,
             });
@@ -156,7 +233,7 @@ const MyPage = () => {
                 setIsHeatmapLoading(true);
 
                 const heatmapResponse = await getMyHeatmap({
-                    memberId: TEMP_MEMBER_ID,
+                    memberId: memberId,
                     startDate,
                     endDate,
                     useCache: true,
@@ -210,6 +287,14 @@ const MyPage = () => {
         fetchRecentTils();
     }, []);
 
+    useEffect(() => {
+        if (!isLoggedIn()) {
+            navigate('/login', { replace: true });
+            return;
+        }
+        fetchSubscriptionAndPayback();
+    }, [navigate]);
+
     return (
         <>
             <MyPageHero />
@@ -222,20 +307,34 @@ const MyPage = () => {
             />
 
             <section className="mypage-content-grid">
-                <HeatmapSection
-                    heatmapDays={heatmapDays}
-                    selectedMonthCount={selectedMonthCount}
-                    onChangeMonthCount={setSelectedMonthCount}
-                    isLoading={isHeatmapLoading}
-                />
+                <div className="mypage-main-column">
+                    <HeatmapSection
+                        heatmapDays={heatmapDays}
+                        selectedMonthCount={selectedMonthCount}
+                        onChangeMonthCount={setSelectedMonthCount}
+                        isLoading={isHeatmapLoading}
+                    />
+                    <WeeklyReportSection />
+                </div>
 
-                <RecentTilSection
-                    recentTils={recentTils}
-                    isLoading={isTilLoading}
-                />
+                <div className="mypage-side-column">
+                    <SubscriptionPaybackSection
+                        subscription={subscription}
+                        payback={payback}
+                        isLoading={isSubscriptionLoading}
+                        isActionLoading={isSubscriptionActionLoading}
+                        onSubscribe={handleSubscribe}
+                        onCancel={handleCancelSubscription}
+                    />
+
+                    <RecentTilSection
+                        recentTils={recentTils}
+                        isLoading={isTilLoading}
+                    />
+                </div>
             </section>
 
-            <WeeklyReportSection />
+
         </>
     );
 };

@@ -30,7 +30,7 @@ const safeParseCache = (cacheKey) => {
 
     try {
         return JSON.parse(cached);
-    } catch (error) {
+    } catch {
         localStorage.removeItem(cacheKey);
         return null;
     }
@@ -158,6 +158,19 @@ export const refreshMyStreak = async (memberId = TEMP_MEMBER_ID) => {
         memberId,
         data,
     });
+
+    return data;
+};
+
+export const recordWriteHistory = async (memberId = TEMP_MEMBER_ID) => {
+    const data = await request('/api/write-histories', {
+        method: 'POST',
+        body: JSON.stringify({
+            memberId,
+        }),
+    });
+
+    clearMyPageCache(memberId);
 
     return data;
 };

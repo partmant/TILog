@@ -1,12 +1,18 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from "vite";
+import react, { reactCompilerPreset } from "@vitejs/plugin-react";
+import babel from "@rolldown/plugin-babel";
+import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    babel({ presets: [reactCompilerPreset()] }),
+    tailwindcss(),
+  ],
+  // 업로드 이미지 요청 백엔드 프록시
   server: {
-    // 백엔드 Spring Boot 서버 (localhost:8080) 로 /api 요청 프록시
     proxy: {
-      '/api': 'http://localhost:8080',
+      "/uploads": "http://localhost:8080",
     },
   },
-})
+});

@@ -108,6 +108,24 @@
     cursor: pointer;
 }
 
+.app-header-logout-button {
+    height: 38px;
+    padding: 0 18px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #6b7280;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+}
+
+.app-header-logout-button:hover {
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
 @media (max-width: 1180px) {
     .app-header {
         grid-template-columns: 1fr;

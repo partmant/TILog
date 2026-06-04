@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getWeeklyReport, generateWeeklyReport } from '../api/weeklyReportApi';
-import { toDateString, TEMP_MEMBER_ID } from '../utils/mypageUtils';
+import { toDateString } from '../utils/mypageUtils';
 import DifficultyPieChart from '../components/report/DifficultyPieChart';
 import CategoryDoughnutChart from '../components/report/CategoryDoughnutChart';
 import TechStackBarChart from '../components/report/TechStackBarChart';
@@ -50,7 +50,7 @@ const WeeklyReportDetailPage = () => {
         setStatus('loading');
         setReport(null);
 
-        getWeeklyReport(TEMP_MEMBER_ID, weekStart)
+        getWeeklyReport(weekStart)
             .then((data) => {
                 if (cancelled) return;
                 setReport(data);
@@ -66,7 +66,7 @@ const WeeklyReportDetailPage = () => {
     const handleGenerate = async () => {
         setStatus('generating');
         try {
-            const data = await generateWeeklyReport(TEMP_MEMBER_ID, weekStart);
+            const data = await generateWeeklyReport(weekStart);
             setReport(data);
             setStatus('done');
         } catch {

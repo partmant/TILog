@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getWeeklyReport, generateWeeklyReport } from '../api/weeklyReportApi';
-import { toDateString, TEMP_MEMBER_ID } from '../utils/mypageUtils';
+import { toDateString } from '../utils/mypageUtils';
+import {getMemberId} from "../utils/authUtils.js";
 
+const memberId = getMemberId();
 const getLastMonday = () => {
     const today = new Date();
     const day = today.getDay(); // 0=일, 1=월 ... 6=토
@@ -20,7 +22,7 @@ export const useWeeklyReport = () => {
         let cancelled = false;
         setStatus('loading');
 
-        getWeeklyReport(TEMP_MEMBER_ID, lastMonday)
+        getWeeklyReport(lastMonday)
             .then((data) => {
                 if (cancelled) return;
                 setReport(data);
@@ -36,7 +38,7 @@ export const useWeeklyReport = () => {
     const generateReport = useCallback(async () => {
         setStatus('generating');
         try {
-            const data = await generateWeeklyReport(TEMP_MEMBER_ID, lastMonday);
+            const data = await generateWeeklyReport(lastMonday);
             setReport(data);
             setStatus('done');
         } catch {

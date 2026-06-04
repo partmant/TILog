@@ -1,8 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 import { useWeeklyReport } from '../../hooks/useWeeklyReport';
 import '../../styles/mypage/WeeklyReportSection.css';
+import {isPremiumUser} from "../../utils/authUtils.js";
 
-const IS_PREMIUM = true; // TODO: Auth 팀 연동 후 실제 값으로 교체
+const IS_PREMIUM = isPremiumUser;
 
 const DIFFICULTY_COLORS = { EASY: '#22c55e', NORMAL: '#3b82f6', HARD: '#ef4444' };
 const DIFFICULTY_LABELS = { EASY: '쉬움', NORMAL: '보통', HARD: '어려움' };

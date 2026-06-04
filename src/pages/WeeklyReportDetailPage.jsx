@@ -2,17 +2,10 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getWeeklyReport, generateWeeklyReport } from '../api/weeklyReportApi';
 import { toDateString, TEMP_MEMBER_ID } from '../utils/mypageUtils';
+import DifficultyPieChart from '../components/report/DifficultyPieChart';
+import CategoryDoughnutChart from '../components/report/CategoryDoughnutChart';
+import TechStackBarChart from '../components/report/TechStackBarChart';
 import '../styles/mypage/WeeklyReportDetail.css';
-
-const DIFFICULTY_COLORS = { EASY: '#22c55e', NORMAL: '#3b82f6', HARD: '#ef4444' };
-const DIFFICULTY_LABELS = { EASY: '쉬움', NORMAL: '보통', HARD: '어려움' };
-const CATEGORY_COLORS = {
-    BACKEND: '#8b5cf6',
-    FRONTEND: '#06b6d4',
-    SECURITY: '#f97316',
-    CS: '#22c55e',
-    OTHER: '#9ca3af',
-};
 
 const getLastMonday = () => {
     const today = new Date();
@@ -140,104 +133,112 @@ const WeeklyReportDetailPage = () => {
     );
 };
 
-const ReportContent = ({ report }) => {
-    const { weeklySummary, techStackDistribution, ruleBasedComment, aiAnalysisComment } = report;
+const RANK_MEDAL = ['🥇', '🥈', '🥉'];
 
-    const categories = techStackDistribution?.categories || {};
-    const tags = techStackDistribution?.tags || {};
+const ReportContent = ({ report }) => {
+    const { weeklySummary, techStackDistribution, cumulativeData, ruleBasedComment, aiAnalysisComment } = report;
+
+    const categories     = techStackDistribution?.categories || {};
+    const tags           = techStackDistribution?.tags || {};
     const difficultyDist = weeklySummary?.difficultyDistribution || {};
-    const diffTotal = Object.values(difficultyDist).reduce((a, b) => a + b, 0);
-    const topTags = Object.entries(tags).sort((a, b) => b[1] - a[1]).slice(0, 5);
-    const topCategory = Object.entries(categories).sort((a, b) => b[1] - a[1])[0]?.[0] || '-';
+    const cumulativeTags = cumulativeData?.tagTotals || {};
+
+    // 1행 stat 카드용
+    const thisWeekPosts   = weeklySummary?.totalPosts ?? 0;
+    const thisWeekMinutes = weeklySummary?.totalLearningTimeMinutes ?? 0;
+    const cumPosts        = cumulativeData?.totalPosts ?? 0;
+    const cumMinutes      = cumulativeData?.totalLearningMinutes ?? 0;
+    const cumTopCat       = Object.entries(cumulativeData?.categoryDistribution || {}).sort((a, b) => b[1] - a[1])[0]?.[0] || '-';
+    const thisWeekTopCat  = Object.entries(categories).sort((a, b) => b[1] - a[1])[0]?.[0] || '-';
+    const catSub          = thisWeekTopCat === cumTopCat ? '이번 주도 동일' : `이번 주 ${thisWeekTopCat}`;
+
+    // 2행 Top3 카드용
+    const top3Tags = Object.entries(cumulativeTags).sort((a, b) => b[1] - a[1]).slice(0, 3);
+
+    const hasDifficulty = Object.values(difficultyDist).some((v) => v > 0);
+    const hasCategories = Object.keys(categories).length > 0;
+    const hasTags       = Object.keys(tags).length > 0 || Object.keys(cumulativeTags).length > 0;
 
     return (
         <div className="rd-content">
 
-            {/* 핵심 지표 */}
+            {/* 1행: 누적 stat 카드 (큰 숫자) + 이번 주 서브 */}
             <div className="rd-stat-cards">
                 <div className="rd-stat-card">
-                    <span className="rd-stat-value">{weeklySummary?.totalPosts ?? 0}</span>
-                    <span className="rd-stat-label">TIL 작성</span>
+                    <span className="rd-stat-label-top">이번 주 TIL</span>
+                    <span className="rd-stat-value">{thisWeekPosts}</span>
+                    <span className="rd-stat-sub">누적 {cumPosts}개</span>
                 </div>
                 <div className="rd-stat-card">
-                    <span className="rd-stat-value">{weeklySummary?.totalLearningTimeMinutes ?? 0}</span>
-                    <span className="rd-stat-label">학습 시간(분)</span>
+                    <span className="rd-stat-label-top">이번 주 학습</span>
+                    <span className="rd-stat-value">
+                        {thisWeekMinutes}<small className="rd-stat-unit">분</small>
+                    </span>
+                    <span className="rd-stat-sub">누적 {cumMinutes}분</span>
                 </div>
                 <div className="rd-stat-card">
-                    <span className="rd-stat-value">{topCategory}</span>
-                    <span className="rd-stat-label">주요 카테고리</span>
+                    <span className="rd-stat-label-top">주요 카테고리</span>
+                    <span className="rd-stat-value rd-stat-category">{cumTopCat}</span>
+                    <span className="rd-stat-sub">{catSub}</span>
                 </div>
             </div>
 
-            {/* 난이도 분포 */}
-            {diffTotal > 0 && (
-                <div className="rd-panel">
-                    <h3>난이도 분포</h3>
-                    <div className="rd-bar-stacked">
-                        {Object.entries(difficultyDist).map(([level, count]) => (
-                            <div
-                                key={level}
-                                style={{
-                                    width: `${(count / diffTotal) * 100}%`,
-                                    background: DIFFICULTY_COLORS[level] || '#9ca3af',
-                                }}
-                                title={`${DIFFICULTY_LABELS[level] || level}: ${count}개`}
-                            />
-                        ))}
+            {/* 2행: 파이차트 | 도넛차트 | Top3 태그 */}
+            <div className="rd-charts-row">
+                {hasDifficulty && (
+                    <div className="rd-panel rd-chart-third">
+                        <h3>난이도 분포</h3>
+                        <div className="rd-chart-container">
+                            <DifficultyPieChart distribution={difficultyDist} />
+                        </div>
                     </div>
-                    <div className="rd-bar-legend">
-                        {Object.entries(difficultyDist).map(([level, count]) => (
-                            <span key={level}>
-                                <i style={{ background: DIFFICULTY_COLORS[level] || '#9ca3af' }} />
-                                {DIFFICULTY_LABELS[level] || level} {count}개 ({Math.round(count / diffTotal * 100)}%)
-                            </span>
-                        ))}
+                )}
+                {hasCategories && (
+                    <div className="rd-panel rd-chart-third">
+                        <h3>카테고리 분포</h3>
+                        <div className="rd-chart-container">
+                            <CategoryDoughnutChart categories={categories} />
+                        </div>
                     </div>
-                </div>
-            )}
-
-            {/* 기술 스택 분포 */}
-            {Object.keys(categories).length > 0 && (
-                <div className="rd-panel">
-                    <h3>기술 스택 분포</h3>
-                    <div className="rd-category-bars">
-                        {Object.entries(categories)
-                            .sort((a, b) => b[1] - a[1])
-                            .map(([cat, pct]) => (
-                                <div key={cat} className="rd-category-row">
-                                    <span className="rd-category-label">{cat}</span>
-                                    <div className="rd-category-track">
-                                        <div
-                                            className="rd-category-fill"
-                                            style={{
-                                                width: `${pct}%`,
-                                                background: CATEGORY_COLORS[cat] || '#9ca3af',
-                                            }}
-                                        />
-                                    </div>
-                                    <span className="rd-category-pct">{pct}%</span>
+                )}
+                <div className="rd-panel rd-chart-third">
+                    <h3>많이 쓴 기술 TOP 3</h3>
+                    {top3Tags.length > 0 ? (
+                        <div className="rd-top3-list">
+                            {top3Tags.map(([tag, count], i) => (
+                                <div key={tag} className="rd-top3-item">
+                                    <span className="rd-top3-medal">{RANK_MEDAL[i]}</span>
+                                    <span className="rd-top3-name">{tag}</span>
+                                    <span className="rd-top3-count">누적 {count}회</span>
                                 </div>
                             ))}
-                    </div>
-
-                    {topTags.length > 0 && (
-                        <div className="rd-top-tags">
-                            <span className="rd-top-tags-label">상위 태그</span>
-                            {topTags.map(([tag, count]) => (
-                                <span key={tag} className="rd-tag-chip">{tag} {count}</span>
-                            ))}
                         </div>
+                    ) : (
+                        <p className="rd-top3-empty">아직 기록이 없어요.</p>
                     )}
                 </div>
-            )}
+            </div>
 
-            {/* 규칙 기반 코멘트 */}
+            {/* 3행 규칙 기반 코멘트 */}
             {ruleBasedComment && (
                 <div className="rd-panel">
-                    <h3>💬 한 줄 코멘트</h3>
+                    <h3>💬 활동 요약 </h3>
                     <blockquote className="rd-rule-comment">{ruleBasedComment}</blockquote>
                 </div>
             )}
+
+            {/* 4행: 기술 스택 막대 + 누적 기준선 */}
+            {hasTags && (
+                <div className="rd-panel">
+                    <h3>기술 스택 분포</h3>
+                    <p className="rd-chart-hint">막대: 이번 주 비율 / 점선: 누적 비율 · 호버 시 이번 주 횟수 확인</p>
+                    <div className="rd-techstack-chart">
+                        <TechStackBarChart thisWeekTags={tags} cumulativeTags={cumulativeTags} />
+                    </div>
+                </div>
+            )}
+
+
 
             {/* AI 심층 분석 */}
             <div className="rd-panel rd-ai-panel">

@@ -133,10 +133,6 @@ const WeeklyReportSection = () => {
                     {report.ruleBasedComment && (
                         <blockquote className="wr-comment">{report.ruleBasedComment}</blockquote>
                     )}
-
-                    <button className="wr-generate-btn" disabled>
-                        ✓ 리포트 생성 완료
-                    </button>
                 </div>
             )}
         </section>

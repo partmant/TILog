@@ -4,22 +4,6 @@ import axios from 'axios';
 
 const PAGE_SIZE = 10;
 
-// 백엔드 없이 UI만 테스트할 때 true로 변경
-// const USE_MOCK = false;
-
-// const MOCK_RESULT = {
-//   content: [
-//     { postId: 1, title: 'Spring Security JWT 인증 구현', content: 'JWT 토큰 기반 인증을 직접 구현했다. AccessToken 만료 시 RefreshToken으로 재발급하는 로직이 핵심이었다.', authorNickname: 'devkim', difficulty: 'HARD', createdAt: '2026-05-28T10:00:00', likeCount: 12, commentCount: 3 },
-//     { postId: 2, title: 'React useEffect 완전 정복', content: 'dependency array를 잘못 쓰면 무한루프가 발생한다. 오늘 제대로 이해했다.', authorNickname: 'frontlee', difficulty: 'NORMAL', createdAt: '2026-05-27T14:00:00', likeCount: 8, commentCount: 1 },
-//     { postId: 3, title: 'MySQL 인덱스 최적화', content: 'EXPLAIN으로 쿼리 실행 계획을 분석하고 복합 인덱스를 추가했다.', authorNickname: 'dbpark', difficulty: 'HARD', createdAt: '2026-05-26T09:00:00', likeCount: 5, commentCount: 2 },
-//     { postId: 4, title: 'Java Stream API 정리', content: 'filter, map, reduce, collect를 실무에 적용해봤다.', authorNickname: 'devkim', difficulty: 'EASY', createdAt: '2026-05-25T11:00:00', likeCount: 15, commentCount: 4 },
-//     { postId: 5, title: 'Docker Compose 로컬 환경 구성', content: 'MySQL + Redis + Spring Boot를 Docker Compose로 한번에 띄웠다.', authorNickname: 'devops', difficulty: 'NORMAL', createdAt: '2026-05-24T16:00:00', likeCount: 20, commentCount: 6 },
-//   ],
-//   totalElements: 5,
-//   totalPages: 1,
-//   number: 0,
-//   size: PAGE_SIZE,
-// };
 
 // URL 파라미터에서 초기 조건값 파싱 (마운트 시 1회 호출)
 function parseConditionsFromUrl(searchParams) {

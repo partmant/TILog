@@ -143,7 +143,7 @@
     gap: 18px;
 }
 
-/* 핵심 지표 */
+/* 1행: stat 카드 */
 .rd-stat-cards {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -154,19 +154,45 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
-    padding: 22px 12px;
+    gap: 4px;
+    padding: 20px 12px 16px;
     border: 1px solid #e5e7eb;
     border-radius: 16px;
     background: #fff;
     box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
 }
 
+.rd-stat-label-top {
+    font-size: 12px;
+    font-weight: 700;
+    color: #9ca3af;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
 .rd-stat-value {
-    font-size: 28px;
+    font-size: 30px;
     font-weight: 900;
     color: #111827;
     letter-spacing: -0.04em;
+    line-height: 1.1;
+}
+
+.rd-stat-unit {
+    font-size: 14px;
+    font-weight: 700;
+    color: #6b7280;
+    margin-left: 2px;
+}
+
+.rd-stat-category {
+    font-size: 20px;
+}
+
+.rd-stat-sub {
+    font-size: 12px;
+    font-weight: 600;
+    color: #8b5cf6;
 }
 
 .rd-stat-label {
@@ -294,6 +320,78 @@
     font-weight: 700;
 }
 
+/* 2행: 3열 차트 행 */
+.rd-charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 18px;
+    align-items: stretch;
+}
+
+.rd-chart-third {
+    min-width: 0;
+}
+
+.rd-chart-container {
+    max-width: 220px;
+    margin: 0 auto;
+}
+
+/* Top3 태그 카드 */
+.rd-top3-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 4px 0;
+}
+
+.rd-top3-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.rd-top3-medal {
+    font-size: 22px;
+    flex-shrink: 0;
+}
+
+.rd-top3-name {
+    flex: 1;
+    font-size: 15px;
+    font-weight: 900;
+    color: #111827;
+}
+
+.rd-top3-count {
+    font-size: 13px;
+    font-weight: 700;
+    color: #8b5cf6;
+    white-space: nowrap;
+}
+
+.rd-top3-empty {
+    margin: 0;
+    font-size: 14px;
+    color: #9ca3af;
+    text-align: center;
+    padding: 24px 0;
+}
+
+/* 기술 스택 차트 */
+.rd-techstack-chart {
+    width: 100%;
+    height: 160px;
+    position: relative;
+}
+
+.rd-chart-hint {
+    margin: -10px 0 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #9ca3af;
+}
+
 /* 규칙 코멘트 */
 .rd-rule-comment {
     margin: 0;
@@ -362,7 +460,11 @@
         grid-column: 1 / -1;
     }
 
-    .rd-category-row {
-        grid-template-columns: 70px 1fr 36px;
+    .rd-charts-row {
+        grid-template-columns: 1fr;
+    }
+
+    .rd-stat-value {
+        font-size: 24px;
     }
 }

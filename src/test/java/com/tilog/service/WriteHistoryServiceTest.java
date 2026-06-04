@@ -1,12 +1,12 @@
 package com.tilog.service;
 
-import com.tilog.dto.writeHistory.WriteHistoryRequest;
-import com.tilog.entity.Member;
-import com.tilog.entity.writeHistory.WriteHistory;
-import com.tilog.repository.MemberRepository;
-import com.tilog.repository.writeHistory.WriteHistoryRepository;
-import com.tilog.service.WriteHistory.WriteHistoryService;
-import com.tilog.service.streak.StreakStatService;
+import com.tilog.domain.writeHistory.dto.WriteHistoryRequest;
+import com.tilog.domain.member.entity.Member;
+import com.tilog.domain.writeHistory.entity.WriteHistory;
+import com.tilog.domain.member.repository.MemberRepository;
+import com.tilog.domain.writeHistory.repository.WriteHistoryRepository;
+import com.tilog.domain.writeHistory.service.WriteHistoryService;
+import com.tilog.domain.streak.service.StreakStatService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

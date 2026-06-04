@@ -23,9 +23,22 @@ public enum ErrorCode {
     FOLLOW_NOT_FOUND(HttpStatus.NOT_FOUND, "팔로우 내역을 찾을 수 없습니다."),
     TARGET_MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "팔로우 대상 회원을 찾을 수 없습니다."),
 
+    // Notification
+    NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "알림을 찾을 수 없습니다."),
+    NOTIFICATION_UNAUTHORIZED(HttpStatus.FORBIDDEN, "알림 접근 권한이 없습니다."),
+
     // Subscription
     SUBSCRIPTION_ALREADY_ACTIVE(HttpStatus.CONFLICT, "이미 활성화된 구독이 존재합니다."),
     SUBSCRIPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "활성 구독 내역을 찾을 수 없습니다."),
+
+    // Payback
+    // Payback
+    PAYBACK_POLICY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 페이백 정책입니다."),
+    ACTIVE_PAYBACK_POLICY_NOT_FOUND(HttpStatus.NOT_FOUND, "현재 활성화된 페이백 정책이 없습니다."),
+    INACTIVE_PAYBACK_POLICY(HttpStatus.BAD_REQUEST, "비활성화된 페이백 정책입니다."),
+    PAYBACK_POLICY_PERIOD_MISMATCH(HttpStatus.BAD_REQUEST, "페이백 정책 기간에 포함되지 않는 참여 기간입니다."),
+    PAYBACK_ALREADY_PARTICIPATED(HttpStatus.CONFLICT, "이미 해당 구독 회차의 페이백 참여 내역이 존재합니다."),
+    PAYBACK_PARTICIPATION_NOT_FOUND(HttpStatus.NOT_FOUND, "진행 중인 페이백 참여 내역이 없습니다."),
 
     // Common
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "게시글을 찾을 수 없습니다."),

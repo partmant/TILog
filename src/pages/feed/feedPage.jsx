@@ -146,7 +146,7 @@ function FeedPage() {
                                 </div>
 
                                 <div>
-                                    <p className="text-sm font-bold text-gray-500">
+                                    <p className="whitespace-nowrap text-sm font-bold text-gray-500">
                                         현재 스트릭
                                     </p>
                                     <p className="text-3xl font-bold">
@@ -168,7 +168,7 @@ function FeedPage() {
                                 </div>
 
                                 <div>
-                                    <p className="text-sm font-bold text-gray-500">
+                                    <p className="whitespace-nowrap text-sm font-bold text-gray-500">
                                         이번 달 작성
                                     </p>
                                     <p className="text-3xl font-bold">

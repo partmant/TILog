@@ -216,6 +216,7 @@ export const normalizeProgressRate = (progressRate) => {
 export const getSubscriptionStatusLabel = (status) => {
     const statusMap = {
         ACTIVE: '구독 중',
+        CANCEL_RESERVED: '취소 예약됨',
         EXPIRED: '만료됨',
         CANCELED: '취소됨',
     };

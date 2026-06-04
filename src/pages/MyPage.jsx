@@ -18,6 +18,7 @@ import {
     cancelSubscription,
     getCurrentPaybackParticipation,
     getMySubscriptionStatus,
+    resumeSubscription,
     subscribePremium,
 } from '../api/subscriptionPaybackApi';
 import MyPageHero from '../components/mypage/MyPageHero';
@@ -131,7 +132,12 @@ const MyPage = () => {
             const subscriptionResponse = await getMySubscriptionStatus();
             setSubscription(subscriptionResponse);
 
-            if (subscriptionResponse?.isActive) {
+            // ACTIVE 또는 CANCEL_RESERVED 모두 페이백 조회
+            const hasValidSubscription =
+                subscriptionResponse?.isActive ||
+                subscriptionResponse?.status === 'CANCEL_RESERVED';
+
+            if (hasValidSubscription) {
                 try {
                     const paybackResponse = await getCurrentPaybackParticipation();
                     setPayback(paybackResponse);
@@ -178,6 +184,19 @@ const MyPage = () => {
         } catch (error) {
             console.error('[SUBSCRIPTION CANCEL API ERROR]', error);
             alert(error.message ?? '구독 취소에 실패했습니다.');
+        } finally {
+            setIsSubscriptionActionLoading(false);
+        }
+    };
+
+    const handleResumeSubscription = async () => {
+        try {
+            setIsSubscriptionActionLoading(true);
+            await resumeSubscription();
+            await fetchSubscriptionAndPayback();
+        } catch (error) {
+            console.error('[SUBSCRIPTION RESUME API ERROR]', error);
+            alert(error.message ?? '구독 재개에 실패했습니다.');
         } finally {
             setIsSubscriptionActionLoading(false);
         }
@@ -325,6 +344,7 @@ const MyPage = () => {
                         isActionLoading={isSubscriptionActionLoading}
                         onSubscribe={handleSubscribe}
                         onCancel={handleCancelSubscription}
+                        onResume={handleResumeSubscription}
                     />
 
                     <RecentTilSection
@@ -333,8 +353,6 @@ const MyPage = () => {
                     />
                 </div>
             </section>
-
-
         </>
     );
 };

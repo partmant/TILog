@@ -109,6 +109,6 @@ public class RuleBasedCommentGenerator {
     // ===== 규칙 3 =====
 
     private static String buildNewTagsComment(List<String> newTags) {
-        return "이번 주 새로 시도한 기술: " + String.join(", ", newTags) + ".";
+        return "새로 시도한 기술: " + String.join(", ", newTags) + ".";
     }
 }

@@ -19,26 +19,53 @@ import PostListPage from "../pages/post/PostListPage.jsx";
 import PostDetailPage from "../pages/post/PostDetailPage.jsx";
 import PostWritePage from "../pages/post/PostWritePage.jsx";
 
+// 인증 라우트
+import PrivateRoute from "./PrivateRoute";
+
 const router = createBrowserRouter([
-    // 메인 경로
+    // =========================
+    // 공개 페이지
+    // =========================
+
+    // 메인 페이지 경로
     {path: "/", element: <HomePage />,},
+    // 로그인 페이지 경로
     {path: "/login", element: <LoginPage />,},
+    // 회원가입 페이지 경로
     {path: "/signup", element: <SignupPage />,},
 
-    // 공통 레이아웃
+    // =========================
+    // 공통 레이아웃 적용 페이지
+    // =========================
     {element: <MainLayout />,
         children: [
-            // 마이 페이지 경로
-            { path: "/mypage", element: <MyPage /> },
-
             // 피드 경로
             { path: "/feed", element: <FeedPage /> },
 
             // 게시글 경로
-            {path: "/posts", element: <PostListPage/>,},
-            {path: "/posts/:postId", element: <PostDetailPage/>,},
-            {path: "/posts/write", element: <PostWritePage />,},
-            {path: "/posts/:postId/edit", element: <PostWritePage />},
+            { path: "/posts", element: <PostListPage/>,},
+            // 게시글 상세 페이지 경로
+            { path: "/posts/:postId", element: <PostDetailPage/>,},
+
+        ],
+    },
+
+    // =========================
+    // 로그인 사용자 전용 페이지
+    // =========================
+    {
+        element: (
+            <PrivateRoute>
+                <MainLayout />
+            </PrivateRoute>
+        ),
+        children: [
+        // 마이 페이지 경로
+        { path: "/mypage", element: <MyPage /> },
+        // 게시글 작성 페이지 경로
+        { path: "/posts/write", element: <PostWritePage />,},
+        // 게시글 수정 페이지 경로
+        { path: "/posts/:postId/edit", element: <PostWritePage />},
         ],
     },
 ]);

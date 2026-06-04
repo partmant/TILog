@@ -118,6 +118,11 @@ public class PaybackParticipation extends BaseTimeEntity {
         this.settledAt = LocalDateTime.now();
     }
 
+    // 구독 연장 시 페이백 종료 일자 연장
+    public void extendPeriod(LocalDate newEndDate) {
+        this.periodEndDate = newEndDate;
+    }
+
     // 같은 기간에 재구독할 때 기존 레코드를 재사용
     public void reactivate(Subscription newSubscription) {
         this.subscription = newSubscription;

@@ -62,10 +62,15 @@ public class Subscription {
                 .build();
     }
 
-    // 구독 취소
+    // 구독 취소 예약 (endedAt 유지 → 기간 만료까지 혜택 유지)
     public void cancel() {
-        this.status = SubscriptionStatus.CANCELED;
-        this.endedAt = LocalDateTime.now();
+        this.status = SubscriptionStatus.CANCEL_RESERVED;
+    }
+
+    // 구독 연장 (endedAt을 현재 endedAt 기준으로 1달 연장, ACTIVE 복원)
+    public void extend() {
+        this.endedAt = this.endedAt.plusMonths(1);
+        this.status = SubscriptionStatus.ACTIVE;
     }
 
     // 구독 만료 처리
@@ -73,9 +78,9 @@ public class Subscription {
         this.status = SubscriptionStatus.EXPIRED;
     }
 
-    // 현재 구독이 유효한지 확인
+    // 현재 구독이 유효한지 확인 (ACTIVE 또는 CANCEL_RESERVED 모두 유효)
     public boolean isActive() {
-        if (this.status != SubscriptionStatus.ACTIVE) {
+        if (this.status != SubscriptionStatus.ACTIVE && this.status != SubscriptionStatus.CANCEL_RESERVED) {
             return false;
         }
         if (this.endedAt == null) {

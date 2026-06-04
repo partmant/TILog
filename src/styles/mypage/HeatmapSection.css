@@ -63,8 +63,7 @@
     width: 100%;
     overflow-x: auto;
     overflow-y: hidden;
-    padding-bottom: 68px;
-    margin-bottom: -54px;
+    padding-bottom: 4px;
 }
 
 .mypage-month-heatmap-list {

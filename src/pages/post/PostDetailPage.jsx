@@ -41,6 +41,8 @@ function PostDetailPage() {
         handleCloseReplyForm,
         handleCreateComment,
         handleCreateReply,
+        showCommentForm,
+        handleOpenCommentForm,
     } = usePostDetail();
 
     // 게시글 로딩 상태
@@ -314,26 +316,36 @@ function PostDetailPage() {
                     )}
 
                     {/* 댓글 작성 */}
-                    <section className="mt-6 rounded-2xl border border-purple-100 bg-purple-50 p-5">
-                        <h4 className="font-bold text-purple-700">
-                            댓글 작성
-                        </h4>
-
-                        <textarea
-                            value={commentContent}
-                            onChange={handleCommentChange}
-                            placeholder="댓글을 입력하세요..."
-                            className="mt-4 h-24 w-full resize-none rounded-xl border border-purple-100 bg-white p-4 text-sm outline-none"
-                        />
-
+                    {!showCommentForm ? (
                         <button
                             type="button"
-                            onClick={handleCreateComment}
-                            className="mt-3 w-full rounded-xl bg-gradient-to-r from-purple-500 to-cyan-400 py-3 font-bold text-white transition hover:opacity-90"
+                            onClick={handleOpenCommentForm}
+                            className="mt-6 w-full rounded-xl bg-gradient-to-r from-purple-500 to-cyan-400 py-3 font-bold text-white transition hover:opacity-90"
                         >
-                            등록하기
+                            댓글 작성하기
                         </button>
-                    </section>
+                    ) : (
+                        <section className="mt-6 rounded-2xl border border-purple-100 bg-purple-50 p-5">
+                            <h4 className="font-bold text-purple-700">
+                                댓글 작성
+                            </h4>
+
+                            <textarea
+                                value={commentContent}
+                                onChange={handleCommentChange}
+                                placeholder="댓글을 입력하세요..."
+                                className="mt-4 h-24 w-full resize-none rounded-xl border border-purple-100 bg-white p-4 text-sm outline-none"
+                            />
+
+                            <button
+                                type="button"
+                                onClick={handleCreateComment}
+                                className="mt-3 w-full rounded-xl bg-gradient-to-r from-purple-500 to-cyan-400 py-3 font-bold text-white transition hover:opacity-90"
+                            >
+                                등록하기
+                            </button>
+                        </section>
+                    )}
 
                     {/* 관련 TIL - 현재는 UI용 정적 영역 */}
                     <section className="mt-8">

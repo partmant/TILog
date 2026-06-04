@@ -61,6 +61,9 @@ export function usePostDetail() {
         last: true,
     });
 
+    // 댓글 작성 폼 열기/닫기 상태
+    const [showCommentForm, setShowCommentForm] = useState(false);
+
     // 좋아요 정보 상태
     const [likeInfo, setLikeInfo] = useState({
         likeCount: 0,
@@ -220,6 +223,7 @@ export function usePostDetail() {
             await refreshCommentsWithReplies(commentPage);
 
             setCommentContent("");
+            setShowCommentForm(false);
             setShowComments(true);
         } catch (error) {
             console.error(error);
@@ -250,6 +254,17 @@ export function usePostDetail() {
         }
     };
 
+    // 댓글 작성창 열기
+    const handleOpenCommentForm = () => {
+        setShowCommentForm(true);
+    };
+
+    // 댓글 작성창 닫기
+    const handleCloseCommentForm = () => {
+        setShowCommentForm(false);
+        setCommentContent("");
+    };
+
     return {
         post,
         comments,
@@ -262,6 +277,7 @@ export function usePostDetail() {
         replyTargetId,
         replyContent,
         showComments,
+        showCommentForm,
         handleEdit,
         handleDelete,
         handleToggleLike,
@@ -273,6 +289,8 @@ export function usePostDetail() {
         handleCreateComment,
         handleCreateReply,
         handleToggleComments,
+        handleOpenCommentForm,
+        handleCloseCommentForm,
         pagedComments,
     };
 }

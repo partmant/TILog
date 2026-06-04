@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../../styles/admin/AdminPage.css';
-import { fetchMemberList, fetchRecentReports } from '../../api/adminApi';
+import { fetchMemberList, fetchRecentReports, changeMemberRole } from '../../api/adminApi';
 
 const AdminPage = () => {
     // ==========================================
@@ -10,6 +10,9 @@ const AdminPage = () => {
     const [recentReports, setRecentReports] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [targetMemberId, setTargetMemberId] = useState('');
+    const [targetRole, setTargetRole] = useState('PREMIUM');
     // ==========================================
     // 2. 부수 효과(Effect): 화면 렌더링 시 API 찌르기
     // ==========================================
@@ -62,6 +65,28 @@ const AdminPage = () => {
         };
     };
 
+    const handleRoleSubmit = async () => {
+        if (!targetMemberId) {
+            alert('권한을 변경할 회원을 선택해주세요.');
+            return;
+        }
+
+        try {
+            // 백엔드로 PATCH API 요청 발사!
+            await changeMemberRole(Number(targetMemberId), targetRole);
+            alert('회원 권한이 성공적으로 변경되었습니다!');
+
+            setIsModalOpen(false); // 모달창 닫기
+
+            // 실무 꿀팁: 권한이 변경되었으니, 회원 목록 데이터를 다시 불러와 화면을 갱신해줍니다.
+            const updatedMembers = await fetchMemberList(0, 10);
+            setMembers(updatedMembers);
+        } catch (error) {
+            console.error(error);
+            alert('권한 변경에 실패했습니다.');
+        }
+    };
+    
     // ==========================================
     // 3. 화면에 보여줄 데이터 준비
     // ==========================================
@@ -109,12 +134,11 @@ const AdminPage = () => {
                 <div className="admin-panel">
                     <h3 className="admin-panel-title">최근 신고 목록</h3>
                     <ul className="admin-report-list">
-                        {/* 🔥 가짜 배열 대신, 백엔드에서 가져온 진짜 상태(recentReports)를 화면에 그립니다! */}
                         {recentReports.length === 0 && !isLoading ? (
                             <li className="admin-report-item">접수된 신고가 없습니다.</li>
                         ) : (
                             recentReports.map((report) => {
-                                const formatted = formatReportData(report); // 예쁘게 변환!
+                                const formatted = formatReportData(report);
                                 return (
                                     <li className="admin-report-item" key={report.reportId}>
                                         <span className="admin-report-label" style={{ backgroundColor: formatted.labelColor, color: formatted.statusColor }}>
@@ -159,7 +183,52 @@ const AdminPage = () => {
                         <h3 className="admin-panel-title">빠른 작업</h3>
                         <div className="admin-action-grid">
                             <button className="admin-action-btn">신고 상세 보기</button>
-                            <button className="admin-action-btn">회원 상태 변경</button>
+                            <button className="admin-action-btn" onClick={() => setIsModalOpen(true)}>
+                                회원 상태 변경
+                            </button>
+                            {isModalOpen && (
+                                <div className="admin-modal-overlay">
+                                    <div className="admin-modal-card">
+                                        <h3>회원 권한 변경</h3>
+
+                                        <div className="admin-modal-form">
+                                            <label>대상 회원</label>
+                                            {/* 아까 가져온 members.content 데이터를 select 박스에 뿌려줍니다! */}
+                                            <select
+                                                value={targetMemberId}
+                                                onChange={(e) => setTargetMemberId(e.target.value)}
+                                            >
+                                                <option value="">회원을 선택하세요</option>
+                                                {members?.content?.map(member => (
+                                                    <option key={member.memberId || member.id} value={member.memberId || member.id}>
+                                                        {member.nickname} ({member.email}) - 현재: {member.role}
+                                                    </option>
+                                                ))}
+                                            </select>
+
+                                            <label>변경할 권한</label>
+                                            <select
+                                                value={targetRole}
+                                                onChange={(e) => setTargetRole(e.target.value)}
+                                            >
+                                                <option value="USER">일반 사용자 (USER)</option>
+                                                <option value="PREMIUM">프리미엄 (PREMIUM)</option>
+                                                <option value="MENTOR">멘토 (MENTOR)</option>
+                                                <option value="ADMIN">관리자 (ADMIN)</option>
+                                            </select>
+                                        </div>
+
+                                        <div className="admin-modal-actions">
+                                            <button className="admin-btn-cancel" onClick={() => setIsModalOpen(false)}>
+                                                취소
+                                            </button>
+                                            <button className="admin-btn-save" onClick={handleRoleSubmit}>
+                                                변경 저장
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                             <button className="admin-action-btn">공지 등록</button>
                             <button className="admin-action-btn">페이백 정산 확인</button>
                         </div>

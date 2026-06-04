@@ -223,3 +223,117 @@
 @media (max-width: 640px) {
     .admin-stats-row, .admin-op-row, .admin-action-grid { grid-template-columns: 1fr; }
 }
+
+/* ==========================================
+   🔥 모달 팝업창 스타일
+========================================== */
+
+/* 화면 전체를 덮는 반투명 배경 */
+.admin-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(17, 24, 39, 0.4);
+    backdrop-filter: blur(4px); /* 뒤쪽 배경을 살짝 흐리게 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+/* 하얀색 모달 카드 */
+.admin-modal-card {
+    background: #ffffff;
+    width: 100%;
+    max-width: 440px;
+    border-radius: 24px;
+    padding: 36px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.15);
+    animation: modalFadeIn 0.3s ease-out forwards;
+}
+
+@keyframes modalFadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.admin-modal-card h3 {
+    margin: 0 0 28px 0;
+    font-size: 22px;
+    font-weight: 900;
+    color: #111827;
+    letter-spacing: -0.02em;
+}
+
+/* 폼 영역 */
+.admin-modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 32px;
+}
+
+.admin-modal-form label {
+    font-size: 13px;
+    font-weight: 800;
+    color: #4b5563;
+    margin-top: 8px;
+}
+
+.admin-modal-form select {
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1.5px solid #e5e7eb;
+    background-color: #f9fafb;
+    font-size: 14px;
+    font-weight: 600;
+    color: #111827;
+    outline: none;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.admin-modal-form select:focus {
+    border-color: #8b5cf6;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+/* 하단 버튼 영역 */
+.admin-modal-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.admin-btn-cancel, .admin-btn-save {
+    flex: 1;
+    height: 52px;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+}
+
+.admin-btn-cancel {
+    background: #f3f4f6;
+    color: #4b5563;
+}
+
+.admin-btn-cancel:hover {
+    background: #e5e7eb;
+}
+
+.admin-btn-save {
+    background: linear-gradient(135deg, #8b5cf6 0%, #22d3ee 100%);
+    color: #ffffff;
+    box-shadow: 0 10px 20px rgba(124, 58, 237, 0.2);
+}
+
+.admin-btn-save:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}

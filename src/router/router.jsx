@@ -19,6 +19,9 @@ import PostListPage from "../pages/post/PostListPage.jsx";
 import PostDetailPage from "../pages/post/PostDetailPage.jsx";
 import PostWritePage from "../pages/post/PostWritePage.jsx";
 
+
+import AdminPage from "../pages/admin/AdminPage.jsx";
+
 // 인증 라우트
 import PrivateRoute from "./PrivateRoute";
 
@@ -66,6 +69,7 @@ const router = createBrowserRouter([
         { path: "/posts/write", element: <PostWritePage />,},
         // 게시글 수정 페이지 경로
         { path: "/posts/:postId/edit", element: <PostWritePage />},
+            { path: "/admin", element: <AdminPage /> },
         ],
     },
 ]);

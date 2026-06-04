@@ -6,7 +6,7 @@ import "@toast-ui/editor/dist/i18n/ko-kr";
 import { getMyStreak } from "../../api/myPageApi";
 import { usePostWriteForm } from "../../hooks/post";
 import { getCurrentStreak } from "../../utils/growthStats";
-import { TEMP_MEMBER_ID } from "../../utils/mypageUtils";
+import { getMemberId } from "../../utils/authUtils";
 
 import {
     difficultyOptions,
@@ -42,8 +42,14 @@ function PostWritePage() {
             try {
                 setIsStreakLoading(true);
 
+                const memberId = getMemberId();
+
+                if (!memberId) {
+                    setCurrentStreak(0);
+                    return;
+                }
+
                 const streakResponse = await getMyStreak({
-                    memberId: TEMP_MEMBER_ID,
                     useCache: true,
                 });
 

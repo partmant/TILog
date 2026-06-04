@@ -4,15 +4,9 @@ import { useNavigate } from "react-router-dom";
 import { getMyHeatmap, getMyStreak } from "../../api/myPageApi";
 import { getPopularTags, searchPosts } from "../../api/post";
 import { difficultyStyle } from "../../constants/post";
-import {
-    DEFAULT_GROWTH_SUMMARY,
-    getCurrentStreak,
-    getMonthWriteCount,
-} from "../../utils/growthStats";
-import {
-    getMonthRange,
-    TEMP_MEMBER_ID,
-} from "../../utils/mypageUtils";
+import { DEFAULT_GROWTH_SUMMARY, getCurrentStreak, getMonthWriteCount, } from "../../utils/growthStats";
+import { getMonthRange, } from "../../utils/mypageUtils";
+import { getMemberId } from "../../utils/authUtils";
 
 // 메인 피드 페이지
 function FeedPage() {
@@ -53,13 +47,20 @@ function FeedPage() {
             try {
                 setIsGrowthSummaryLoading(true);
 
+                const memberId = getMemberId();
+
+                if (!memberId) {
+                    setGrowthSummary(DEFAULT_GROWTH_SUMMARY);
+                    return;
+                }
+
                 const [streakResponse, heatmapResponse] = await Promise.all([
                     getMyStreak({
-                        memberId: TEMP_MEMBER_ID,
+                        memberId,
                         useCache: true,
                     }),
                     getMyHeatmap({
-                        memberId: TEMP_MEMBER_ID,
+                        memberId,
                         startDate,
                         endDate,
                         useCache: true,

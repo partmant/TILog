@@ -25,7 +25,7 @@ export default function LoginPage() {
             // apiClient가 data.data / data.result 자동 언래핑
             const token = res?.accessToken ?? res;
             localStorage.setItem("accessToken", token);
-            navigate("/");
+            navigate("/mypage");
         } catch (err) {
             setError(err.message || "로그인에 실패했습니다.");
         } finally {

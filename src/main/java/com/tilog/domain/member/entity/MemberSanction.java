@@ -3,12 +3,15 @@ package com.tilog.domain.member.entity;
 import com.tilog.domain.report.entity.ReasonType;
 import com.tilog.domain.report.entity.ReportProcess;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class MemberSanction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,4 +40,12 @@ public class MemberSanction {
     private LocalDateTime endAt;
     private LocalDateTime createdAt;
 
+
+    public MemberSanction(Member member, Member admin, SanctionType sanctionType, ReasonType reasonType, String content){
+        this.member = member;
+        this.admin = admin;
+        this.sanctionType = sanctionType;
+        this.reasonType = reasonType;
+        this.content = content;
+    }
 }

@@ -33,8 +33,12 @@ public class AuthService {
             throw new AuthException("정지된 계정입니다.");
         }
 
-        String accessToken = jwtTokenProvider.createAccessToken(member.getId(), member.getRole());
-        String refreshToken = jwtTokenProvider.createRefreshToken(member.getId(), member.getRole());
+        String createdAt = member.getCreatedAt() != null
+                ? member.getCreatedAt().toLocalDate().toString()
+                : "";
+
+        String accessToken = jwtTokenProvider.createAccessToken(member.getId(), member.getRole(), member.getNickname(), member.getEmail(), createdAt);
+        String refreshToken = jwtTokenProvider.createRefreshToken(member.getId(), member.getRole(), member.getNickname(), member.getEmail(), createdAt);
         return TokenResponse.of(
                 accessToken,
                 refreshToken,

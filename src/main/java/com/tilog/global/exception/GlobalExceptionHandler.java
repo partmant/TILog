@@ -1,6 +1,7 @@
 package com.tilog.global.exception;
 
 import com.tilog.global.response.ApiResponse;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -48,6 +49,23 @@ public class GlobalExceptionHandler {
                 .findFirst()
                 .map(error -> error.getDefaultMessage())
                 .orElse("잘못된 요청입니다.");
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.fail(message));
+    }
+
+    /**
+     * @RequestParam, @PathVariable 등 단순 파라미터 검증 실패 -> 400 Bad Request
+     * - @Valid 없이 @Validated + @Pattern 등으로 검증 시 발생
+     * - 첫 번째 위반 메시지를 사용자에게 노출
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleConstraintViolationException(ConstraintViolationException e) {
+        String message = e.getConstraintViolations().stream()
+                .findFirst()
+                .map(violation -> violation.getMessage())
+                .orElse("잘못된 요청입니다.");
+
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.fail(message));

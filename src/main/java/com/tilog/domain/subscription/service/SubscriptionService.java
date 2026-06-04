@@ -3,6 +3,9 @@ package com.tilog.domain.subscription.service;
 import com.tilog.domain.member.entity.Member;
 import com.tilog.domain.member.entity.MemberRole;
 import com.tilog.domain.member.repository.MemberRepository;
+import com.tilog.domain.payback.entity.PaybackPolicy;
+import com.tilog.domain.payback.service.PaybackParticipationService;
+import com.tilog.domain.payback.service.PaybackPolicyService;
 import com.tilog.domain.subscription.dto.SubscriptionHistoryResponse;
 import com.tilog.domain.subscription.dto.SubscriptionStatusResponse;
 import com.tilog.domain.subscription.entity.Subscription;
@@ -12,9 +15,12 @@ import com.tilog.global.exception.ErrorCode;
 import com.tilog.global.security.SecurityUtil;
 import com.tilog.domain.subscription.repository.SubscriptionRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -32,37 +38,39 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class SubscriptionService {
-
     private final SubscriptionRepository subscriptionRepository;
     private final MemberRepository memberRepository;
+    private final PaybackPolicyService paybackPolicyService;
+    private final PaybackParticipationService paybackParticipationService;
 
     // Mock 구독 신청 (30일 ACTIVE → PREMIUM 권한 부여)
     @Transactional
     public SubscriptionStatusResponse subscribe() {
         Long memberId = SecurityUtil.getCurrentMemberId();
+        LocalDateTime now = LocalDateTime.now();
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
-        // 이미 활성 구독 존재 여부 체크
-        Optional<Subscription> existing = subscriptionRepository
-                .findTopByMemberIdAndStatusOrderByStartedAtDesc(memberId, SubscriptionStatus.ACTIVE);
+        validateNoActiveSubscription(memberId, now);
 
-        if (existing.isPresent() && existing.get().isActive()) {
-            throw new CustomException(ErrorCode.SUBSCRIPTION_ALREADY_ACTIVE);
-        }
-
-        // Mock 구독 생성
         Subscription subscription = Subscription.createMock(member);
-        subscriptionRepository.save(subscription);
+        Subscription savedSubscription = subscriptionRepository.save(subscription);
 
-        // 회원 권한 PREMIUM으로 승격
+        PaybackPolicy policy = paybackPolicyService.getCurrentActivePolicy(LocalDate.now());
+        paybackParticipationService.createForSubscription(
+                memberId,
+                savedSubscription,
+                policy
+        );
+
         member.changeRole(MemberRole.PREMIUM);
 
-        return SubscriptionStatusResponse.from(subscription);
+        return SubscriptionStatusResponse.from(savedSubscription);
     }
 
     // 구독 취소 (ACTIVE → CANCELED, PREMIUM → USER)
+    // ACTIVE 구독이 여러 개 쌓인 경우도 모두 취소 처리
     @Transactional
     public SubscriptionStatusResponse cancel() {
         Long memberId = SecurityUtil.getCurrentMemberId();
@@ -70,30 +78,41 @@ public class SubscriptionService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
-        Subscription subscription = subscriptionRepository
-                .findTopByMemberIdAndStatusOrderByStartedAtDesc(memberId, SubscriptionStatus.ACTIVE)
-                .filter(Subscription::isActive)
-                .orElseThrow(() -> new CustomException(ErrorCode.SUBSCRIPTION_NOT_FOUND));
+        List<Subscription> activeSubscriptions = subscriptionRepository.findAllActiveByMemberId(memberId);
 
-        subscription.cancel();
+        if (activeSubscriptions.isEmpty()) {
+            throw new CustomException(ErrorCode.SUBSCRIPTION_NOT_FOUND);
+        }
 
-        // 회원 권한 USER로 복원 (MENTOR/ADMIN은 그대로 유지)
+        Subscription latest = activeSubscriptions.get(0);
+
+        activeSubscriptions.forEach(s -> {
+            s.cancel();
+            paybackParticipationService.cancelForSubscription(s.getId());
+        });
+
         if (member.getRole() == MemberRole.PREMIUM) {
             member.changeRole(MemberRole.USER);
         }
 
-        return SubscriptionStatusResponse.from(subscription);
+        return SubscriptionStatusResponse.from(latest);
     }
 
     // 현재 구독 상태 조회
     public SubscriptionStatusResponse getMyStatus() {
         Long memberId = SecurityUtil.getCurrentMemberId();
+        LocalDateTime now = LocalDateTime.now();
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
-        return subscriptionRepository
-                .findTopByMemberIdAndStatusOrderByStartedAtDesc(memberId, SubscriptionStatus.ACTIVE)
+        return subscriptionRepository.findCurrentActiveSubscriptions(
+                        memberId,
+                        now,
+                        PageRequest.of(0, 1)
+                )
+                .stream()
+                .findFirst()
                 .map(SubscriptionStatusResponse::from)
                 .orElseGet(() -> SubscriptionStatusResponse.noSubscription(member.getNickname()));
     }
@@ -109,6 +128,32 @@ public class SubscriptionService {
         return subscriptionRepository.findByMemberIdOrderByStartedAtDesc(memberId)
                 .stream()
                 .map(SubscriptionHistoryResponse::from)
-                .collect(Collectors.toList());
+                .toList();
+    }
+
+    private void validateNoActiveSubscription(Long memberId, LocalDateTime now) {
+        boolean hasActiveSubscription = subscriptionRepository.findCurrentActiveSubscriptions(
+                        memberId,
+                        now,
+                        PageRequest.of(0, 1)
+                )
+                .stream()
+                .findFirst()
+                .isPresent();
+
+        if (hasActiveSubscription) {
+            throw new CustomException(ErrorCode.SUBSCRIPTION_ALREADY_ACTIVE);
+        }
+    }
+
+    private Subscription findCurrentActiveSubscription(Long memberId, LocalDateTime now) {
+        return subscriptionRepository.findCurrentActiveSubscriptions(
+                        memberId,
+                        now,
+                        PageRequest.of(0, 1)
+                )
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new CustomException(ErrorCode.SUBSCRIPTION_NOT_FOUND));
     }
 }

@@ -22,6 +22,7 @@ public class PostQueryDto {
         private Integer viewCount;
         private Integer studyTime;
         private String nickname;
+        private LocalDateTime createdAt;
         private List<String> tagNames;
 
         public static ListResponse from(Post post, List<String> tagNames) {
@@ -33,6 +34,7 @@ public class PostQueryDto {
                     .viewCount(post.getViewCount())
                     .studyTime(post.getStudyTime())
                     .nickname(post.getMember().getNickname())
+                    .createdAt(post.getCreatedAt())
                     .tagNames(tagNames)
                     .build();
         }
@@ -53,7 +55,10 @@ public class PostQueryDto {
         private LocalDateTime createdAt;
         private List<String> tagNames;
 
-        public static DetailResponse from(Post post, List<String> tagNames) {
+        // 본인 체크 용
+        private boolean isOwner;
+
+        public static DetailResponse from(Post post, List<String> tagNames, boolean isOwner) {
             return DetailResponse.builder()
                     .postId(post.getId())
                     .title(post.getTitle())
@@ -65,6 +70,7 @@ public class PostQueryDto {
                     .viewCount(post.getViewCount())
                     .studyTime(post.getStudyTime())
                     .tagNames(tagNames)
+                    .isOwner(isOwner)
                     .build();
         }
     }

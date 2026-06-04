@@ -84,16 +84,12 @@ public class PaybackParticipationService {
                 .ifPresent(PaybackParticipation::cancel);
     }
 
-    private int countAchievedWriteDays(
-            Long memberId,
-            LocalDate periodStartDate,
-            LocalDate periodEndDate
-    ) {
-        return writeHistoryRepository.countByMember_IdAndWrittenDateBetweenAndWriteCountGreaterThan(
-                memberId,
-                periodStartDate,
-                periodEndDate,
-                0
-        );
+    // 구독 연장 시 페이백 종료 일자 동기화
+    @Transactional
+    public void extendForSubscription(Long subscriptionId, LocalDate newEndDate) {
+        paybackParticipationRepository
+                .findBySubscription_IdAndResultStatus(subscriptionId, PaybackResultStatus.IN_PROGRESS)
+                .ifPresent(p -> p.extendPeriod(newEndDate));
     }
-}
+
+    private 

@@ -2,6 +2,4 @@ package com.tilog.domain.subscription.entity;
 
 public enum SubscriptionStatus {
     ACTIVE,
-    EXPIRED,
-    CANCELED
-}
+    CANCEL_RESERVED, // 취소 

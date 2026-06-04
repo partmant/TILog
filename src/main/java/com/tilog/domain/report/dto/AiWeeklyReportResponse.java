@@ -21,6 +21,7 @@ public class AiWeeklyReportResponse {
 
     private WeeklySummaryData weeklySummary;
     private TechStackDistributionData techStackDistribution;
+    private CumulativeStatsData cumulativeData;
 
     private String ruleBasedComment;
     private String aiAnalysisComment;

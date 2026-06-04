@@ -1,5 +1,5 @@
 import Select from 'react-select';
-import { TAG_OPTIONS } from '../../constants/tagOptions';
+import { useTagOptions } from '../../hooks/useTagOptions';
 
 const DIFFICULTIES = ['EASY', 'NORMAL', 'HARD'];
 
@@ -33,7 +33,8 @@ const styles = {
 //   onChange    (key, value) => void
 //   onReset     () => void
 const AdvancedSearchPanel = ({ conditions, onChange, onReset }) => {
-  const selectedTag = TAG_OPTIONS.find(o => o.value === conditions.tagName) || null;
+  const { tagOptions, loading: tagsLoading } = useTagOptions();
+  const selectedTag = tagOptions.find(o => o.value === conditions.tagName) || null;
 
   return (
     <div style={styles.panel}>
@@ -54,10 +55,11 @@ const AdvancedSearchPanel = ({ conditions, onChange, onReset }) => {
         <span style={styles.label}>태그</span>
         <div style={{ width: 220 }}>
           <Select
-            options={TAG_OPTIONS}
+            options={tagOptions}
             value={selectedTag}
             onChange={(opt) => onChange('tagName', opt ? opt.value : '')}
             isClearable
+            isLoading={tagsLoading}
             placeholder="기술 스택 선택"
           />
         </div>

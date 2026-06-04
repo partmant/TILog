@@ -33,7 +33,7 @@ public class PaybackPolicy extends BaseTimeEntity {
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
 
-    @Column(name = "end_date", nullable = false)
+    @Column(name = "end_date")
     private LocalDate endDate;
 
     @Column(name = "is_active", nullable = false)

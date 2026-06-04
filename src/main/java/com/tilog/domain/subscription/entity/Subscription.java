@@ -26,7 +26,6 @@ public class Subscription {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @CreationTimestamp
     @Column(name = "started_at", nullable = false, updatable = false)
     private LocalDateTime startedAt;
 
@@ -38,17 +37,27 @@ public class Subscription {
     private SubscriptionStatus status;
 
     @Builder
-    private Subscription(Member member, LocalDateTime endedAt, SubscriptionStatus status) {
+    private Subscription(
+            Member member,
+            LocalDateTime startedAt,
+            LocalDateTime endedAt,
+            SubscriptionStatus status
+    ) {
         this.member = member;
+        this.startedAt = startedAt;
         this.endedAt = endedAt;
         this.status = status;
     }
 
-    // Mock 구독 생성 (30일)
+    // Mock 구독 생성
     public static Subscription createMock(Member member) {
+        LocalDateTime startedAt = LocalDateTime.now();
+        LocalDateTime endedAt = startedAt.plusMonths(1).minusSeconds(1);
+
         return Subscription.builder()
                 .member(member)
-                .endedAt(LocalDateTime.now().plusDays(30))
+                .startedAt(startedAt)
+                .endedAt(endedAt)
                 .status(SubscriptionStatus.ACTIVE)
                 .build();
     }

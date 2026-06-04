@@ -52,3 +52,11 @@ export const doSanction = async (reportId, sanctionData) => {
     const response = await api.post(`/api/admin/reports/${reportId}/sanction`, sanctionData);
     return response.data;
 };
+
+/**
+ * 최근 신고 목록 4건 조회
+ */
+export const fetchRecentReports = async () => {
+    const response = await api.get('/api/admin/reports/recent');
+    return response.data; // 백엔드에서 만든 List<ReportResponseDto>가 튀어나옵니다!
+};

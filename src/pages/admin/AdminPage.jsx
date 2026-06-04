@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import '../../styles/admin/AdminPage.css';
-import { fetchMemberList } from '../../api/adminApi'; // 🔥 백엔드 API 호출 함수
+import { fetchMemberList, fetchRecentReports } from '../../api/adminApi';
 
 const AdminPage = () => {
     // ==========================================
     // 1. 상태(State) 관리: 마법의 데이터 상자
     // ==========================================
     const [members, setMembers] = useState(null);
+    const [recentReports, setRecentReports] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
     // ==========================================
@@ -16,8 +17,14 @@ const AdminPage = () => {
         const loadData = async () => {
             try {
                 // 백엔드 컨트롤러(getMemberList)에 1페이지, 10명 데이터를 요청합니다.
-                const data = await fetchMemberList(0, 10);
-                setMembers(data); // 성공하면 상자에 데이터를 담습니다.
+                const [memberData, reportData] = await Promise.all([
+                    fetchMemberList(0, 10),
+                    fetchRecentReports()
+                ]);
+
+                setMembers(memberData);
+                setRecentReports(reportData);
+
             } catch (error) {
                 console.error("회원 데이터를 불러오는데 실패했습니다.", error);
             } finally {
@@ -27,6 +34,33 @@ const AdminPage = () => {
 
         loadData();
     }, []); // 빈 배열 `[]`: 컴포넌트가 처음 화면에 나타날 때 딱 한 번만 실행!
+
+    // 3. 백엔드 데이터(Enum)를 화면용 예쁜 한글/색상으로 변환해 주는 마법의 함수
+    const formatReportData = (report) => {
+        // 사유(ReasonType) 변환
+        let category = '기타';
+        let labelColor = '#f3f4f6';
+
+        if (report.reasonType === 'SWEARING') { category = '욕설/비방'; labelColor = '#fee2e2'; }
+        else if (report.reasonType === 'ADVERTISEMENT') { category = '광고/홍보'; labelColor = '#ffedd5'; }
+        else if (report.reasonType === 'SPAM') { category = '도배/스팸'; labelColor = '#dbeafe'; }
+        else if (report.reasonType === 'PERSONAL_INFO') { category = '개인정보'; labelColor = '#d1fae5'; }
+
+        // 처리 상태(Status) 변환
+        let status = '대기';
+        let statusColor = '#ef4444'; // 빨간색
+
+        if (report.status === 'PROCESSED') { status = '완료'; statusColor = '#10b981'; } // 초록색
+        else if (report.status === 'IN_PROGRESS') { status = '검토중'; statusColor = '#3b82f6'; } // 파란색
+
+        return {
+            category,
+            detail: report.reasonDetail, // 백엔드에서 온 상세 내용
+            status,
+            statusColor,
+            labelColor
+        };
+    };
 
     // ==========================================
     // 3. 화면에 보여줄 데이터 준비
@@ -42,14 +76,6 @@ const AdminPage = () => {
         { title: '전체 TIL', count: '8,932개', subText: '오늘 +128', icon: '📝' },
         { title: '대기 신고', count: '17건', subText: '확인 필요', icon: '⚠️', isAlert: true },
         { title: '처리 완료', count: '284건', subText: '이번 달 기준', icon: '✅' },
-    ];
-
-    // 임시 더미 데이터 (나중에 신고 내역 API를 만들면 이것도 교체할 예정입니다)
-    const recentReports = [
-        { category: '욕설/비방', detail: '댓글 내용에 부적절한 표현 포함', status: '대기', statusColor: '#ef4444', labelColor: '#fee2e2' },
-        { category: '광고/홍보', detail: '외부 링크 반복 등록', status: '대기', statusColor: '#ef4444', labelColor: '#ffedd5' },
-        { category: '개인정보', detail: '이메일 주소 노출', status: '완료', statusColor: '#10b981', labelColor: '#d1fae5' },
-        { category: '도배/스팸', detail: '동일 내용 반복 작성', status: '검토중', statusColor: '#3b82f6', labelColor: '#dbeafe' },
     ];
 
     // ==========================================
@@ -79,23 +105,29 @@ const AdminPage = () => {
                 ))}
             </div>
 
-            {/* 메인 콘텐츠 그리드 */}
             <div className="admin-content-grid">
-                {/* 좌측: 최근 신고 목록 */}
                 <div className="admin-panel">
                     <h3 className="admin-panel-title">최근 신고 목록</h3>
                     <ul className="admin-report-list">
-                        {recentReports.map((report, index) => (
-                            <li className="admin-report-item" key={index}>
-                                <span className="admin-report-label" style={{ backgroundColor: report.labelColor, color: report.statusColor }}>
-                                    {report.category}
-                                </span>
-                                <span className="admin-report-detail">{report.detail}</span>
-                                <span className="admin-report-status" style={{ color: report.statusColor }}>
-                                    {report.status}
-                                </span>
-                            </li>
-                        ))}
+                        {/* 🔥 가짜 배열 대신, 백엔드에서 가져온 진짜 상태(recentReports)를 화면에 그립니다! */}
+                        {recentReports.length === 0 && !isLoading ? (
+                            <li className="admin-report-item">접수된 신고가 없습니다.</li>
+                        ) : (
+                            recentReports.map((report) => {
+                                const formatted = formatReportData(report); // 예쁘게 변환!
+                                return (
+                                    <li className="admin-report-item" key={report.reportId}>
+                                        <span className="admin-report-label" style={{ backgroundColor: formatted.labelColor, color: formatted.statusColor }}>
+                                            {formatted.category}
+                                        </span>
+                                        <span className="admin-report-detail">{formatted.detail}</span>
+                                        <span className="admin-report-status" style={{ color: formatted.statusColor }}>
+                                            {formatted.status}
+                                        </span>
+                                    </li>
+                                )
+                            })
+                        )}
                     </ul>
                 </div>
 

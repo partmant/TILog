@@ -23,6 +23,9 @@ import java.util.Date;
 public class JwtTokenProvider {
 
     private static final String CLAIM_ROLE = "role";
+    private static final String CLAIM_NICKNAME = "nickname";
+    private static final String CLAIM_EMAIL = "email";
+    private static final String CLAIM_CREATED_AT = "createdAt";
 
     private final SecretKey secretKey;
     private final long accessTokenValidityMillis;
@@ -39,21 +42,24 @@ public class JwtTokenProvider {
         this.refreshTokenValidityMillis = refreshTokenValiditySeconds * 1000;
     }
 
-    public String createAccessToken(Long memberId, MemberRole role) {
-        return createToken(memberId, role, accessTokenValidityMillis);
+    public String createAccessToken(Long memberId, MemberRole role, String nickname, String email, String createdAt) {
+        return createToken(memberId, role, nickname, email, createdAt, accessTokenValidityMillis);
     }
 
-    public String createRefreshToken(Long memberId, MemberRole role) {
-        return createToken(memberId, role, refreshTokenValidityMillis);
+    public String createRefreshToken(Long memberId, MemberRole role, String nickname, String email, String createdAt) {
+        return createToken(memberId, role, nickname, email, createdAt, refreshTokenValidityMillis);
     }
 
-    private String createToken(Long memberId, MemberRole role, long validityMillis) {
+    private String createToken(Long memberId, MemberRole role, String nickname, String email, String createdAt, long validityMillis) {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + validityMillis);
 
         return Jwts.builder()
                 .subject(String.valueOf(memberId))
                 .claim(CLAIM_ROLE, role.name())
+                .claim(CLAIM_NICKNAME, nickname)
+                .claim(CLAIM_EMAIL, email)
+                .claim(CLAIM_CREATED_AT, createdAt)
                 .issuedAt(now)
                 .expiration(expiry)
                 .signWith(secretKey)

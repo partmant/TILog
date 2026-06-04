@@ -70,23 +70,32 @@ public class SubscriptionService {
     }
 
     // 구독 취소 (ACTIVE → CANCELED, PREMIUM → USER)
+    // ACTIVE 구독이 여러 개 쌓인 경우도 모두 취소 처리
     @Transactional
     public SubscriptionStatusResponse cancel() {
         Long memberId = SecurityUtil.getCurrentMemberId();
-        LocalDateTime now = LocalDateTime.now();
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
-        Subscription subscription = findCurrentActiveSubscription(memberId, now);
+        List<Subscription> activeSubscriptions = subscriptionRepository.findAllActiveByMemberId(memberId);
 
-        subscription.cancel();
+        if (activeSubscriptions.isEmpty()) {
+            throw new CustomException(ErrorCode.SUBSCRIPTION_NOT_FOUND);
+        }
+
+        Subscription latest = activeSubscriptions.get(0);
+
+        activeSubscriptions.forEach(s -> {
+            s.cancel();
+            paybackParticipationService.cancelForSubscription(s.getId());
+        });
 
         if (member.getRole() == MemberRole.PREMIUM) {
             member.changeRole(MemberRole.USER);
         }
 
-        return SubscriptionStatusResponse.from(subscription);
+        return SubscriptionStatusResponse.from(latest);
     }
 
     // 현재 구독 상태 조회

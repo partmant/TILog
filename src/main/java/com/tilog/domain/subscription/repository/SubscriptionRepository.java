@@ -36,6 +36,15 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
             Pageable pageable
     );
 
+    // 특정 회원의 ACTIVE 상태인 구독 전체 조회 (취소 시 모두 처리용)
+    @Query("""
+            SELECT s
+            FROM Subscription s
+            WHERE s.member.id = :memberId
+              AND s.status = 'ACTIVE'
+            """)
+    List<Subscription> findAllActiveByMemberId(@Param("memberId") Long memberId);
+
     // 만료 처리가 필요한 구독 조회 (ACTIVE 상태이면서 endedAt이 현재 이전)
     @Query("""
             SELECT s

@@ -113,6 +113,22 @@ public class PaybackParticipation extends BaseTimeEntity {
         );
     }
 
+    public void cancel() {
+        this.resultStatus = PaybackResultStatus.FAILED;
+        this.settledAt = LocalDateTime.now();
+    }
+
+    // 같은 기간에 재구독할 때 기존 레코드를 재사용
+    public void reactivate(Subscription newSubscription) {
+        this.subscription = newSubscription;
+        this.achievedWriteDays = 0;
+        this.progressRate = BigDecimal.ZERO;
+        this.resultStatus = PaybackResultStatus.IN_PROGRESS;
+        this.refundStatus = RefundStatus.NONE;
+        this.joinedAt = LocalDateTime.now();
+        this.settledAt = null;
+    }
+
     public void updateProgress(int achievedWriteDays, int requiredWriteDays) {
         this.achievedWriteDays = achievedWriteDays;
         this.progressRate = calculateProgressRate(achievedWriteDays, requiredWriteDays);

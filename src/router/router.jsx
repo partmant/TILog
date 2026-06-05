@@ -23,6 +23,9 @@ import PostWritePage from "../pages/post/PostWritePage.jsx";
 // 인증 라우트
 import PrivateRoute from "./PrivateRoute";
 
+// 팔로잉한 피드 목록
+import MemberTilListPage from "../pages/post/MemberTilListPage";
+
 const router = createBrowserRouter([
     // =========================
     // 공개 페이지
@@ -47,7 +50,8 @@ const router = createBrowserRouter([
             { path: "/posts", element: <PostListPage/>,},
             // 게시글 상세 페이지 경로
             { path: "/posts/:postId", element: <PostDetailPage/>,},
-
+            // 팔로잉한 피드 목록
+            { path: "/members/:memberId/tils", element: <MemberTilListPage /> },
         ],
     },
 

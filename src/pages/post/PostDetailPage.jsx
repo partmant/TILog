@@ -25,6 +25,7 @@ function PostDetailPage() {
         pagedComments,
         repliesMap,
         likeInfo,
+        followInfo,
         commentContent,
         commentPage,
         commentPageInfo,
@@ -34,6 +35,7 @@ function PostDetailPage() {
         handleEdit,
         handleDelete,
         handleToggleLike,
+        handleToggleFollow,
         handleMoveList,
         handleCommentChange,
         handleReplyChange,
@@ -43,6 +45,13 @@ function PostDetailPage() {
         handleCreateReply,
         showCommentForm,
         handleOpenCommentForm,
+        editCommentId,
+        editCommentContent,
+        handleOpenEditComment,
+        handleCloseEditComment,
+        handleEditCommentChange,
+        handleUpdateComment,
+        handleDeleteComment,
     } = usePostDetail();
 
     // 게시글 로딩 상태
@@ -180,6 +189,21 @@ function PostDetailPage() {
                         >
                             좋아요 {likeInfo.likeCount}
                         </button>
+
+                        {/* 팔로우 버튼 - 다른 사람 게시글일 때만 표시 */}
+                        {!post.owner && (
+                            <button
+                                type="button"
+                                onClick={handleToggleFollow}
+                                className={`rounded-2xl px-8 py-3 font-bold transition ${
+                                    followInfo.following
+                                        ? "bg-purple-500 text-white hover:bg-purple-600"
+                                        : "bg-purple-50 text-purple-500 hover:bg-purple-100"
+                                }`}
+                            >
+                                {followInfo.following ? "팔로잉 ✓" : "+ 팔로우"}
+                            </button>
+                        )}
                     </div>
                 </article>
 
@@ -209,19 +233,70 @@ function PostDetailPage() {
                                         {comment.nickname}
                                     </p>
 
-                                    {/* 댓글 내용 */}
-                                    <p className="mt-2 text-sm text-slate-600">
-                                        {comment.content}
-                                    </p>
+                                    {/* 댓글 내용 or 수정 폼 */}
+                                    {editCommentId === comment.commentId ? (
+                                        <div className="mt-2">
+                                            <textarea
+                                                value={editCommentContent}
+                                                onChange={handleEditCommentChange}
+                                                className="h-20 w-full resize-none rounded-xl border border-purple-100 bg-white p-3 text-sm outline-none"
+                                            />
+                                            <div className="mt-2 flex gap-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleUpdateComment(comment.commentId)}
+                                                    className="rounded-lg bg-purple-500 px-4 py-2 text-sm font-bold text-white"
+                                                >
+                                                    저장
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={handleCloseEditComment}
+                                                    className="rounded-lg bg-gray-200 px-4 py-2 text-sm font-bold text-gray-600"
+                                                >
+                                                    취소
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <p className="mt-2 text-sm text-slate-600">
+                                            {comment.content}
+                                        </p>
+                                    )}
 
-                                    {/* 대댓글 작성 버튼 */}
-                                    <button
-                                        type="button"
-                                        onClick={() => handleOpenReplyForm(comment.commentId)}
-                                        className="mt-3 text-xs font-bold text-purple-500"
-                                    >
-                                        답글 작성
-                                    </button>
+                                    {/* 댓글 액션 버튼 영역 */}
+                                    <div className="mt-3 flex items-center gap-3">
+                                        {/* 답글 작성 버튼 */}
+                                        <button
+                                            type="button"
+                                            onClick={() => handleOpenReplyForm(comment.commentId)}
+                                            className="text-xs font-bold text-purple-500"
+                                        >
+                                            답글 작성
+                                        </button>
+
+                                        {/* 수정/삭제 - 본인 댓글일 때만 */}
+                                        {comment.owner && (
+                                            <>
+                                                <span className="text-xs text-gray-300">|</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleOpenEditComment(comment.commentId, comment.content)}
+                                                    className="text-xs font-bold text-slate-500 hover:text-slate-700"
+                                                >
+                                                    수정
+                                                </button>
+                                                <span className="text-xs text-gray-300">|</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleDeleteComment(comment.commentId)}
+                                                    className="text-xs font-bold text-red-400 hover:text-red-600"
+                                                >
+                                                    삭제
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
 
                                     {/* 대댓글 목록 */}
                                     {(repliesMap[comment.commentId] || []).map((reply) => (
@@ -233,9 +308,57 @@ function PostDetailPage() {
                                                 {reply.nickname}
                                             </p>
 
-                                            <p className="mt-2 text-sm text-slate-600">
-                                                {reply.content}
-                                            </p>
+                                            {/* 대댓글 내용 or 수정 폼 */}
+                                            {editCommentId === reply.commentId ? (
+                                                <div className="mt-2">
+                                                    <textarea
+                                                        value={editCommentContent}
+                                                        onChange={handleEditCommentChange}
+                                                        className="h-16 w-full resize-none rounded-xl border border-purple-100 bg-slate-50 p-2 text-sm outline-none"
+                                                    />
+                                                    <div className="mt-2 flex gap-2">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleUpdateComment(reply.commentId)}
+                                                            className="rounded-lg bg-purple-500 px-3 py-1 text-xs font-bold text-white"
+                                                        >
+                                                            저장
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={handleCloseEditComment}
+                                                            className="rounded-lg bg-gray-200 px-3 py-1 text-xs font-bold text-gray-600"
+                                                        >
+                                                            취소
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <p className="mt-2 text-sm text-slate-600">
+                                                    {reply.content}
+                                                </p>
+                                            )}
+
+                                            {/* 대댓글 수정/삭제 - 본인일 때만 */}
+                                            {reply.owner && editCommentId !== reply.commentId && (
+                                                <div className="mt-2 flex items-center gap-2">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleOpenEditComment(reply.commentId, reply.content)}
+                                                        className="text-xs font-bold text-slate-500 hover:text-slate-700"
+                                                    >
+                                                        수정
+                                                    </button>
+                                                    <span className="text-xs text-gray-300">|</span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleDeleteComment(reply.commentId)}
+                                                        className="text-xs font-bold text-red-400 hover:text-red-600"
+                                                    >
+                                                        삭제
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
                                     ))}
 

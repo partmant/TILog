@@ -12,6 +12,7 @@ import SignupPage from "../pages/SignupPage.jsx";
 
 // 마이 페이지
 import MyPage from "../pages/MyPage.jsx";
+import WeeklyReportDetailPage from "../pages/WeeklyReportDetailPage.jsx";
 
 // 게시글 관련 페이지
 import FeedPage from "../pages/feed/FeedPage.jsx";
@@ -68,6 +69,8 @@ const router = createBrowserRouter([
         children: [
         // 마이 페이지 경로
         { path: "/mypage", element: <MyPage /> },
+        // 주간 리포트 상세 페이지 경로
+        { path: "/weekly-report", element: <WeeklyReportDetailPage /> },
         // 게시글 작성 페이지 경로
         { path: "/posts/write", element: <PostWritePage />,},
         // 게시글 수정 페이지 경로

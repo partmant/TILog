@@ -1,4 +1,8 @@
-import { useMemo } from 'react';
+import {
+    useMemo,
+    useState,
+} from 'react';
+import { createPortal } from 'react-dom';
 import {
     buildMonthlyHeatmap,
     getHeatLevel,
@@ -7,12 +11,49 @@ import '../../styles/mypage/HeatmapSection.css';
 
 const WEEK_DAY_LABELS = ['일', '월', '화', '수', '목', '금', '토'];
 
+const TOOLTIP_WIDTH = 132;
+const TOOLTIP_HEIGHT = 48;
+const TOOLTIP_MARGIN = 12;
+const TOOLTIP_OFFSET = 10;
+
+const getTooltipPosition = (cellElement) => {
+    const rect = cellElement.getBoundingClientRect();
+
+    const centerX = rect.left + rect.width / 2;
+    const minLeft = TOOLTIP_MARGIN + TOOLTIP_WIDTH / 2;
+    const maxLeft = window.innerWidth - TOOLTIP_MARGIN - TOOLTIP_WIDTH / 2;
+
+    const left = Math.min(
+        Math.max(centerX, minLeft),
+        maxLeft
+    );
+
+    const bottomTop = rect.bottom + TOOLTIP_OFFSET;
+    const isBottomOverflow = bottomTop + TOOLTIP_HEIGHT > window.innerHeight - TOOLTIP_MARGIN;
+
+    if (isBottomOverflow) {
+        return {
+            left,
+            top: rect.top - TOOLTIP_OFFSET,
+            placement: 'top',
+        };
+    }
+
+    return {
+        left,
+        top: bottomTop,
+        placement: 'bottom',
+    };
+};
+
 const HeatmapSection = ({
                             heatmapDays,
                             selectedMonthCount,
                             onChangeMonthCount,
                             isLoading,
                         }) => {
+    const [activeTooltip, setActiveTooltip] = useState(null);
+
     const monthlyHeatmap = useMemo(
         () => buildMonthlyHeatmap(heatmapDays),
         [heatmapDays]
@@ -21,6 +62,20 @@ const HeatmapSection = ({
     const totalWriteCount = heatmapDays.reduce((sum, day) => sum + day.writeCount, 0);
     const writtenDays = heatmapDays.filter((day) => day.writeCount > 0).length;
     const averageWriteCount = writtenDays === 0 ? 0 : totalWriteCount / writtenDays;
+
+    const handleTooltipOpen = (event, day) => {
+        const position = getTooltipPosition(event.currentTarget);
+
+        setActiveTooltip({
+            date: day.date,
+            writeCount: day.writeCount,
+            ...position,
+        });
+    };
+
+    const handleTooltipClose = () => {
+        setActiveTooltip(null);
+    };
 
     return (
         <section className="mypage-panel mypage-heatmap-panel">
@@ -56,7 +111,10 @@ const HeatmapSection = ({
                             ))}
                         </div>
 
-                        <div className="mypage-month-heatmap-scroll">
+                        <div
+                            className="mypage-month-heatmap-scroll"
+                            onScroll={handleTooltipClose}
+                        >
                             <div className="mypage-month-heatmap-list">
                                 {monthlyHeatmap.map((monthData) => (
                                     <div className="mypage-month-block" key={monthData.key}>
@@ -84,15 +142,13 @@ const HeatmapSection = ({
                                                             <span
                                                                 className={`mypage-heatmap-cell level-${getHeatLevel(day.writeCount)}`}
                                                                 key={day.date}
-                                                                title={`${day.date} · ${day.writeCount}개 작성`}
                                                                 aria-label={`${day.date}에 ${day.writeCount}개 작성`}
-                                                            >
-                                <span className="mypage-heatmap-tooltip">
-                                  {day.date}
-                                    <br />
-                                    {day.writeCount}개 작성
-                                </span>
-                              </span>
+                                                                onMouseEnter={(event) => handleTooltipOpen(event, day)}
+                                                                onMouseLeave={handleTooltipClose}
+                                                                onFocus={(event) => handleTooltipOpen(event, day)}
+                                                                onBlur={handleTooltipClose}
+                                                                tabIndex={0}
+                                                            />
                                                         );
                                                     })}
                                                 </div>
@@ -133,6 +189,22 @@ const HeatmapSection = ({
                         </div>
                     </div>
                 </>
+            )}
+
+            {activeTooltip && typeof document !== 'undefined' && createPortal(
+                <div
+                    className={`mypage-heatmap-tooltip-portal ${activeTooltip.placement}`}
+                    style={{
+                        left: `${activeTooltip.left}px`,
+                        top: `${activeTooltip.top}px`,
+                    }}
+                    role="tooltip"
+                >
+                    {activeTooltip.date}
+                    <br />
+                    {activeTooltip.writeCount}개 작성
+                </div>,
+                document.body
             )}
         </section>
     );

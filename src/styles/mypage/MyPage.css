@@ -44,7 +44,10 @@ button {
 
 .mypage-heatmap-panel {
     align-self: start;
+    width: 100%;
+    max-width: 100%;
     height: fit-content;
+    overflow: hidden;
 }
 
 .mypage-main-column {
@@ -58,6 +61,7 @@ button {
     display: flex;
     flex-direction: column;
     gap: 22px;
+    min-width: 0;
     align-self: start;
 }
 

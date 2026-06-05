@@ -42,7 +42,9 @@ public class MemberService {
         Member member = Member.create(
                 request.email(),
                 passwordEncoder.encode(request.password()),
-                request.nickname()
+                request.nickname(),
+                request.currentStatus(),
+                request.targetJob()
         );
 
         Member saved = memberRepository.save(member);

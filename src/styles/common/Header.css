@@ -747,3 +747,22 @@
     background: #7c3aed;
     color: #fff;
 }
+
+/* ── 팔로우 취소 버튼 ── */
+.header-panel-unfollow-btn {
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 700;
+    color: #ef4444;
+    background: #fff1f1;
+    border: none;
+    border-radius: 8px;
+    padding: 4px 10px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+}
+.header-panel-unfollow-btn:hover {
+    background: #ef4444;
+    color: #fff;
+}

@@ -8,7 +8,7 @@ import {
     deleteNotification,
     deleteAllNotifications,
 } from "../../api/notification";
-import { getFollowers, getFollowings } from "../../api/follow";
+import { getFollowers, getFollowings, unfollow } from "../../api/follow";
 
 export function useHeader() {
     const navigate = useNavigate();
@@ -136,6 +136,16 @@ export function useHeader() {
         navigate(`/members/${memberId}/tils`);
     };
 
+    // 팔로잉 패널에서 언팔로우
+    const handleUnfollowFromPanel = async (memberId) => {
+        try {
+            await unfollow(memberId);
+            setFollowings((prev) => prev.filter((m) => m.memberId !== memberId));
+        } catch {
+            alert("팔로우 취소 실패");
+        }
+    };
+
     const handleMoveHome = () => navigate("/");
     const handleMoveMyPage = () => navigate("/mypage");
     const handleSearch = () => {
@@ -158,5 +168,6 @@ export function useHeader() {
         followers, followings, followLoading,
         followPanelRef, handleToggleFollowPanel,
         handleNavigateToMemberTil,
+        handleUnfollowFromPanel,
     };
 }

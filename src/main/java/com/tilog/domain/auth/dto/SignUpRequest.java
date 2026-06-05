@@ -4,6 +4,9 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import com.tilog.domain.member.entity.CurrentStatus;
+import com.tilog.domain.member.entity.TargetJob;
+
 
 public record SignUpRequest(
         @NotBlank(message = "이메일은 필수입니다.")

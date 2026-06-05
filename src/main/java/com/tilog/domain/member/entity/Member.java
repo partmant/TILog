@@ -65,7 +65,8 @@ public class Member extends BaseTimeEntity {
     private LocalDateTime bannedUntil;
 
     @Builder
-    private Member(String email, String password, String nickname, MemberRole role) {
+    private Member(String email, String password, String nickname,
+                   CurrentStatus currentStatus, TargetJob targetJob, MemberRole role) {
         this.email = email;
         this.password = password;
         this.nickname = nickname;

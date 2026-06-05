@@ -43,6 +43,9 @@ public class Member extends BaseTimeEntity {
     @Column(name = "nickname", nullable = false, length = 20)
     private String nickname;
 
+    @Column(name = "profile_image_url", length = 500)
+    private String profileImageUrl;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private MemberRole role;
@@ -113,5 +116,10 @@ public class Member extends BaseTimeEntity {
 
     public void changeRole(MemberRole newRole){
         this.role = newRole;
+    }
+
+    // 프로필 이미지 URL 업데이트
+    public void updateProfileImage(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
     }
 }

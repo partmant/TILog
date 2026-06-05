@@ -10,7 +10,8 @@ public record MemberResponse(
         String email,
         String nickname,
         MemberRole role,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        String profileImageUrl
 ) {
     public static MemberResponse from(Member member) {
         return new MemberResponse(
@@ -18,7 +19,8 @@ public record MemberResponse(
                 member.getEmail(),
                 member.getNickname(),
                 member.getRole(),
-                member.getCreatedAt()
+                member.getCreatedAt(),
+                member.getProfileImageUrl()
         );
     }
 }

@@ -6,9 +6,17 @@ import com.tilog.domain.member.entity.Member;
 import com.tilog.global.exception.MemberException;
 import com.tilog.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -17,6 +25,9 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+
+    @Value("${file.upload-path}")
+    private String uploadPath;
 
     // 회원가입
     @Transactional
@@ -36,5 +47,55 @@ public class MemberService {
 
         Member saved = memberRepository.save(member);
         return MemberResponse.from(saved);
+    }
+
+    // 내 정보 조회
+    public MemberResponse getMyInfo(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException("존재하지 않는 회원입니다."));
+        return MemberResponse.from(member);
+    }
+
+    // 프로필 이미지 업데이트
+    @Transactional
+    public MemberResponse updateProfileImage(Long memberId, MultipartFile image) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException("존재하지 않는 회원입니다."));
+
+        String imageUrl = saveProfileImage(image);
+        member.updateProfileImage(imageUrl);
+
+        return MemberResponse.from(member);
+    }
+
+    private String saveProfileImage(MultipartFile image) {
+        try {
+            String originalName = image.getOriginalFilename();
+            if (originalName == null || originalName.isBlank()) {
+                throw new IllegalArgumentException("파일명이 존재하지 않습니다.");
+            }
+
+            String extension = extractExtension(originalName);
+            String storedName = UUID.randomUUID() + extension;
+
+            Path directory = Paths.get(uploadPath, "profile");
+            if (!Files.exists(directory)) {
+                Files.createDirectories(directory);
+            }
+
+            Path savePath = directory.resolve(storedName);
+            image.transferTo(savePath);
+
+            return "/uploads/profile/" + storedName;
+        } catch (IOException e) {
+            throw new RuntimeException("프로필 이미지 업로드 실패", e);
+        }
+    }
+
+    private String extractExtension(String fileName) {
+        if (fileName == null || !fileName.contains(".")) {
+            return "";
+        }
+        return fileName.substring(fileName.lastIndexOf("."));
     }
 }

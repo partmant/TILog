@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { getCurrentUser, isLoggedIn, logout } from "../../utils/authUtils";
 import { useHeader } from "../../hooks/common/useHeader";
+import { useSSE } from "../../hooks/sse/useSSE";
 import { getMyProfile } from "../../api/memberApi";
 import "../../styles/common/Header.css";
 
@@ -70,7 +71,7 @@ const Header = () => {
     };
 
     const {
-        showNotifications, notifications, unreadCount, notificationRef,
+        showNotifications, notifications, unreadCount: headerUnreadCount, notificationRef,
         handleToggleNotifications, handleMarkAsRead, handleMarkAllAsRead,
         handleDeleteNotification, handleDeleteAllNotifications,
         showFollowPanel, followTab, setFollowTab,
@@ -78,6 +79,11 @@ const Header = () => {
         followPanelRef, handleToggleFollowPanel,
         handleNavigateToMemberTil,
     } = useHeader();
+
+    // 🔥 2-2. 회원님의 실시간 SSE 안테나 추가!
+    const { unreadCount: sseUnreadCount } = useSSE(loggedIn);
+    // 실시간 알림이 있으면 그 숫자를 띄우고, 없으면 기본 숫자를 띄웁니다.
+    const finalUnreadCount = sseUnreadCount > 0 ? sseUnreadCount : headerUnreadCount;
 
     return (
         <header className="app-header">
@@ -209,9 +215,10 @@ const Header = () => {
                                 aria-label="알림"
                             >
                                 <BellIcon />
-                                {unreadCount > 0 && (
+                                {/* 🔥 3. unreadCount를 finalUnreadCount로 변경! */}
+                                {finalUnreadCount > 0 && (
                                     <span className="app-header-notification-badge">
-                                        {unreadCount > 99 ? "99+" : unreadCount}
+                                        {finalUnreadCount > 99 ? "99+" : finalUnreadCount}
                                     </span>
                                 )}
                             </button>

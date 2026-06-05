@@ -4,6 +4,7 @@ import com.tilog.domain.member.entity.Member;
 import com.tilog.domain.member.repository.MemberRepository;
 import com.tilog.domain.post.dto.PostCommandDto;
 import com.tilog.domain.post.dto.PostQueryDto;
+import com.tilog.domain.post.dto.PostSimpleResponse;
 import com.tilog.domain.post.entity.Post;
 import com.tilog.domain.post.entity.PostImage;
 import com.tilog.domain.post.entity.Visibility;
@@ -261,5 +262,13 @@ public class PostService {
         }
 
         return null;
+    }
+
+    // 내 게시글 간단 목록 조회 (모달 드롭다운용)
+    public List<PostSimpleResponse> getMySimplePosts(Long loginMemberId) {
+        return postRepository.findByMember_IdAndIsDeletedFalseOrderByCreatedAtDesc(loginMemberId)
+                .stream()
+                .map(PostSimpleResponse::from)
+                .toList();
     }
 }

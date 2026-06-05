@@ -3,6 +3,7 @@ package com.tilog.domain.member.service;
 import com.tilog.domain.auth.dto.SignUpRequest;
 import com.tilog.domain.member.dto.MemberResponse;
 import com.tilog.domain.member.entity.Member;
+import com.tilog.domain.member.entity.MemberRole;
 import com.tilog.global.exception.MemberException;
 import com.tilog.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -97,5 +99,12 @@ public class MemberService {
             return "";
         }
         return fileName.substring(fileName.lastIndexOf("."));
+    }
+
+    public List<MemberResponse> getMentors() {  // 멘토 권한 가진 사용자 목록 조회
+        return memberRepository.findByRole(MemberRole.MENTOR)
+                .stream()
+                .map(MemberResponse::from)
+                .toList();
     }
 }

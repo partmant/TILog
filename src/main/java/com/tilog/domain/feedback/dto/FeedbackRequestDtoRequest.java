@@ -11,4 +11,5 @@ public class FeedbackRequestDtoRequest {
     private Long tilId;
     private Long requestorId;
     private Long mentorId;
+    private String comment;
 }

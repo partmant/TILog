@@ -4,6 +4,7 @@ import com.tilog.domain.notification.dto.NotificationResponse;
 import com.tilog.domain.member.entity.Member;
 import com.tilog.domain.notification.entity.Notification;
 import com.tilog.domain.notification.entity.NotificationType;
+import com.tilog.domain.notification.repository.EmitterRepository;
 import com.tilog.global.exception.CustomException;
 import com.tilog.global.exception.ErrorCode;
 import com.tilog.global.security.SecurityUtil;
@@ -14,7 +15,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,6 +28,9 @@ public class NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final MemberRepository memberRepository;
+    private final EmitterRepository emitterRepository;
+
+    private static final Long DEFAULT_TIMEOUT = 60L * 1000 * 60; // SSE 통신 유효 시간: 1시간
 
     /**
      * 알림 발송 — CommentService, LikeService, FollowService에서 호출
@@ -45,9 +51,11 @@ public class NotificationService {
 
         String message = buildMessage(sender.getNickname(), type);
 
-        notificationRepository.save(
+        Notification notification = notificationRepository.save(
                 Notification.create(receiver, sender, type, message, relatedEntityId, relatedEntityType)
         );
+
+        sendToClient(receiverId, NotificationResponse.from(notification));
     }
 
     /** 내 알림 목록 (최신순, 슬라이스 페이징) */
@@ -79,6 +87,34 @@ public class NotificationService {
         }
 
         notification.read();
+    }
+
+    public SseEmitter subscribe(Long memberId) {    // client의 SSE 구독 처리
+        SseEmitter emitter = new SseEmitter(DEFAULT_TIMEOUT);
+        emitterRepository.save(memberId, emitter);
+
+        emitter.onCompletion(() -> emitterRepository.deleteById(memberId));
+        emitter.onTimeout(() -> emitterRepository.deleteById(memberId));
+        emitter.onError((e) -> emitterRepository.deleteById(memberId));
+
+        sendToClient(memberId, "EventStream Created. [userId=" + memberId + "]");
+
+        return emitter;
+    }
+
+    private void sendToClient(Long receiverId, Object data) {   // 특정 회원에게 데이터 실제 전송
+        SseEmitter emitter = emitterRepository.get(receiverId);
+
+        if(emitter != null){
+            try {
+                emitter.send(SseEmitter.event()
+                        .id(String.valueOf(receiverId))
+                        .name("sse")
+                        .data(data));
+            } catch (IOException exception){
+                emitterRepository.deleteById(receiverId);
+            }
+        }
     }
 
     /** 전체 읽음 처리 */

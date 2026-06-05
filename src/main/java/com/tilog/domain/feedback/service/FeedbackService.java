@@ -1,5 +1,6 @@
 package com.tilog.domain.feedback.service;
 
+import com.tilog.domain.feedback.dto.FeedbackListResponseDto;
 import com.tilog.domain.feedback.dto.FeedbackRequestDtoRequest;
 import com.tilog.domain.feedback.dto.FeedbackWriteRequestDto;
 import com.tilog.domain.feedback.dto.FeedbackDetailResponseDto;
@@ -14,6 +15,8 @@ import com.tilog.domain.post.repository.TilPostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -73,5 +76,34 @@ public class FeedbackService {
         FeedbackDetailResponseDto feedbackDetail = new FeedbackDetailResponseDto(findFeedback.getFeedbackId(), findFeedback.getTil().getId(), findFeedback.getMentor().getId(), findFeedback.getStatus(), findFeedback.getTechnicalScore(), findFeedback.getFlowScore(), findFeedback.getDesignScore(), findFeedback.getComment(), findFeedback.getRequestedAt(), findFeedback.getCompletedAt());
 
         return feedbackDetail;
+    }
+
+    @Transactional(readOnly = true)
+    public List<FeedbackListResponseDto> getFeedbackList(Long loginMemberId, MemberRole role) { // 피드백 목록 가져오기
+        List<FeedbackListResponseDto> result = new java.util.ArrayList<>();
+
+        // 1. 내가 '요청한' 피드백 목록 (일반/프리미엄 모두 확인 가능)
+        List<MentorFeedback> requestedList = mentorFeedbackRepository.findByRequestor_Id(loginMemberId);
+        result.addAll(requestedList.stream()
+                .map(fb -> FeedbackListResponseDto.from(fb, "REQUESTED"))
+                .toList());
+
+        // 2. 만약 멘토라면, 내가 '받은' 피드백 목록도 추가로 가져옵니다
+        if (role == MemberRole.MENTOR) {
+            // 🔥 findByMentorId -> findByMentor_Id 로 변경
+            List<MentorFeedback> receivedList = mentorFeedbackRepository.findByMentor_Id(loginMemberId);
+            result.addAll(receivedList.stream()
+                    .map(fb -> FeedbackListResponseDto.from(fb, "RECEIVED"))
+                    .toList());
+        }
+
+        return result;
+    }
+
+    @Transactional(readOnly = true)
+    public MemberRole getMemberRole(Long memberId) {    // 회원의 권한을 DB에서 조회
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("회원 정보를 찾을 수 없습니다."));
+        return member.getRole();
     }
 }

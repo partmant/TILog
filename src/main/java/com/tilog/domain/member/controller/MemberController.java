@@ -6,8 +6,11 @@ import com.tilog.global.response.ApiResponse;
 import com.tilog.global.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/members")
@@ -30,5 +33,11 @@ public class MemberController {
     ) {
         Long memberId = SecurityUtil.getCurrentMemberId();
         return ApiResponse.success(memberService.updateProfileImage(memberId, image));
+    }
+
+    @GetMapping("/mentors")
+    public ResponseEntity<ApiResponse<List<MemberResponse>>> getMentors(){
+        List<MemberResponse> mentors = memberService.getMentors();
+        return ResponseEntity.ok(ApiResponse.success(mentors));
     }
 }

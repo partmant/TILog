@@ -1,6 +1,8 @@
+import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { getCurrentUser, isLoggedIn, logout } from "../../utils/authUtils";
 import { useHeader } from "../../hooks/common/useHeader";
+import { getMyProfile } from "../../api/memberApi";
 import "../../styles/common/Header.css";
 
 const NOTIFICATION_LABEL = {
@@ -45,6 +47,22 @@ const Header = () => {
     const loggedIn = isLoggedIn();
     const user = getCurrentUser();
     const initial = user?.nickname?.charAt(0).toUpperCase() ?? "U";
+
+    const [profileImageUrl, setProfileImageUrl] = useState(null);
+
+    useEffect(() => {
+        if (!loggedIn) return;
+        getMyProfile()
+            .then((data) => setProfileImageUrl(data?.profileImageUrl ?? null))
+            .catch(() => {});
+
+        // MyPage에서 이미지 변경 시 헤더도 즉시 반영
+        const handleProfileUpdate = (e) => {
+            setProfileImageUrl(e.detail?.profileImageUrl ?? null);
+        };
+        window.addEventListener('profileImageUpdated', handleProfileUpdate);
+        return () => window.removeEventListener('profileImageUpdated', handleProfileUpdate);
+    }, [loggedIn]);
 
     const handleLogout = () => {
         logout();
@@ -260,7 +278,11 @@ const Header = () => {
 
                         <button type="button" className="app-header-profile-button"
                                 onClick={() => navigate("/mypage")} aria-label="마이페이지로 이동">
-                            {initial}
+                            <img
+                                src={profileImageUrl || '/default-profile.svg'}
+                                alt="프로필"
+                                className="app-header-profile-img"
+                            />
                         </button>
 
                         <button type="button" className="app-header-logout-button"

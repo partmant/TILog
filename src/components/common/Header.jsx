@@ -1,9 +1,6 @@
-import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { getCurrentUser, isLoggedIn, logout } from "../../utils/authUtils";
 import { useHeader } from "../../hooks/common/useHeader";
-import { useSSE } from "../../hooks/sse/useSSE";
-import { getMyProfile } from "../../api/memberApi";
 import "../../styles/common/Header.css";
 
 const NOTIFICATION_LABEL = {
@@ -49,41 +46,21 @@ const Header = () => {
     const user = getCurrentUser();
     const initial = user?.nickname?.charAt(0).toUpperCase() ?? "U";
 
-    const [profileImageUrl, setProfileImageUrl] = useState(null);
-
-    useEffect(() => {
-        if (!loggedIn) return;
-        getMyProfile()
-            .then((data) => setProfileImageUrl(data?.profileImageUrl ?? null))
-            .catch(() => {});
-
-        // MyPage에서 이미지 변경 시 헤더도 즉시 반영
-        const handleProfileUpdate = (e) => {
-            setProfileImageUrl(e.detail?.profileImageUrl ?? null);
-        };
-        window.addEventListener('profileImageUpdated', handleProfileUpdate);
-        return () => window.removeEventListener('profileImageUpdated', handleProfileUpdate);
-    }, [loggedIn]);
-
     const handleLogout = () => {
         logout();
         navigate("/login", { replace: true });
     };
 
     const {
-        showNotifications, notifications, unreadCount: headerUnreadCount, notificationRef,
+        showNotifications, notifications, unreadCount, notificationRef,
         handleToggleNotifications, handleMarkAsRead, handleMarkAllAsRead,
         handleDeleteNotification, handleDeleteAllNotifications,
         showFollowPanel, followTab, setFollowTab,
         followers, followings, followLoading,
         followPanelRef, handleToggleFollowPanel,
         handleNavigateToMemberTil,
+        handleUnfollowFromPanel,
     } = useHeader();
-
-    // 🔥 2-2. 회원님의 실시간 SSE 안테나 추가!
-    const { unreadCount: sseUnreadCount } = useSSE(loggedIn);
-    // 실시간 알림이 있으면 그 숫자를 띄우고, 없으면 기본 숫자를 띄웁니다.
-    const finalUnreadCount = sseUnreadCount > 0 ? sseUnreadCount : headerUnreadCount;
 
     return (
         <header className="app-header">
@@ -190,13 +167,22 @@ const Header = () => {
                                                         {member.nickname}
                                                     </span>
                                                     {followTab === "followings" && (
-                                                        <button
-                                                            type="button"
-                                                            className="header-panel-til-btn"
-                                                            onClick={() => handleNavigateToMemberTil(member.memberId)}
-                                                        >
-                                                            TIL 보기
-                                                        </button>
+                                                        <>
+                                                            <button
+                                                                type="button"
+                                                                className="header-panel-til-btn"
+                                                                onClick={() => handleNavigateToMemberTil(member.memberId)}
+                                                            >
+                                                                TIL 보기
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                className="header-panel-unfollow-btn"
+                                                                onClick={() => handleUnfollowFromPanel(member.memberId)}
+                                                            >
+                                                                취소
+                                                            </button>
+                                                        </>
                                                     )}
                                                 </li>
                                             ));
@@ -215,10 +201,9 @@ const Header = () => {
                                 aria-label="알림"
                             >
                                 <BellIcon />
-                                {/* 🔥 3. unreadCount를 finalUnreadCount로 변경! */}
-                                {finalUnreadCount > 0 && (
+                                {unreadCount > 0 && (
                                     <span className="app-header-notification-badge">
-                                        {finalUnreadCount > 99 ? "99+" : finalUnreadCount}
+                                        {unreadCount > 99 ? "99+" : unreadCount}
                                     </span>
                                 )}
                             </button>
@@ -285,11 +270,7 @@ const Header = () => {
 
                         <button type="button" className="app-header-profile-button"
                                 onClick={() => navigate("/mypage")} aria-label="마이페이지로 이동">
-                            <img
-                                src={profileImageUrl || '/default-profile.svg'}
-                                alt="프로필"
-                                className="app-header-profile-img"
-                            />
+                            {initial}
                         </button>
 
                         <button type="button" className="app-header-logout-button"

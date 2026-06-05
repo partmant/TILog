@@ -36,3 +36,15 @@ export const getFeedbackDetail = async (feedbackId) => {
     const response = await api.get(`/api/feedbacks/${feedbackId}`);
     return response.data; // FeedbackDetailResponseDto 가 반환됩니다!
 };
+
+// 5. 멘토 목록 조회 (드롭다운용)
+export const fetchMentors = async () => {
+    const response = await api.get('/api/members/mentors');
+    return response.data; // ApiResponse 구조에 따라 response.data.data 가 될 수도 있습니다.
+};
+
+// 6. 내 게시글 간단 조회 (드롭다운용)
+export const fetchMySimplePosts = async () => {
+    const response = await api.get('/api/posts/me/simple');
+    return response.data;
+};

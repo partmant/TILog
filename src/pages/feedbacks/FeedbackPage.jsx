@@ -43,12 +43,14 @@ const FeedbackPage = () => {
         // user 정보가 없거나(비로그인), 권한이 일반 USER인 경우
         if (!user || user.role === 'USER') {
             alert('프리미엄 회원 또는 멘토만 이용할 수 있는 기능입니다');
-            navigate(-1); // 이전 페이지로 강제 백! (또는 navigate('/feed') 로 메인으로 쫓아냄)
+            navigate('/feed', { replace: true });
         }
     }, [user, navigate]);
 
     // 화면 렌더링 시 피드백 목록 불러오기
     useEffect(() => {
+        if (!user || user.role === 'USER') return;
+        
         const loadFeedbacks = async () => {
             try {
                 const res = await fetchFeedbackList();

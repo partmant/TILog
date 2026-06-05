@@ -14,10 +14,11 @@ public class CommentResponse {
     private final String nickname;
     private final Long parentCommentId;
     private final String content;
+    private final boolean owner;
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
 
-    private CommentResponse(TilComment comment) {
+    private CommentResponse(TilComment comment, Long currentMemberId) {
         this.commentId = comment.getCommentId();
         this.postId = comment.getPost().getId();
         this.memberId = comment.getMember().getId();
@@ -25,11 +26,12 @@ public class CommentResponse {
         this.parentCommentId = comment.getParentComment() != null
                 ? comment.getParentComment().getCommentId() : null;
         this.content = comment.getContent();
+        this.owner = comment.getMember().getId().equals(currentMemberId);
         this.createdAt = comment.getCreatedAt();
         this.updatedAt = comment.getUpdatedAt();
     }
 
-    public static CommentResponse from(TilComment comment) {
-        return new CommentResponse(comment);
+    public static CommentResponse from(TilComment comment, Long currentMemberId) {
+        return new CommentResponse(comment, currentMemberId);
     }
 }

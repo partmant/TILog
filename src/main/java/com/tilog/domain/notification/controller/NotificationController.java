@@ -46,4 +46,18 @@ public class NotificationController {
         notificationService.markAllAsRead();
         return ResponseEntity.ok(ApiResponse.success("전체 읽음 처리되었습니다."));
     }
+
+    /** 알림 단건 삭제 */
+    @DeleteMapping("/{notificationId}")
+    public ResponseEntity<ApiResponse<Void>> deleteNotification(@PathVariable Long notificationId) {
+        notificationService.deleteNotification(notificationId);
+        return ResponseEntity.ok(ApiResponse.<Void>success("알림이 삭제되었습니다."));
+    }
+
+    /** 알림 전체 삭제 */
+    @DeleteMapping
+    public ResponseEntity<ApiResponse<Void>> deleteAllNotifications() {
+        notificationService.deleteAllNotifications();
+        return ResponseEntity.ok(ApiResponse.<Void>success("전체 알림이 삭제되었습니다."));
+    }
 }

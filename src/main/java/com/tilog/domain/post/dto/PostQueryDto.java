@@ -45,6 +45,7 @@ public class PostQueryDto {
     @Builder
     public static class DetailResponse {
         private Long postId;
+        private Long memberId;
         private String title;
         private String content;
         private String difficulty;
@@ -61,6 +62,7 @@ public class PostQueryDto {
         public static DetailResponse from(Post post, List<String> tagNames, boolean isOwner) {
             return DetailResponse.builder()
                     .postId(post.getId())
+                    .memberId(post.getMember().getId())
                     .title(post.getTitle())
                     .content(post.getContent())
                     .difficulty(post.getDifficulty() == null ? null : post.getDifficulty().name())

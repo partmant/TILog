@@ -33,15 +33,20 @@ public interface PostRepository extends JpaRepository<Post, Long>, PostRepositor
             Collection<Long> memberIds, Pageable pageable
     );
 
+    // 특정 회원의 공개 TIL 목록 (PUBLIC만, 최신순)
+    Slice<Post> findByMember_IdAndVisibilityAndIsDeletedFalseOrderByCreatedAtDesc(
+            Long memberId, Visibility visibility, Pageable pageable
+    );
+
     /**
      * 주간 요약 — 총 게시글 수, 총 학습 시간(분)
      * returns Object[]{Long count, Long totalStudyTime}
      */
     @Query("SELECT COUNT(p), COALESCE(SUM(p.studyTime), 0) " +
-        "FROM Post p " +
-        "WHERE p.member.id = :memberId " +
-        "AND p.createdAt BETWEEN :from AND :to " +
-        "AND p.isDeleted = false")
+            "FROM Post p " +
+            "WHERE p.member.id = :memberId " +
+            "AND p.createdAt BETWEEN :from AND :to " +
+            "AND p.isDeleted = false")
     List<Object[]> findWeeklySummary(@Param("memberId") Long memberId,
                                      @Param("from") LocalDateTime from,
                                      @Param("to") LocalDateTime to);
@@ -51,11 +56,11 @@ public interface PostRepository extends JpaRepository<Post, Long>, PostRepositor
      * returns List<Object[]{Difficulty, Long count}>
      */
     @Query("SELECT p.difficulty, COUNT(p) " +
-        "FROM Post p " +
-        "WHERE p.member.id = :memberId " +
-        "AND p.createdAt BETWEEN :from AND :to " +
-        "AND p.isDeleted = false " +
-        "GROUP BY p.difficulty")
+            "FROM Post p " +
+            "WHERE p.member.id = :memberId " +
+            "AND p.createdAt BETWEEN :from AND :to " +
+            "AND p.isDeleted = false " +
+            "GROUP BY p.difficulty")
     List<Object[]> findDifficultyDistribution(@Param("memberId") Long memberId,
                                               @Param("from") LocalDateTime from,
                                               @Param("to") LocalDateTime to);
@@ -65,12 +70,12 @@ public interface PostRepository extends JpaRepository<Post, Long>, PostRepositor
      * returns List<Object[]{String tagName, Long count}>
      */
     @Query("SELECT pt.tag.name, COUNT(p) " +
-        "FROM Post p " +
-        "JOIN PostTag pt ON pt.post = p " +
-        "WHERE p.member.id = :memberId " +
-        "AND p.createdAt BETWEEN :from AND :to " +
-        "AND p.isDeleted = false " +
-        "GROUP BY pt.tag.name")
+            "FROM Post p " +
+            "JOIN PostTag pt ON pt.post = p " +
+            "WHERE p.member.id = :memberId " +
+            "AND p.createdAt BETWEEN :from AND :to " +
+            "AND p.isDeleted = false " +
+            "GROUP BY pt.tag.name")
     List<Object[]> findTagDistribution(@Param("memberId") Long memberId,
                                        @Param("from") LocalDateTime from,
                                        @Param("to") LocalDateTime to);

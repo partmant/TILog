@@ -1,8 +1,10 @@
 package com.tilog.domain.report.entity;
 
 import com.tilog.domain.member.entity.Member;
+import com.tilog.domain.report.dto.CumulativeStatsData;
 import com.tilog.domain.report.dto.TechStackDistributionData;
 import com.tilog.domain.report.dto.WeeklySummaryData;
+import com.tilog.domain.report.entity.converter.CumulativeStatsDataConverter;
 import com.tilog.domain.report.entity.converter.TechStackDistributionDataConverter;
 import com.tilog.domain.report.entity.converter.WeeklySummaryDataConverter;
 import jakarta.persistence.*;
@@ -41,6 +43,10 @@ public class AiWeeklyReport {
     @Column(name = "tech_stack_distribution_data", columnDefinition = "TEXT")
     private TechStackDistributionData techStackDistributionData;
 
+    @Convert(converter = CumulativeStatsDataConverter.class)
+    @Column(name = "cumulative_data", columnDefinition = "TEXT")
+    private CumulativeStatsData cumulativeData;
+
     @Column(name = "rule_based_comment", columnDefinition = "TEXT")
     private String ruleBasedComment;
 
@@ -53,12 +59,14 @@ public class AiWeeklyReport {
     public AiWeeklyReport(Member member, LocalDate weekStartDate, LocalDate weekEndDate,
                           WeeklySummaryData weeklySummaryData,
                           TechStackDistributionData techStackDistributionData,
+                          CumulativeStatsData cumulativeData,
                           String ruleBasedComment) {
         this.member = member;
         this.weekStartDate = weekStartDate;
         this.weekEndDate = weekEndDate;
         this.weeklySummaryData = weeklySummaryData;
         this.techStackDistributionData = techStackDistributionData;
+        this.cumulativeData = cumulativeData;
         this.ruleBasedComment = ruleBasedComment;
         this.createdAt = LocalDateTime.now();
     }

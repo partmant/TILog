@@ -43,10 +43,10 @@ public interface PostRepository extends JpaRepository<Post, Long>, PostRepositor
      * returns Object[]{Long count, Long totalStudyTime}
      */
     @Query("SELECT COUNT(p), COALESCE(SUM(p.studyTime), 0) " +
-            "FROM Post p " +
-            "WHERE p.member.id = :memberId " +
-            "AND p.createdAt BETWEEN :from AND :to " +
-            "AND p.isDeleted = false")
+        "FROM Post p " +
+        "WHERE p.member.id = :memberId " +
+        "AND p.createdAt BETWEEN :from AND :to " +
+        "AND p.isDeleted = false")
     List<Object[]> findWeeklySummary(@Param("memberId") Long memberId,
                                      @Param("from") LocalDateTime from,
                                      @Param("to") LocalDateTime to);
@@ -56,11 +56,11 @@ public interface PostRepository extends JpaRepository<Post, Long>, PostRepositor
      * returns List<Object[]{Difficulty, Long count}>
      */
     @Query("SELECT p.difficulty, COUNT(p) " +
-            "FROM Post p " +
-            "WHERE p.member.id = :memberId " +
-            "AND p.createdAt BETWEEN :from AND :to " +
-            "AND p.isDeleted = false " +
-            "GROUP BY p.difficulty")
+        "FROM Post p " +
+        "WHERE p.member.id = :memberId " +
+        "AND p.createdAt BETWEEN :from AND :to " +
+        "AND p.isDeleted = false " +
+        "GROUP BY p.difficulty")
     List<Object[]> findDifficultyDistribution(@Param("memberId") Long memberId,
                                               @Param("from") LocalDateTime from,
                                               @Param("to") LocalDateTime to);
@@ -70,13 +70,46 @@ public interface PostRepository extends JpaRepository<Post, Long>, PostRepositor
      * returns List<Object[]{String tagName, Long count}>
      */
     @Query("SELECT pt.tag.name, COUNT(p) " +
-            "FROM Post p " +
-            "JOIN PostTag pt ON pt.post = p " +
-            "WHERE p.member.id = :memberId " +
-            "AND p.createdAt BETWEEN :from AND :to " +
-            "AND p.isDeleted = false " +
-            "GROUP BY pt.tag.name")
+        "FROM Post p " +
+        "JOIN PostTag pt ON pt.post = p " +
+        "WHERE p.member.id = :memberId " +
+        "AND p.createdAt BETWEEN :from AND :to " +
+        "AND p.isDeleted = false " +
+        "GROUP BY pt.tag.name")
     List<Object[]> findTagDistribution(@Param("memberId") Long memberId,
                                        @Param("from") LocalDateTime from,
                                        @Param("to") LocalDateTime to);
+
+    /**
+     * 누적 요약 — 전체 기간 게시글 수, 학습시간, 난이도 분포
+     * returns Object[]{Long count, Long totalStudyTime}
+     */
+    @Query("SELECT COUNT(p), COALESCE(SUM(p.studyTime), 0) " +
+        "FROM Post p " +
+        "WHERE p.member.id = :memberId " +
+        "AND p.isDeleted = false")
+    List<Object[]> findCumulativeSummary(@Param("memberId") Long memberId);
+
+    /**
+     * 누적 난이도별 게시글 수
+     * returns List<Object[]{Difficulty, Long count}>
+     */
+    @Query("SELECT p.difficulty, COUNT(p) " +
+        "FROM Post p " +
+        "WHERE p.member.id = :memberId " +
+        "AND p.isDeleted = false " +
+        "GROUP BY p.difficulty")
+    List<Object[]> findCumulativeDifficultyDistribution(@Param("memberId") Long memberId);
+
+    /**
+     * 누적 태그별 게시글 수
+     * returns List<Object[]{String tagName, Long count}>
+     */
+    @Query("SELECT pt.tag.name, COUNT(p) " +
+        "FROM Post p " +
+        "JOIN PostTag pt ON pt.post = p " +
+        "WHERE p.member.id = :memberId " +
+        "AND p.isDeleted = false " +
+        "GROUP BY pt.tag.name")
+    List<Object[]> findCumulativeTagDistribution(@Param("memberId") Long memberId);
 }

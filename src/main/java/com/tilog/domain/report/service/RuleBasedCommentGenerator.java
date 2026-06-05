@@ -32,12 +32,12 @@ public class RuleBasedCommentGenerator {
         String praise = buildPraise(thisWeek, lastWeek);
         if (praise != null) sb.append(praise).append(" ");
 
-        // 규칙 1: 최다 카테고리 비중
+        // 규칙 1: 지난주 대비 작성량
+        sb.append(buildComparisonComment(thisWeek, lastWeek)).append(" ");
+
+        // 규칙 2: 최다 카테고리 비중
         String category = buildCategoryComment(techStack);
         if (category != null) sb.append(category).append(" ");
-
-        // 규칙 2: 지난주 대비 작성량
-        sb.append(buildComparisonComment(thisWeek, lastWeek)).append(" ");
 
         // 규칙 3: 새로 시도한 태그 (있을 때만)
         if (newTags != null && !newTags.isEmpty()) {
@@ -79,6 +79,22 @@ public class RuleBasedCommentGenerator {
 
     // ===== 규칙 1 =====
 
+    private static String buildComparisonComment(WeeklySummaryData thisWeek, WeeklySummaryData lastWeek) {
+        if (lastWeek == null) return "첫 번째 주간 리포트예요!";
+
+        int lastPosts = lastWeek.getTotalPosts();
+        if (lastPosts == 0) {
+            return String.format("총 %d개의 TIL을 작성했어요.", thisWeek.getTotalPosts());
+        }
+
+        int pct = (int) Math.round((double)(thisWeek.getTotalPosts() - lastPosts) / lastPosts * 100);
+        if (pct > 0) return String.format("이전 리포트 대비 작성량 +%d%% ↑.", pct);
+        if (pct < 0) return String.format("이전 리포트 대비 작성량 %d%% ↓.", pct);
+        return "이전 리포트와 동일한 작성량이에요.";
+    }
+
+    // ===== 규칙 2 =====
+
     private static String buildCategoryComment(TechStackDistributionData techStack) {
         if (techStack == null
                 || techStack.getCategories() == null
@@ -90,25 +106,9 @@ public class RuleBasedCommentGenerator {
                 .orElse(null);
     }
 
-    // ===== 규칙 2 =====
-
-    private static String buildComparisonComment(WeeklySummaryData thisWeek, WeeklySummaryData lastWeek) {
-        if (lastWeek == null) return "첫 번째 주간 리포트예요!";
-
-        int lastPosts = lastWeek.getTotalPosts();
-        if (lastPosts == 0) {
-            return String.format("총 %d개의 TIL을 작성했어요.", thisWeek.getTotalPosts());
-        }
-
-        int pct = (int) Math.round((double)(thisWeek.getTotalPosts() - lastPosts) / lastPosts * 100);
-        if (pct > 0) return String.format("지난주 대비 작성량 +%d%% ↑.", pct);
-        if (pct < 0) return String.format("지난주 대비 작성량 %d%% ↓.", pct);
-        return "지난주와 동일한 작성량이에요.";
-    }
-
     // ===== 규칙 3 =====
 
     private static String buildNewTagsComment(List<String> newTags) {
-        return "이번 주 새로 시도한 기술: " + String.join(", ", newTags) + ".";
+        return "새로 시도한 기술: " + String.join(", ", newTags) + ".";
     }
 }

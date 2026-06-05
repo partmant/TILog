@@ -20,12 +20,12 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
     // 특정 회원의 모든 구독 이력 조회
     List<Subscription> findByMemberIdOrderByStartedAtDesc(Long memberId);
 
-    // 특정 회원의 현재 유효한 활성 구독을 조회
+    // 특정 회원의 현재 유효한 구독을 조회 (ACTIVE 또는 CANCEL_RESERVED)
     @Query("""
             SELECT s
             FROM Subscription s
             WHERE s.member.id = :memberId
-              AND s.status = 'ACTIVE'
+              AND s.status IN ('ACTIVE', 'CANCEL_RESERVED')
               AND s.startedAt <= :now
               AND s.endedAt >= :now
             ORDER BY s.startedAt DESC
@@ -45,11 +45,13 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
             """)
     List<Subscription> findAllActiveByMemberId(@Param("memberId") Long memberId);
 
-    // 만료 처리가 필요한 구독 조회 (ACTIVE 상태이면서 endedAt이 현재 이전)
+    // 만료 처리가 필요한 구독 조회 (ACTIVE 또는 CANCEL_RESERVED 상태이면서 endedAt이 현재 이전)
+    // JOIN FETCH로 member 즉시 로딩 (스케줄러에서 N+1 방지)
     @Query("""
             SELECT s
             FROM Subscription s
-            WHERE s.status = 'ACTIVE'
+            JOIN FETCH s.member
+            WHERE s.status IN ('ACTIVE', 'CANCEL_RESERVED')
               AND s.endedAt < :now
             """)
     List<Subscription> findExpiredSubscriptions(@Param("now") LocalDateTime now);

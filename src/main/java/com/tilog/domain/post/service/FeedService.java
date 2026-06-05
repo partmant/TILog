@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class FeedService {
 
     private final FollowRepository followRepository;
-    private final PostRepository postRepository;  // 2번 담당자 Repository
+    private final PostRepository postRepository;
 
     /**
      * 팔로잉 피드 — 내가 팔로우한 사용자들의 TIL 최신순 조회

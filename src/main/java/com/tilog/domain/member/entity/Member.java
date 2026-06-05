@@ -50,6 +50,14 @@ public class Member extends BaseTimeEntity {
     @Column(name = "role", nullable = false)
     private MemberRole role;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "current_status")
+    private CurrentStatus currentStatus;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "target_job")
+    private TargetJob targetJob;
+
     @Column(name = "is_banned", nullable = false)
     private boolean banned;
 
@@ -57,23 +65,31 @@ public class Member extends BaseTimeEntity {
     private LocalDateTime bannedUntil;
 
     @Builder
-    private Member(String email, String password, String nickname, MemberRole role) {
+    private Member(String email, String password, String nickname,
+                   CurrentStatus currentStatus, TargetJob targetJob, MemberRole role) {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
+        this.currentStatus = currentStatus;
+        this.targetJob = targetJob;
         this.role = role != null ? role : MemberRole.USER;
         this.banned = false;
         this.bannedUntil = null;
     }
 
    // 회원가입 시 신규 회원 생성
-    public static Member create(String email, String encodedPassword, String nickname) {
-        return Member.builder()
-                .email(email)
-                .password(encodedPassword)
-                .nickname(nickname)
-                .role(MemberRole.USER)
-                .build();
+   public static Member create(String email, String encodedPassword, String nickname,
+                               CurrentStatus currentStatus, TargetJob targetJob) {
+       return Member.builder()
+               .email(email).password(encodedPassword).nickname(nickname)
+               .currentStatus(currentStatus).targetJob(targetJob).role(MemberRole.USER)
+               .build();
+    }
+    // 프로필 수정
+    public void updateProfile(String nickname, CurrentStatus currentStatus, TargetJob targetJob) {
+        if (nickname != null && !nickname.isBlank()) this.nickname = nickname;
+        this.currentStatus = currentStatus;
+        this.targetJob = targetJob;
     }
 //    @CreationTimestamp
 //    @Column(name = "created_at", nullable = false, updatable = false)

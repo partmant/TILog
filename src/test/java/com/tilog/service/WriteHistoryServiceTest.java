@@ -95,7 +95,7 @@ class WriteHistoryServiceTest {
         Member member = Member.create(
                 "test" + memberId + "@example.com",
                 "encoded-password",
-                "테스트유저" + memberId
+                "테스트유저" + memberId, null, null
         );
 
         setMemberId(member, memberId);

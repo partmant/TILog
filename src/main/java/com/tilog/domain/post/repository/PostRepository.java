@@ -29,6 +29,11 @@ public interface PostRepository extends JpaRepository<Post, Long>, PostRepositor
     List<Post> findByMemberAndVisibilityAndIsDeletedFalse(Member member, Visibility visibility);
 
     // 팔로잉 피드용
+
+    // 마이페이지 상단 통계 - 회원의 전체 TIL 수 (삭제 제외, DRAFT 포함)
+    @Query("SELECT COUNT(p) FROM Post p WHERE p.member.id = :memberId AND p.isDeleted = false")
+    int countTotalTilsByMember(@Param("memberId") Long memberId);
+
     Slice<Post> findByMember_IdInAndIsDeletedFalseOrderByCreatedAtDesc(
             Collection<Long> memberIds, Pageable pageable
     );

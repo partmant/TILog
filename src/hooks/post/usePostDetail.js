@@ -3,9 +3,11 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import { getPostDetail, deletePost, } from "../../api/post";
 
-import { getComments, createComment, getReplies, } from "../../api/comment";
+import { getComments, createComment, updateComment, deleteComment, getReplies, } from "../../api/comment";
 
 import { getLikeInfo, likePost, unlikePost, } from "../../api/like";
+
+import { follow, unfollow, isFollowing, } from "../../api/follow";
 
 import { getPostEditPath, postListPath, } from "../../constants/post";
 
@@ -70,6 +72,17 @@ export function usePostDetail() {
         liked: false,
     });
 
+    // 팔로우 상태
+    const [followInfo, setFollowInfo] = useState({
+        following: false,
+    });
+
+    // 댓글 수정 대상 ID
+    const [editCommentId, setEditCommentId] = useState(null);
+
+    // 댓글 수정 입력값
+    const [editCommentContent, setEditCommentContent] = useState("");
+
     // =========================
     // 데이터 조회
     // =========================
@@ -129,6 +142,21 @@ export function usePostDetail() {
 
         fetchLikeInfo();
     }, [postId]);
+
+    // 팔로우 여부 조회 (다른 사람 게시글일 때만)
+    useEffect(() => {
+        const fetchFollowInfo = async () => {
+            if (!post || post.owner) return;
+            try {
+                const following = await isFollowing(post.memberId);
+                setFollowInfo({ following });
+            } catch {
+                setFollowInfo({ following: false });
+            }
+        };
+
+        fetchFollowInfo();
+    }, [post]);
 
     // =========================
     // 이벤트 처리
@@ -209,6 +237,68 @@ export function usePostDetail() {
         }
     };
 
+    // 팔로우 토글 요청
+    const handleToggleFollow = async () => {
+        try {
+            if (followInfo.following) {
+                await unfollow(post.memberId);
+                setFollowInfo({ following: false });
+            } else {
+                await follow(post.memberId);
+                setFollowInfo({ following: true });
+            }
+        } catch (error) {
+            console.error(error);
+            alert("팔로우 처리 실패");
+        }
+    };
+
+    // 댓글 수정창 열기
+    const handleOpenEditComment = (commentId, currentContent) => {
+        setEditCommentId(commentId);
+        setEditCommentContent(currentContent);
+    };
+
+    // 댓글 수정창 닫기
+    const handleCloseEditComment = () => {
+        setEditCommentId(null);
+        setEditCommentContent("");
+    };
+
+    // 댓글 수정 입력값 변경
+    const handleEditCommentChange = (e) => {
+        setEditCommentContent(e.target.value);
+    };
+
+    // 댓글 수정 요청
+    const handleUpdateComment = async (commentId) => {
+        if (!editCommentContent.trim()) {
+            alert("댓글 내용을 입력해주세요.");
+            return;
+        }
+        try {
+            await updateComment(commentId, editCommentContent);
+            await refreshCommentsWithReplies(commentPage);
+            handleCloseEditComment();
+        } catch (error) {
+            console.error(error);
+            alert("댓글 수정 실패");
+        }
+    };
+
+    // 댓글 삭제 요청
+    const handleDeleteComment = async (commentId) => {
+        const confirmed = window.confirm("댓글을 삭제하시겠습니까?");
+        if (!confirmed) return;
+        try {
+            await deleteComment(commentId);
+            await refreshCommentsWithReplies(commentPage);
+        } catch (error) {
+            console.error(error);
+            alert("댓글 삭제 실패");
+        }
+    };
+
     // 댓글 작성 요청
     const handleCreateComment = async () => {
         if (!commentContent.trim()) {
@@ -270,6 +360,7 @@ export function usePostDetail() {
         comments,
         repliesMap,
         likeInfo,
+        followInfo,
         commentContent,
         commentPage,
         commentPageInfo,
@@ -278,9 +369,12 @@ export function usePostDetail() {
         replyContent,
         showComments,
         showCommentForm,
+        editCommentId,
+        editCommentContent,
         handleEdit,
         handleDelete,
         handleToggleLike,
+        handleToggleFollow,
         handleMoveList,
         handleCommentChange,
         handleReplyChange,
@@ -291,6 +385,11 @@ export function usePostDetail() {
         handleToggleComments,
         handleOpenCommentForm,
         handleCloseCommentForm,
+        handleOpenEditComment,
+        handleCloseEditComment,
+        handleEditCommentChange,
+        handleUpdateComment,
+        handleDeleteComment,
         pagedComments,
     };
 }

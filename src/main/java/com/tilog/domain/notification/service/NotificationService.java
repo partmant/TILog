@@ -88,6 +88,27 @@ public class NotificationService {
         notificationRepository.markAllAsRead(memberId);
     }
 
+    /** 알림 단건 삭제 */
+    @Transactional
+    public void deleteNotification(Long notificationId) {
+        Long memberId = SecurityUtil.getCurrentMemberId();
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOTIFICATION_NOT_FOUND));
+
+        if (!notification.getReceiver().getId().equals(memberId)) {
+            throw new CustomException(ErrorCode.NOTIFICATION_UNAUTHORIZED);
+        }
+
+        notificationRepository.delete(notification);
+    }
+
+    /** 알림 전체 삭제 */
+    @Transactional
+    public void deleteAllNotifications() {
+        Long memberId = SecurityUtil.getCurrentMemberId();
+        notificationRepository.deleteAllByReceiverId(memberId);
+    }
+
     private String buildMessage(String senderNickname, NotificationType type) {
         return switch (type) {
             case COMMENT -> senderNickname + "님이 회원님의 TIL에 댓글을 남겼습니다.";

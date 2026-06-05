@@ -1,5 +1,6 @@
 package com.tilog.domain.post.service;
 
+import com.tilog.domain.post.entity.Visibility;
 import com.tilog.domain.post.entity.Post;
 import com.tilog.domain.post.dto.FeedPostResponse;
 import com.tilog.global.security.SecurityUtil;
@@ -21,15 +22,10 @@ import java.util.stream.Collectors;
 public class FeedService {
 
     private final FollowRepository followRepository;
-    private final PostRepository postRepository;  // 2번 담당자 Repository
+    private final PostRepository postRepository;
 
     /**
      * 팔로잉 피드 — 내가 팔로우한 사용자들의 TIL 최신순 조회
-     * PostRepository에 아래 메서드 추가 필요 (2번 담당자에게 요청):
-     *
-     * Slice<Post> findByMember_IdInAndIsDeletedFalseOrderByCreatedAtDesc(
-     *     Collection<Long> memberIds, Pageable pageable
-     * );
      */
     public List<FeedPostResponse> getFollowingFeed(int page, int size) {
         Long currentMemberId = SecurityUtil.getCurrentMemberId();
@@ -45,6 +41,20 @@ public class FeedService {
         Slice<Post> posts = postRepository
                 .findByMember_IdInAndIsDeletedFalseOrderByCreatedAtDesc(
                         followingIds, PageRequest.of(page, size)
+                );
+
+        return posts.stream()
+                .map(FeedPostResponse::from)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 특정 회원의 공개 TIL 목록 조회
+     */
+    public List<FeedPostResponse> getMemberTils(Long memberId, int page, int size) {
+        Slice<Post> posts = postRepository
+                .findByMember_IdAndVisibilityAndIsDeletedFalseOrderByCreatedAtDesc(
+                        memberId, Visibility.PUBLIC, PageRequest.of(page, size)
                 );
 
         return posts.stream()

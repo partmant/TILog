@@ -33,6 +33,11 @@ public interface PostRepository extends JpaRepository<Post, Long>, PostRepositor
             Collection<Long> memberIds, Pageable pageable
     );
 
+    // 특정 회원의 공개 TIL 목록 (PUBLIC만, 최신순)
+    Slice<Post> findByMember_IdAndVisibilityAndIsDeletedFalseOrderByCreatedAtDesc(
+            Long memberId, Visibility visibility, Pageable pageable
+    );
+
     /**
      * 주간 요약 — 총 게시글 수, 총 학습 시간(분)
      * returns Object[]{Long count, Long totalStudyTime}

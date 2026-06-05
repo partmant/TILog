@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { getPostDetail, deletePost, } from "../../api/post";
+import { getPostDetail, deletePost, generatePostSummary, } from "../../api/post";
 
 import { getComments, createComment, updateComment, deleteComment, getReplies, } from "../../api/comment";
 
@@ -30,6 +30,11 @@ export function usePostDetail() {
 
     // 게시글 상태
     const [post, setPost] = useState(null);
+
+    // 게시글 핵심 요약 상태
+    const [postSummary, setPostSummary] = useState("");
+    const [postSummaryLoading, setPostSummaryLoading] = useState(false);
+    const [postSummaryError, setPostSummaryError] = useState("");
 
     // 댓글 열기/닫기 상태
     const [showComments, setShowComments] = useState(false);
@@ -95,6 +100,41 @@ export function usePostDetail() {
         };
 
         fetchPostDetail();
+    }, [postId]);
+
+    // 게시글 핵심 요약 조회
+    useEffect(() => {
+        let ignore = false;
+
+        const fetchPostSummary = async () => {
+            setPostSummary("");
+            setPostSummaryError("");
+            setPostSummaryLoading(true);
+
+            try {
+                const data = await generatePostSummary(postId);
+                if (!ignore) {
+                    setPostSummary(data?.summary || "");
+                }
+            } catch (error) {
+                console.error(error);
+                if (!ignore) {
+                    setPostSummaryError(
+                        error.response?.data?.message || "핵심 요약을 불러오지 못했습니다."
+                    );
+                }
+            } finally {
+                if (!ignore) {
+                    setPostSummaryLoading(false);
+                }
+            }
+        };
+
+        fetchPostSummary();
+
+        return () => {
+            ignore = true;
+        };
     }, [postId]);
 
     // 게시글 댓글 및 대댓글 목록 재조회
@@ -357,6 +397,9 @@ export function usePostDetail() {
 
     return {
         post,
+        postSummary,
+        postSummaryLoading,
+        postSummaryError,
         comments,
         repliesMap,
         likeInfo,

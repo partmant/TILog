@@ -18,6 +18,12 @@ export const getPostDetail = async (postId, increaseViewCount = true) => {
     return response.data;
 };
 
+// 게시글 핵심 요약 생성 API
+export const generatePostSummary = async (postId) => {
+    const response = await api.post(`/api/posts/${postId}/summary`);
+    return response.data;
+};
+
 // 게시글 검색 API
 const mapPostSummary = (post) => ({
     postId: post.postId,

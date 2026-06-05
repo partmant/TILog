@@ -1,63 +1,71 @@
-import { useState, useEffect, useRef } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { getCurrentUser, isLoggedIn, logout } from "../../utils/authUtils";
+import { useHeader } from "../../hooks/common/useHeader";
 import { useSSE } from "../../hooks/sse/useSSE";
 import "../../styles/common/Header.css";
-import { fetchMyNotifications, markNotificationAsRead, markAllNotificationsAsRead } from "../../api/notificationApi";
+
+const NOTIFICATION_LABEL = {
+    COMMENT: "댓글",
+    LIKE: "좋아요",
+    FOLLOW: "팔로우",
+};
+
+// 휴지통 아이콘
+const TrashIcon = () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="3 6 5 6 21 6"/>
+        <path d="M19 6l-1 14H6L5 6"/>
+        <path d="M10 11v6M14 11v6"/>
+        <path d="M9 6V4h6v2"/>
+    </svg>
+);
+
+// 벨 아이콘
+const BellIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+    </svg>
+);
+
+// 사람들 아이콘
+const PeopleIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+    </svg>
+);
+
 const Header = () => {
     const navigate = useNavigate();
-
     const loggedIn = isLoggedIn();
     const user = getCurrentUser();
     const initial = user?.nickname?.charAt(0).toUpperCase() ?? "U";
-
-    const { unreadCount, setUnreadCount } = useSSE(loggedIn);
-    const [isNotiOpen, setIsNotiOpen] = useState(false);
-    const [notifications, setNotifications] = useState([]);
-    const dropdownRef = useRef(null);
-
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-                setIsNotiOpen(false);
-            }
-        };
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
-
-    const handleNotiClick = async () => {
-        const nextState = !isNotiOpen;
-        setIsNotiOpen(nextState);
-
-        // 드롭다운이 열릴 때 백엔드에서 알림 목록을 가져옵니다!
-        if (nextState) {
-            try {
-                const res = await fetchMyNotifications();
-                // ApiResponse.success() 구조라면 res.data 배열을 저장
-                setNotifications(res.data || []);
-            } catch (error) {
-                console.error("알림 목록을 불러오지 못했습니다.", error);
-            }
-        }
-    };
-
-    const handleReadNotification = async (notiId) => {
-        try {
-            await markNotificationAsRead(notiId);
-            // 클릭한 알림의 isRead 상태를 화면에서도 true로 변경
-            setNotifications(prev => prev.map(n => n.id === notiId ? { ...n, isRead: true } : n));
-            // 총 안 읽은 갯수 1 감소 (0 이하로 내려가지 않게)
-            setUnreadCount(prev => Math.max(0, prev - 1));
-        } catch (error) {
-            console.error(error);
-        }
-    };
 
     const handleLogout = () => {
         logout();
         navigate("/login", { replace: true });
     };
+
+    const {
+        showNotifications, notifications, unreadCount: headerUnreadCount, notificationRef,
+        handleToggleNotifications, handleMarkAsRead, handleMarkAllAsRead,
+        handleDeleteNotification, handleDeleteAllNotifications,
+        showFollowPanel, followTab, setFollowTab,
+        followers, followings, followLoading,
+        followPanelRef, handleToggleFollowPanel,
+        handleNavigateToMemberTil,
+    } = useHeader();
+
+    // 🔥 2-2. 회원님의 실시간 SSE 안테나 추가!
+    const { unreadCount: sseUnreadCount } = useSSE(loggedIn);
+    // 실시간 알림이 있으면 그 숫자를 띄우고, 없으면 기본 숫자를 띄웁니다.
+    const finalUnreadCount = sseUnreadCount > 0 ? sseUnreadCount : headerUnreadCount;
 
     return (
         <header className="app-header">
@@ -67,7 +75,6 @@ const Header = () => {
                 onClick={() => navigate(loggedIn ? "/mypage" : "/feed")}
             >
                 <div className="app-header-logo">T</div>
-
                 <div>
                     <strong>TILog</strong>
                     <span>Growth Platform</span>
@@ -75,40 +82,21 @@ const Header = () => {
             </button>
 
             <nav className="app-header-nav">
-                <NavLink
-                    to="/feed"
-                    className={({ isActive }) =>
-                        isActive ? "app-header-nav-link active" : "app-header-nav-link"
-                    }
-                >
+                <NavLink to="/feed" className={({ isActive }) =>
+                    isActive ? "app-header-nav-link active" : "app-header-nav-link"}>
                     메인 피드
                 </NavLink>
-
-                <NavLink
-                    to="/posts"
-                    className={({ isActive }) =>
-                        isActive ? "app-header-nav-link active" : "app-header-nav-link"
-                    }
-                >
+                <NavLink to="/posts" className={({ isActive }) =>
+                    isActive ? "app-header-nav-link active" : "app-header-nav-link"}>
                     TIL 목록
                 </NavLink>
-
-                <NavLink
-                    to="/feedback"
-                    className={({ isActive }) =>
-                        isActive ? "app-header-nav-link active" : "app-header-nav-link"
-                    }
-                >
+                <NavLink to="/feedback" className={({ isActive }) =>
+                    isActive ? "app-header-nav-link active" : "app-header-nav-link"}>
                     피드백
                 </NavLink>
-
                 {loggedIn && (
-                    <NavLink
-                        to="/mypage"
-                        className={({ isActive }) =>
-                            isActive ? "app-header-nav-link active" : "app-header-nav-link"
-                        }
-                    >
+                    <NavLink to="/mypage" className={({ isActive }) =>
+                        isActive ? "app-header-nav-link active" : "app-header-nav-link"}>
                         마이페이지
                     </NavLink>
                 )}
@@ -117,85 +105,184 @@ const Header = () => {
             <div className="app-header-actions">
                 {loggedIn ? (
                     <>
-                        <button
-                            type="button"
-                            className="app-header-write-button"
-                            onClick={() => navigate("/posts/write")}
-                        >
+                        <button type="button" className="app-header-write-button"
+                                onClick={() => navigate("/posts/write")}>
                             TIL 작성하기
                         </button>
 
-                        <div className="noti-dropdown-container" ref={dropdownRef}>
+                        {/* ── 팔로워/팔로잉 패널 ── */}
+                        <div className="header-panel-wrapper" ref={followPanelRef}>
                             <button
                                 type="button"
-                                className="app-header-noti-button"
-                                onClick={handleNotiClick}
+                                className={`app-header-icon-button ${showFollowPanel ? "active" : ""}`}
+                                onClick={handleToggleFollowPanel}
+                                aria-label="팔로워/팔로잉"
                             >
-                                🔔
-                                {unreadCount > 0 && <span className="noti-badge">{unreadCount}</span>}
+                                <PeopleIcon />
                             </button>
 
-                            {isNotiOpen && (
-                                <div className="noti-dropdown-menu">
-                                    <div className="noti-dropdown-header">
-                                        <h4>알림</h4>
-                                        <button className="noti-read-all-btn" onClick={markAllNotificationsAsRead}>
-                                            모두 읽음
-                                        </button>
+                            {showFollowPanel && (
+                                <div className="header-dropdown-panel">
+                                    {/* 패널 헤더 */}
+                                    <div className="header-panel-head">
+                                        <div className="header-panel-tabs">
+                                            <button
+                                                type="button"
+                                                className={`header-panel-tab ${followTab === "followers" ? "active" : ""}`}
+                                                onClick={() => setFollowTab("followers")}
+                                            >
+                                                팔로워
+                                                {followers.length > 0 && (
+                                                    <span className="header-panel-tab-count">
+                                                        {followers.length}
+                                                    </span>
+                                                )}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className={`header-panel-tab ${followTab === "followings" ? "active" : ""}`}
+                                                onClick={() => setFollowTab("followings")}
+                                            >
+                                                팔로잉
+                                                {followings.length > 0 && (
+                                                    <span className="header-panel-tab-count">
+                                                        {followings.length}
+                                                    </span>
+                                                )}
+                                            </button>
+                                        </div>
                                     </div>
-                                    <ul className="noti-list">
-                                        {notifications.length === 0 ? (
-                                            <li className="noti-empty">새로운 알림이 없습니다.</li>
-                                        ) : (
-                                            notifications.map((noti) => (
-                                                <li
-                                                    key={noti.id}
-                                                    className={`noti-item ${noti.isRead ? 'read' : 'unread'}`}
-                                                    onClick={() => handleReadNotification(noti.id)}
-                                                >
-                                                    <div className="noti-content">{noti.message}</div>
-                                                    <div className="noti-time">방금 전</div> {/* 시간 포맷팅은 추후 적용 */}
+
+                                    {/* 목록 */}
+                                    <ul className="header-panel-list">
+                                        {followLoading ? (
+                                            <li className="header-panel-empty">불러오는 중...</li>
+                                        ) : (() => {
+                                            const list = followTab === "followers" ? followers : followings;
+                                            return list.length === 0 ? (
+                                                <li className="header-panel-empty">
+                                                    {followTab === "followers" ? "팔로워가 없습니다" : "팔로잉이 없습니다"}
                                                 </li>
-                                            ))
-                                        )}
+                                            ) : list.map((member) => (
+                                                <li key={member.memberId} className="header-panel-follow-item">
+                                                    <div className="header-panel-avatar">
+                                                        {member.nickname?.charAt(0).toUpperCase()}
+                                                    </div>
+                                                    <span className="header-panel-nickname">
+                                                        {member.nickname}
+                                                    </span>
+                                                    {followTab === "followings" && (
+                                                        <button
+                                                            type="button"
+                                                            className="header-panel-til-btn"
+                                                            onClick={() => handleNavigateToMemberTil(member.memberId)}
+                                                        >
+                                                            TIL 보기
+                                                        </button>
+                                                    )}
+                                                </li>
+                                            ));
+                                        })()}
                                     </ul>
                                 </div>
                             )}
                         </div>
 
-                        <button
-                            type="button"
-                            className="app-header-profile-button"
-                            onClick={() => navigate("/mypage")}
-                            aria-label="마이페이지로 이동"
-                        >
+                        {/* ── 알림 패널 ── */}
+                        <div className="header-panel-wrapper" ref={notificationRef}>
+                            <button
+                                type="button"
+                                className={`app-header-icon-button ${showNotifications ? "active" : ""}`}
+                                onClick={handleToggleNotifications}
+                                aria-label="알림"
+                            >
+                                <BellIcon />
+                                {/* 🔥 3. unreadCount를 finalUnreadCount로 변경! */}
+                                {finalUnreadCount > 0 && (
+                                    <span className="app-header-notification-badge">
+                                        {finalUnreadCount > 99 ? "99+" : finalUnreadCount}
+                                    </span>
+                                )}
+                            </button>
+
+                            {showNotifications && (
+                                <div className="header-dropdown-panel">
+                                    {/* 패널 헤더 */}
+                                    <div className="header-panel-head">
+                                        <span className="header-panel-title">알림</span>
+                                        <div className="header-panel-actions">
+                                            {notifications.some((n) => !n.isRead) && (
+                                                <button type="button"
+                                                        className="header-panel-action-btn"
+                                                        onClick={handleMarkAllAsRead}>
+                                                    모두 읽음
+                                                </button>
+                                            )}
+                                            {notifications.length > 0 && (
+                                                <button type="button"
+                                                        className="header-panel-action-btn danger"
+                                                        onClick={handleDeleteAllNotifications}>
+                                                    모두 삭제
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* 알림 목록 */}
+                                    <ul className="header-panel-list">
+                                        {notifications.length === 0 ? (
+                                            <li className="header-panel-empty">새로운 알림이 없습니다</li>
+                                        ) : notifications.map((n) => (
+                                            <li
+                                                key={n.notificationId}
+                                                className={`header-panel-noti-item ${!n.isRead ? "unread" : ""}`}
+                                                onClick={() => !n.isRead && handleMarkAsRead(n.notificationId)}
+                                            >
+                                                <span className="header-panel-noti-type">
+                                                    {NOTIFICATION_LABEL[n.notificationType] ?? n.notificationType}
+                                                </span>
+                                                <span className="header-panel-noti-message">
+                                                    {n.message}
+                                                </span>
+                                                <div className="header-panel-noti-right">
+                                                    {!n.isRead && <span className="header-panel-noti-dot" />}
+                                                    <button
+                                                        type="button"
+                                                        className="header-panel-noti-delete"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleDeleteNotification(n.notificationId);
+                                                        }}
+                                                        aria-label="알림 삭제"
+                                                    >
+                                                        <TrashIcon />
+                                                    </button>
+                                                </div>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                        </div>
+
+                        <button type="button" className="app-header-profile-button"
+                                onClick={() => navigate("/mypage")} aria-label="마이페이지로 이동">
                             {initial}
                         </button>
 
-                        <button
-                            type="button"
-                            className="app-header-logout-button"
-                            onClick={handleLogout}
-                            aria-label="로그아웃"
-                        >
+                        <button type="button" className="app-header-logout-button"
+                                onClick={handleLogout} aria-label="로그아웃">
                             로그아웃
                         </button>
                     </>
                 ) : (
                     <>
-                        <button
-                            type="button"
-                            className="app-header-logout-button"
-                            onClick={() => navigate("/login")}
-                        >
+                        <button type="button" className="app-header-logout-button"
+                                onClick={() => navigate("/login")}>
                             로그인
                         </button>
-
-                        <button
-                            type="button"
-                            className="app-header-write-button"
-                            onClick={() => navigate("/signup")}
-                        >
+                        <button type="button" className="app-header-write-button"
+                                onClick={() => navigate("/signup")}>
                             회원가입
                         </button>
                     </>

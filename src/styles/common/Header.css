@@ -162,144 +162,578 @@
     }
 }
 
-.app-header-noti-button {
-    position: relative;
-    display: grid;
-    width: 46px;
-    height: 46px;
-    place-items: center;
-    border: none;
-    border-radius: 50%;
+.app-header-follow-button:hover {
     background: #f3f4f6;
-    font-size: 20px;
-    cursor: pointer;
-    transition: background 0.2s;
+    color: #7c3aed;
 }
 
-.app-header-noti-button:hover {
-    background: #e5e7eb;
-}
-
-.noti-badge {
-    position: absolute;
-    top: -2px;
-    right: -2px;
-    background: #ef4444;
-    color: white;
-    font-size: 11px;
-    font-weight: 900;
-    width: 20px;
-    height: 20px;
+/* ── 알림 벨 버튼 ── */
+.app-header-notification-button {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    border: 2px solid white;
-    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: none;
+    background: transparent;
+    color: #6b7280;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
 }
 
-@keyframes popIn {
-    0% { transform: scale(0); }
-    100% { transform: scale(1); }
-}
-
-.noti-dropdown-container {
-    position: relative;
-}
-
-/* 드롭다운 팝업창 */
-.noti-dropdown-menu {
+/* ── 읽지 않은 알림 뱃지 ── */
+.app-header-notification-badge {
     position: absolute;
-    top: 56px;
-    right: -10px;
+    top: 2px;
+    right: 2px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #a855f7, #06b6d4);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: center;
+    pointer-events: none;
+}
+
+/* ── 알림 드롭다운 패널 ── */
+.notification-panel {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
     width: 320px;
-    background: #ffffff;
+    max-height: 420px;
+    background: #fff;
     border-radius: 16px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
-    border: 1px solid #f3f4f6;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    border: 1px solid #f0f0f0;
     overflow: hidden;
     z-index: 1000;
-    animation: dropDownFade 0.2s ease-out forwards;
-}
-
-@keyframes dropDownFade {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* 드롭다운 상단 헤더 */
-.noti-dropdown-header {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
+    animation: panelFadeIn 0.15s ease;
+}
+
+@keyframes panelFadeIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.notification-panel-header {
+    display: flex;
     align-items: center;
-    padding: 16px 20px;
+    justify-content: space-between;
+    padding: 14px 16px 10px;
     border-bottom: 1px solid #f3f4f6;
-    background: #fafafa;
+    flex-shrink: 0;
 }
 
-.noti-dropdown-header h4 {
-    margin: 0;
+.notification-panel-title {
     font-size: 15px;
-    font-weight: 800;
-    color: #111827;
+    font-weight: 700;
+    color: #1f2937;
 }
 
-.noti-read-all-btn {
+.notification-panel-read-all {
+    font-size: 12px;
+    font-weight: 600;
+    color: #7c3aed;
     background: none;
     border: none;
-    font-size: 12px;
-    font-weight: 700;
-    color: #8b5cf6;
     cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: background 0.15s;
 }
 
-.noti-read-all-btn:hover {
-    text-decoration: underline;
+.notification-panel-read-all:hover {
+    background: #f5f3ff;
 }
 
-/* 알림 리스트 목록 */
-.noti-list {
+.notification-panel-list {
     list-style: none;
     margin: 0;
-    padding: 0;
-    max-height: 360px;
+    padding: 6px 0;
     overflow-y: auto;
+    flex: 1;
 }
 
-.noti-empty {
-    padding: 40px 20px;
+.notification-panel-empty {
+    padding: 32px 16px;
     text-align: center;
     font-size: 13px;
     color: #9ca3af;
-    font-weight: 600;
 }
 
-.noti-item {
-    padding: 16px 20px;
-    border-bottom: 1px solid #f9fafb;
+.notification-panel-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 16px;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: background 0.15s;
+    position: relative;
 }
 
-.noti-item:hover {
-    background: #f8fafc;
+.notification-panel-item:hover {
+    background: #fafafa;
 }
 
-/* 안 읽은 알림은 배경색을 살짝 다르게 표시 */
-.noti-item.unread {
-    background: #f0fdfa;
+.notification-panel-item.unread {
+    background: #faf5ff;
 }
 
-.noti-content {
-    font-size: 14px;
-    font-weight: 600;
+.notification-panel-type {
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 700;
+    color: #7c3aed;
+    background: #f3e8ff;
+    padding: 2px 7px;
+    border-radius: 999px;
+    margin-top: 1px;
+}
+
+.notification-panel-message {
+    font-size: 13px;
     color: #374151;
     line-height: 1.4;
-    margin-bottom: 6px;
+    flex: 1;
 }
 
-.noti-time {
+.notification-panel-dot {
+    flex-shrink: 0;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #a855f7, #06b6d4);
+    margin-top: 5px;
+}
+
+/* ── 팔로워/팔로잉 모달 오버레이 ── */
+.follow-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: overlayFadeIn 0.15s ease;
+}
+
+@keyframes overlayFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* ── 팔로워/팔로잉 모달 ── */
+.follow-modal {
+    width: 380px;
+    max-height: 520px;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.16);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: modalSlideUp 0.2s ease;
+}
+
+@keyframes modalSlideUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.follow-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px 0;
+    flex-shrink: 0;
+}
+
+.follow-modal-tabs {
+    display: flex;
+    gap: 4px;
+    background: #f3f4f6;
+    border-radius: 10px;
+    padding: 3px;
+}
+
+.follow-modal-tab {
+    padding: 6px 20px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 600;
+    color: #6b7280;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.follow-modal-tab.active {
+    background: #fff;
+    color: #7c3aed;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.follow-modal-close {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    background: #f3f4f6;
+    color: #6b7280;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+}
+
+.follow-modal-close:hover {
+    background: #e5e7eb;
+}
+
+.follow-modal-list {
+    list-style: none;
+    margin: 12px 0 0;
+    padding: 0 8px 12px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.follow-modal-empty {
+    padding: 40px 16px;
+    text-align: center;
+    font-size: 13px;
+    color: #9ca3af;
+}
+
+.follow-modal-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    transition: background 0.15s;
+    cursor: default;
+}
+
+.follow-modal-item:hover {
+    background: #faf5ff;
+}
+
+.follow-modal-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #a855f7, #06b6d4);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.follow-modal-nickname {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+/* ── 공통 아이콘 버튼 ── */
+.app-header-icon-button {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: #6b7280;
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s;
+    flex-shrink: 0;
+}
+.app-header-icon-button:hover,
+.app-header-icon-button.active {
+    background: #f3f0ff;
+    color: #7c3aed;
+}
+
+/* ── 패널 공통 래퍼 ── */
+.header-panel-wrapper {
+    position: relative;
+}
+
+/* ── 드롭다운 패널 공통 ── */
+.header-dropdown-panel {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 320px;
+    max-height: 440px;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 8px 36px rgba(0, 0, 0, 0.13);
+    border: 1px solid #f0eaff;
+    overflow: hidden;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    animation: panelFadeIn 0.15s ease;
+}
+
+@keyframes panelFadeIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── 패널 헤더 ── */
+.header-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid #f5f3ff;
+    flex-shrink: 0;
+    gap: 8px;
+}
+
+.header-panel-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1f2937;
+    flex-shrink: 0;
+}
+
+/* ── 패널 액션 버튼 (모두읽음/모두삭제) ── */
+.header-panel-actions {
+    display: flex;
+    gap: 6px;
+    margin-left: auto;
+}
+
+.header-panel-action-btn {
     font-size: 11px;
     font-weight: 600;
+    color: #7c3aed;
+    background: none;
+    border: 1px solid #e9d5ff;
+    border-radius: 6px;
+    padding: 3px 9px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+}
+.header-panel-action-btn:hover {
+    background: #f5f3ff;
+}
+.header-panel-action-btn.danger {
+    color: #ef4444;
+    border-color: #fecaca;
+}
+.header-panel-action-btn.danger:hover {
+    background: #fff5f5;
+}
+
+/* ── 팔로워/팔로잉 탭 ── */
+.header-panel-tabs {
+    display: flex;
+    gap: 2px;
+    background: #f3f4f6;
+    border-radius: 10px;
+    padding: 3px;
+}
+
+.header-panel-tab {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 16px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 600;
+    color: #6b7280;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+.header-panel-tab.active {
+    background: #fff;
+    color: #7c3aed;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.header-panel-tab-count {
+    font-size: 11px;
+    font-weight: 700;
+    background: #ede9fe;
+    color: #7c3aed;
+    border-radius: 999px;
+    padding: 0 6px;
+    min-width: 18px;
+    text-align: center;
+    line-height: 18px;
+    height: 18px;
+}
+.header-panel-tab.active .header-panel-tab-count {
+    background: #7c3aed;
+    color: #fff;
+}
+
+/* ── 공통 목록 ── */
+.header-panel-list {
+    list-style: none;
+    margin: 0;
+    padding: 6px 0 8px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.header-panel-empty {
+    padding: 32px 16px;
+    text-align: center;
+    font-size: 13px;
     color: #9ca3af;
+}
+
+/* ── 팔로우 아이템 ── */
+.header-panel-follow-item {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 9px 16px;
+    transition: background 0.13s;
+}
+.header-panel-follow-item:hover {
+    background: #faf5ff;
+}
+
+.header-panel-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #a855f7, #06b6d4);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.header-panel-nickname {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+/* ── 알림 아이템 ── */
+.header-panel-noti-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: background 0.13s;
+    position: relative;
+}
+.header-panel-noti-item:hover {
+    background: #fafafa;
+}
+.header-panel-noti-item.unread {
+    background: #faf5ff;
+}
+
+.header-panel-noti-type {
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 700;
+    color: #7c3aed;
+    background: #f3e8ff;
+    padding: 2px 7px;
+    border-radius: 999px;
+    margin-top: 1px;
+    white-space: nowrap;
+}
+
+.header-panel-noti-message {
+    font-size: 12px;
+    color: #374151;
+    line-height: 1.45;
+    flex: 1;
+    word-break: keep-all;
+}
+
+/* 우측 영역 (점 + 휴지통) */
+.header-panel-noti-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.header-panel-noti-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #a855f7, #06b6d4);
+    flex-shrink: 0;
+}
+
+/* 휴지통 버튼 */
+.header-panel-noti-delete {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: #d1d5db;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    flex-shrink: 0;
+}
+.header-panel-noti-delete:hover {
+    background: #fee2e2;
+    color: #ef4444;
+}
+
+/* ── TIL 보기 버튼 (팔로잉 목록) ── */
+.header-panel-til-btn {
+    margin-left: auto;
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 700;
+    color: #7c3aed;
+    background: #f3e8ff;
+    border: none;
+    border-radius: 8px;
+    padding: 4px 10px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+}
+.header-panel-til-btn:hover {
+    background: #7c3aed;
+    color: #fff;
 }

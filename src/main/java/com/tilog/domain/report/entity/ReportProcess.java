@@ -2,12 +2,15 @@ package com.tilog.domain.report.entity;
 
 import com.tilog.domain.member.entity.Member;
 import jakarta.persistence.*;
-import lombok.Getter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ReportProcess {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,5 +29,17 @@ public class ReportProcess {
     private TargetAction targetAction;
 
     private String processContent;
-    private LocalDateTime createdAt;
+
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Builder
+    public ReportProcess(Long targetId, Member admin, TargetType targetType, TargetAction targetAction, String processContent) {
+        this.targetId = targetId;
+        this.admin = admin;
+        this.targetType = targetType;
+        this.targetAction = targetAction;
+        this.processContent = processContent;
+        this.createdAt = LocalDateTime.now();
+    }
 }

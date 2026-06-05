@@ -233,14 +233,14 @@
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    right: 0;
+    bottom: 0;
     background: rgba(17, 24, 39, 0.4);
-    backdrop-filter: blur(4px); /* 뒤쪽 배경을 살짝 흐리게 */
+    backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
+    z-index: 9999;
 }
 
 /* 하얀색 모달 카드 */

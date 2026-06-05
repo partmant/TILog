@@ -54,9 +54,17 @@ export const doSanction = async (reportId, sanctionData) => {
 };
 
 /**
- * 최근 신고 목록 4건 조회
+ * 6. 최근 신고 목록 4건 조회
  */
 export const fetchRecentReports = async () => {
     const response = await api.get('/api/admin/reports/recent');
     return response.data; // 백엔드에서 만든 List<ReportResponseDto>가 튀어나옵니다!
+};
+
+/**
+ * 7. 신고 통계 조회 (대기 중인 신고, 처리된 신고 개수)
+ */
+export const fetchReportStats = async () => {
+    const response = await api.get('/api/admin/reports/stats');
+    return response.data;
 };

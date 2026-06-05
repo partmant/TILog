@@ -95,6 +95,11 @@ const Header = () => {
                         마이페이지
                     </NavLink>
                 )}
+                {user?.role === 'ADMIN' && (
+                    <NavLink to="/admin" className={({ isActive }) => isActive ? "app-header-nav-link active text-error" : "app-header-nav-link"}>
+                        관리자
+                    </NavLink>
+                )}
             </nav>
 
             <div className="app-header-actions">

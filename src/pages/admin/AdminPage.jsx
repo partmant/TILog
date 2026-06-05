@@ -1,8 +1,21 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../../styles/admin/AdminPage.css';
-import { fetchMemberList, fetchRecentReports, changeMemberRole } from '../../api/adminApi';
+import {fetchMemberList, fetchRecentReports, changeMemberRole, doSanction} from '../../api/adminApi';
+import { getCurrentUser } from '../../utils/authUtils';
 
 const AdminPage = () => {
+
+    const navigate = useNavigate();
+    const user = getCurrentUser();
+
+    useEffect(() => {
+        if (!user || user.role !== 'ADMIN') {
+            alert('비정상적인 접근입니다. 관리자만 이용할 수 있습니다 🚨');
+            navigate('/feed', { replace: true }); // 메인 피드로 강제 추방 & 뒤로가기 방지
+        }
+    }, [user, navigate]);
+
     // ==========================================
     // 1. 상태(State) 관리: 마법의 데이터 상자
     // ==========================================
@@ -13,10 +26,45 @@ const AdminPage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [targetMemberId, setTargetMemberId] = useState('');
     const [targetRole, setTargetRole] = useState('PREMIUM');
+
+    //  신고 제재 모달 State
+    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+    const [selectedReportId, setSelectedReportId] = useState(null);
+    const [sanctionData, setSanctionData] = useState({
+        sanctionType: 'WARNING', // SUSPENSION(정지), BAN(영구추방) 등 백엔드 Enum에 맞게 세팅
+        content: ''
+    });
+
+    // 제재(Sanction) 실행 함수
+    const handleSanctionSubmit = async () => {
+        if (!sanctionData.content) {
+            alert('제재 사유(내용)를 입력해주세요.');
+            return;
+        }
+
+        try {
+            await doSanction(selectedReportId, {
+                sanctionType: sanctionData.sanctionType,
+                reasonType: 'OTHER',
+                content: sanctionData.content
+            });
+            alert('신고 처리가 완료되었습니다!');
+            setIsReportModalOpen(false);
+
+            const updatedReports = await fetchRecentReports();
+            setRecentReports(updatedReports);
+        } catch (error) {
+            console.error(error);
+            alert('신고 처리에 실패했습니다.');
+        }
+    };
+
     // ==========================================
     // 2. 부수 효과(Effect): 화면 렌더링 시 API 찌르기
     // ==========================================
     useEffect(() => {
+        if (!user || user.role !== 'ADMIN') return;
+
         const loadData = async () => {
             try {
                 // 백엔드 컨트롤러(getMemberList)에 1페이지, 10명 데이터를 요청합니다.
@@ -36,7 +84,7 @@ const AdminPage = () => {
         };
 
         loadData();
-    }, []); // 빈 배열 `[]`: 컴포넌트가 처음 화면에 나타날 때 딱 한 번만 실행!
+    }, [user]); // 빈 배열 `[]`: 컴포넌트가 처음 화면에 나타날 때 딱 한 번만 실행!
 
     // 3. 백엔드 데이터(Enum)를 화면용 예쁜 한글/색상으로 변환해 주는 마법의 함수
     const formatReportData = (report) => {
@@ -182,7 +230,21 @@ const AdminPage = () => {
                     <div className="admin-panel">
                         <h3 className="admin-panel-title">빠른 작업</h3>
                         <div className="admin-action-grid">
-                            <button className="admin-action-btn">신고 상세 보기</button>
+                            <button
+                                className="admin-action-btn"
+                                onClick={() => {
+                                    if(recentReports.length === 0) {
+                                        alert('처리할 대기 신고가 없습니다.');
+                                        return;
+                                    }
+                                    // 임시로 가장 첫 번째 신고 항목을 잡고 엽니다.
+                                    // (실무에선 리스트에서 클릭한 항목의 ID를 넘겨주는 방식을 씁니다)
+                                    setSelectedReportId(recentReports[0].reportId);
+                                    setIsReportModalOpen(true);
+                                }}
+                            >
+                                신고 상세 보기
+                            </button>
                             <button className="admin-action-btn" onClick={() => setIsModalOpen(true)}>
                                 회원 상태 변경
                             </button>
@@ -224,6 +286,45 @@ const AdminPage = () => {
                                             </button>
                                             <button className="admin-btn-save" onClick={handleRoleSubmit}>
                                                 변경 저장
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            {/* ========================================== */}
+                            {/* 팝업창 2: 신고 처리 및 제재 모달 */}
+                            {/* ========================================== */}
+                            {isReportModalOpen && (
+                                <div className="admin-modal-overlay">
+                                    <div className="admin-modal-card">
+                                        <h3>신고 처리 및 회원 제재</h3>
+
+                                        <div className="admin-modal-form">
+                                            <label>제재 수위 선택</label>
+                                            <select
+                                                value={sanctionData.sanctionType}
+                                                onChange={(e) => setSanctionData({...sanctionData, sanctionType: e.target.value})}
+                                            >
+                                                <option value="WARNING">경고 (WARNING)</option>
+                                                <option value="SUSPENSION">계정 정지 (SUSPENSION)</option>
+                                                <option value="BAN">영구 추방 (BAN)</option>
+                                            </select>
+
+                                            <label>제재 사유 작성 (유저에게 발송됨)</label>
+                                            <textarea
+                                                rows={4}
+                                                placeholder="이용 약관 위반 사유를 상세히 적어주세요."
+                                                value={sanctionData.content}
+                                                onChange={(e) => setSanctionData({...sanctionData, content: e.target.value})}
+                                            />
+                                        </div>
+
+                                        <div className="admin-modal-actions">
+                                            <button className="admin-btn-cancel" onClick={() => setIsReportModalOpen(false)}>
+                                                취소
+                                            </button>
+                                            <button className="admin-btn-save" style={{background: '#ef4444'}} onClick={handleSanctionSubmit}>
+                                                제재 확정
                                             </button>
                                         </div>
                                     </div>

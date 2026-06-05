@@ -1,8 +1,30 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { request } from "../api/apiClient";
-import { clearAuthStorage } from "../utils/authUtils";
 import "../styles/auth/Auth.css";
+
+const CURRENT_STATUS_OPTIONS = [
+    { value: "JOB_SEEKER", label: "취준생" },
+    { value: "STUDENT", label: "학생" },
+    { value: "EMPLOYED", label: "재직자" },
+    { value: "CAREER_CHANGE", label: "이직준비자" },
+    { value: "FREELANCER", label: "프리랜서" },
+];
+
+const TARGET_JOB_OPTIONS = [
+    { value: "BACKEND", label: "백엔드 개발자" },
+    { value: "FRONTEND", label: "프론트엔드 개발자" },
+    { value: "FULLSTACK", label: "풀스택 개발자" },
+    { value: "MOBILE_ANDROID", label: "안드로이드 앱 개발자" },
+    { value: "MOBILE_IOS", label: "iOS 앱 개발자" },
+    { value: "DATA_ENGINEER", label: "데이터 엔지니어" },
+    { value: "AI_ML_ENGINEER", label: "AI / ML 엔지니어" },
+    { value: "INFRA_DEVOPS", label: "인프라 / DevOps 엔지니어" },
+    { value: "GAME_DEVELOPER", label: "게임 개발자" },
+    { value: "EMBEDDED", label: "임베디드 / IoT 개발자" },
+    { value: "PRODUCT_MANAGER", label: "기획자 / PM / PO" },
+    { value: "ETC", label: "기타 / 미정" },
+];
 
 export default function SignupPage() {
     const navigate = useNavigate();
@@ -11,6 +33,8 @@ export default function SignupPage() {
         nickname: "",
         password: "",
         passwordConfirm: "",
+        currentStatus: "",
+        targetJob: "",
     });
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
@@ -34,9 +58,10 @@ export default function SignupPage() {
                     email: form.email,
                     nickname: form.nickname,
                     password: form.password,
+                    currentStatus: form.currentStatus || null,
+                    targetJob: form.targetJob || null,
                 }),
             });
-            clearAuthStorage();
             navigate("/login");
         } catch (err) {
             setError(err.message || "회원가입에 실패했습니다.");
@@ -47,13 +72,14 @@ export default function SignupPage() {
 
     return (
         <div className="auth-page">
-            <div className="auth-card">
+            <div className="auth-card" style={{ maxWidth: 980 }}>
                 {/* 좌측 폼 */}
                 <div className="auth-form-panel">
                     <h2 className="auth-form-title">회원가입</h2>
                     <p className="auth-form-subtitle">TIL 작성 습관을 만들고 성장 데이터를 기록해보세요.</p>
 
                     <form className="auth-form" onSubmit={handleSubmit}>
+                        {/* 이메일 + 닉네임 */}
                         <div className="auth-row">
                             <div className="auth-field">
                                 <label htmlFor="email">이메일</label>
@@ -65,6 +91,7 @@ export default function SignupPage() {
                                     placeholder="user01@email.com"
                                     value={form.email}
                                     onChange={handleChange}
+                                    required
                                 />
                             </div>
                             <div className="auth-field">
@@ -77,10 +104,12 @@ export default function SignupPage() {
                                     placeholder="user01"
                                     value={form.nickname}
                                     onChange={handleChange}
+                                    required
                                 />
                             </div>
                         </div>
 
+                        {/* 비밀번호 */}
                         <div className="auth-row">
                             <div className="auth-field">
                                 <label htmlFor="password">비밀번호</label>
@@ -89,9 +118,10 @@ export default function SignupPage() {
                                     className="auth-input"
                                     type="password"
                                     name="password"
-                                    placeholder="8자 이상 입력"
+                                    placeholder="영문+숫자 8자 이상"
                                     value={form.password}
                                     onChange={handleChange}
+                                    required
                                 />
                             </div>
                             <div className="auth-field">
@@ -104,24 +134,48 @@ export default function SignupPage() {
                                     placeholder="다시 입력"
                                     value={form.passwordConfirm}
                                     onChange={handleChange}
+                                    required
                                 />
                             </div>
                         </div>
 
-                        <div className="auth-field">
-                            <label htmlFor="techStack">관심 기술 스택</label>
-                            <input
-                                id="techStack"
-                                className="auth-input"
-                                type="text"
-                                name="techStack"
-                                placeholder="Spring, React, JPA"
-                            />
+                        {/* 현재 상태 + 목표 직군 */}
+                        <div className="auth-row">
+                            <div className="auth-field">
+                                <label htmlFor="currentStatus">현재 상태 <span style={{ color: "#9ca3af", fontWeight: 400 }}>(선택)</span></label>
+                                <select
+                                    id="currentStatus"
+                                    className="auth-input"
+                                    name="currentStatus"
+                                    value={form.currentStatus}
+                                    onChange={handleChange}
+                                >
+                                    <option value="">선택 안 함</option>
+                                    {CURRENT_STATUS_OPTIONS.map((opt) => (
+                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="auth-field">
+                                <label htmlFor="targetJob">목표 직군 <span style={{ color: "#9ca3af", fontWeight: 400 }}>(선택)</span></label>
+                                <select
+                                    id="targetJob"
+                                    className="auth-input"
+                                    name="targetJob"
+                                    value={form.targetJob}
+                                    onChange={handleChange}
+                                >
+                                    <option value="">선택 안 함</option>
+                                    {TARGET_JOB_OPTIONS.map((opt) => (
+                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
 
                         <div className="auth-checkbox-group">
                             <label className="auth-checkbox-label">
-                                <input type="checkbox" />
+                                <input type="checkbox" required />
                                 이용약관과 개인정보 처리방침에 동의합니다.
                             </label>
                             <label className="auth-checkbox-label">

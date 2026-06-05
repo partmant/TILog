@@ -50,6 +50,7 @@ function PostWritePage() {
                 }
 
                 const streakResponse = await getMyStreak({
+                    memberId,
                     useCache: true,
                 });
 

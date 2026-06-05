@@ -20,7 +20,9 @@ const SubscriptionPaybackSection = ({
                                     }) => {
     const [isPaybackOpen, setIsPaybackOpen] = useState(false);
 
-    const hasActiveSubscription = Boolean(subscription?.isActive);
+    // ACTIVE 또는 CANCEL_RESERVED 모두 구독 정보 표시
+    const hasActiveSubscription = Boolean(subscription?.isActive) || subscription?.status === 'CANCEL_RESERVED';
+    const isCancelReserved = subscription?.status === 'CANCEL_RESERVED';
     const hasPayback = Boolean(payback?.paybackParticipationId);
 
     const remainingDays = getRemainingDays(subscription?.endedAt);
@@ -93,16 +95,19 @@ const SubscriptionPaybackSection = ({
                     <strong>
                         {formatDateText(subscription.startedAt)} ~ {formatDateText(subscription.endedAt)}
                     </strong>
-                    <em>남은 기간 {remainingDays}일</em>
+                    {isCancelReserved
+                        ? <em>만료 후 자동 갱신 없음 · 남은 기간 {remainingDays}일</em>
+                        : <em>자동 갱신 · 남은 기간 {remainingDays}일</em>
+                    }
                 </div>
 
                 <button
                     type="button"
                     className="mypage-subscription-cancel-button"
-                    onClick={onCancel}
-                    disabled={isActionLoading}
+                    onClick={isCancelReserved ? undefined : onCancel}
+                    disabled={isCancelReserved || isActionLoading}
                 >
-                    {isActionLoading ? '처리 중...' : '구독 취소'}
+                    {isActionLoading ? '처리 중...' : isCancelReserved ? '취소됨' : '구독 취소'}
                 </button>
             </div>
 

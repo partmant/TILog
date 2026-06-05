@@ -55,6 +55,24 @@ export const getMemberId = () => {
     return getCurrentUser()?.memberId ?? null;
 };
 
+export const clearAuthStorage = () => {
+    localStorage.removeItem('accessToken');
+
+    Object.keys(localStorage)
+        .filter((key) => key.startsWith('tilog:'))
+        .forEach((key) => localStorage.removeItem(key));
+};
+
+export const hasRole = (targetRole) => {
+    const role = getCurrentUser()?.role ?? '';
+
+    return role === targetRole || role === `ROLE_${targetRole}`;
+};
+
+export const isPremiumUser = () => {
+    return hasRole('PREMIUM');
+};
+
 /**
  * 로그인 여부를 확인합니다. (토큰 존재 + 만료 여부)
  * @returns {boolean}
@@ -76,9 +94,5 @@ export const isLoggedIn = () => {
  * 로그아웃 처리 (토큰 제거)
  */
 export const logout = () => {
-    localStorage.removeItem('accessToken');
-    // 관련 캐시도 함께 제거
-    Object.keys(localStorage)
-        .filter((key) => key.startsWith('tilog:'))
-        .forEach((key) => localStorage.removeItem(key));
+    clearAuthStorage();
 };

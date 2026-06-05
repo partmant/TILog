@@ -162,6 +162,19 @@ export const refreshMyStreak = async (memberId = TEMP_MEMBER_ID) => {
     return data;
 };
 
+export const recordWriteHistory = async (memberId = TEMP_MEMBER_ID) => {
+    const data = await request('/api/write-histories', {
+        method: 'POST',
+        body: JSON.stringify({
+            memberId,
+        }),
+    });
+
+    clearMyPageCache(memberId);
+
+    return data;
+};
+
 export const getMyHeatmap = async ({
                                        startDate,
                                        endDate,

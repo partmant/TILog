@@ -53,6 +53,15 @@ export const cancelSubscription = async () => {
     return unwrapApiResponse(response);
 };
 
+export const resumeSubscription = async () => {
+    const response = await fetch(`${API_BASE_URL}/api/subscriptions/resume`, {
+        method: 'PATCH',
+        headers: getAuthHeaders(),
+    });
+
+    return unwrapApiResponse(response);
+};
+
 export const getCurrentPaybackParticipation = async () => {
     const response = await fetch(`${API_BASE_URL}/api/payback-participations/me/current`, {
         method: 'GET',

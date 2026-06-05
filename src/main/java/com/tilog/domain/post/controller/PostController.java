@@ -2,6 +2,7 @@ package com.tilog.domain.post.controller;
 
 import com.tilog.domain.post.dto.PostCommandDto;
 import com.tilog.domain.post.dto.PostQueryDto;
+import com.tilog.domain.post.dto.PostSimpleResponse;
 import com.tilog.domain.post.service.PostService;
 import com.tilog.global.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
@@ -53,5 +54,12 @@ public class PostController {
     public void deletePost(@PathVariable("postId") Long postId) {
         Long loginMemberId = SecurityUtil.getCurrentMemberId();
         postService.deletePost(postId, loginMemberId);
+    }
+
+    // 🔥 추가: 내 게시글 간단 목록 조회
+    @GetMapping("/me/simple")
+    public List<PostSimpleResponse> getMySimplePosts() {
+        Long loginMemberId = SecurityUtil.getCurrentMemberId();
+        return postService.getMySimplePosts(loginMemberId);
     }
 }

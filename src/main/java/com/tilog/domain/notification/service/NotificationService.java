@@ -150,6 +150,7 @@ public class NotificationService {
             case COMMENT -> senderNickname + "님이 회원님의 TIL에 댓글을 남겼습니다.";
             case LIKE    -> senderNickname + "님이 회원님의 TIL을 좋아합니다.";
             case FOLLOW  -> senderNickname + "님이 회원님을 팔로우하기 시작했습니다.";
+            case FEEDBACK -> senderNickname + " 멘토님이 회원님의 TIL에 피드백을 남겼습니다!";
         };
     }
 }

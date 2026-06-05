@@ -7,8 +7,36 @@ import {
 } from '../../utils/mypageUtils';
 import '../../styles/mypage/RecentTilSection.css';
 
-const RecentTilSection = ({ recentTils, isLoading }) => {
+const getTilPostId = (til) => {
+    return til.postId ?? til.id ?? til.tilId;
+};
+
+const RecentTilSection = ({
+                              recentTils,
+                              isLoading,
+                              memberId,
+                          }) => {
     const navigate = useNavigate();
+
+    const handleMoveAllTils = () => {
+        if (!memberId) {
+            navigate('/login');
+            return;
+        }
+
+        navigate(`/members/${memberId}/tils`);
+    };
+
+    const handleMoveDetail = (til) => {
+        const postId = getTilPostId(til);
+
+        if (!postId) {
+            alert('게시글 정보를 찾을 수 없습니다.');
+            return;
+        }
+
+        navigate(`/posts/${postId}`);
+    };
 
     return (
         <section className="mypage-panel mypage-recent-panel">
@@ -21,7 +49,7 @@ const RecentTilSection = ({ recentTils, isLoading }) => {
                 <button
                     className="mypage-text-button"
                     type="button"
-                    onClick={() => navigate('/tils')}
+                    onClick={handleMoveAllTils}
                 >
                     전체 보기
                 </button>
@@ -36,27 +64,31 @@ const RecentTilSection = ({ recentTils, isLoading }) => {
                     {recentTils.length === 0 ? (
                         <div className="mypage-empty">최근 작성한 TIL이 없습니다.</div>
                     ) : (
-                        recentTils.map((til, index) => (
-                            <article
-                                className="mypage-recent-item"
-                                key={til.postId ?? til.id ?? index}
-                                onClick={() => navigate(`/tils/${til.postId ?? til.id}`)}
-                            >
-                                <span className={`mypage-category category-${index % 4}`}>
-                                    {getTilCategory(til)}
-                                </span>
+                        recentTils.map((til, index) => {
+                            const postId = getTilPostId(til);
 
-                                <div className="mypage-recent-content">
-                                    <strong>{getTilTitle(til)}</strong>
-                                    <p>{getTilMeta(til)}</p>
-                                </div>
+                            return (
+                                <article
+                                    className="mypage-recent-item"
+                                    key={postId ?? index}
+                                    onClick={() => handleMoveDetail(til)}
+                                >
+                                    <span className={`mypage-category category-${index % 4}`}>
+                                        {getTilCategory(til)}
+                                    </span>
 
-                                <div className="mypage-recent-date">
-                                    <span>{getTilDate(til)}</span>
-                                    <b>›</b>
-                                </div>
-                            </article>
-                        ))
+                                    <div className="mypage-recent-content">
+                                        <strong>{getTilTitle(til)}</strong>
+                                        <p>{getTilMeta(til)}</p>
+                                    </div>
+
+                                    <div className="mypage-recent-date">
+                                        <span>{getTilDate(til)}</span>
+                                        <b>›</b>
+                                    </div>
+                                </article>
+                            );
+                        })
                     )}
                 </div>
             )}

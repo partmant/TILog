@@ -1,4 +1,5 @@
 import {
+    useCallback,
     useEffect,
     useMemo,
     useState,
@@ -11,22 +12,19 @@ import {
     getMyStreak,
 } from '../api/myPageApi';
 import {
-    getCachedRecentTils,
-    getRecentTils,
-} from '../api/tilApi';
-import {
     cancelSubscription,
     getCurrentPaybackParticipation,
     getMySubscriptionStatus,
     resumeSubscription,
     subscribePremium,
 } from '../api/subscriptionPaybackApi';
+import { getMemberTils } from '../api/feed';
 import MyPageHero from '../components/mypage/MyPageHero';
 import MyPageStats from '../components/mypage/MyPageStats';
 import HeatmapSection from '../components/mypage/HeatmapSection';
 import RecentTilSection from '../components/mypage/RecentTilSection';
 import SubscriptionPaybackSection from '../components/mypage/SubscriptionPaybackSection';
-import WeeklyReportSection from "../components/mypage/WeeklyReportSection";
+import WeeklyReportSection from '../components/mypage/WeeklyReportSection';
 
 import {
     buildHeatmapDays,
@@ -79,14 +77,54 @@ const getInitialStreak = (memberId) => {
     return normalizeStreak(getCachedStreak(memberId));
 };
 
-const getInitialRecentTils = () => {
-    return normalizeTilList(
-        getCachedRecentTils({
-            page: 0,
-            size: 4,
-            sort: 'LATEST',
+const RECENT_TIL_CACHE_TTL = 1000 * 60 * 5;
+
+const getRecentTilCacheKey = (memberId) => {
+    return `mypage:recent-tils:member:${memberId}:page:0:size:4`;
+};
+
+const getCachedMyRecentTils = (memberId) => {
+    if (!memberId) {
+        return null;
+    }
+
+    const cached = localStorage.getItem(getRecentTilCacheKey(memberId));
+
+    if (!cached) {
+        return null;
+    }
+
+    try {
+        const parsed = JSON.parse(cached);
+
+        if (Date.now() - parsed.cachedAt > RECENT_TIL_CACHE_TTL) {
+            localStorage.removeItem(getRecentTilCacheKey(memberId));
+            return null;
+        }
+
+        return parsed.data;
+    } catch {
+        localStorage.removeItem(getRecentTilCacheKey(memberId));
+        return null;
+    }
+};
+
+const setCachedMyRecentTils = (memberId, data) => {
+    if (!memberId) {
+        return;
+    }
+
+    localStorage.setItem(
+        getRecentTilCacheKey(memberId),
+        JSON.stringify({
+            cachedAt: Date.now(),
+            data,
         })
     );
+};
+
+const getInitialRecentTils = (memberId) => {
+    return normalizeTilList(getCachedMyRecentTils(memberId));
 };
 
 const MyPage = () => {
@@ -97,7 +135,7 @@ const MyPage = () => {
 
     const [streak, setStreak] = useState(() => getInitialStreak(memberId));
     const [heatmapItems, setHeatmapItems] = useState(() => getInitialHeatmapItems(6, memberId));
-    const [recentTils, setRecentTils] = useState(() => getInitialRecentTils());
+    const [recentTils, setRecentTils] = useState(() => getInitialRecentTils(memberId));
 
     const [subscription, setSubscription] = useState(null);
     const [payback, setPayback] = useState(null);
@@ -111,7 +149,7 @@ const MyPage = () => {
     });
 
     const [isTilLoading, setIsTilLoading] = useState(() => {
-        return getInitialRecentTils().length === 0;
+        return getInitialRecentTils(memberId).length === 0;
     });
 
     const [isSubscriptionLoading, setIsSubscriptionLoading] = useState(true);
@@ -125,48 +163,60 @@ const MyPage = () => {
     const totalWriteCount = heatmapDays.reduce((sum, day) => sum + day.writeCount, 0);
     const writtenDays = heatmapDays.filter((day) => day.writeCount > 0).length;
 
-    const fetchSubscriptionAndPayback = async () => {
-        try {
-            setIsSubscriptionLoading(true);
+    const loadSubscriptionAndPayback = useCallback(async () => {
+        const subscriptionResponse = await getMySubscriptionStatus();
 
-            const subscriptionResponse = await getMySubscriptionStatus();
-            setSubscription(subscriptionResponse);
+        const hasValidSubscription =
+            subscriptionResponse?.isActive ||
+            subscriptionResponse?.status === 'CANCEL_RESERVED';
 
-            // ACTIVE 또는 CANCEL_RESERVED 모두 페이백 조회
-            const hasValidSubscription =
-                subscriptionResponse?.isActive ||
-                subscriptionResponse?.status === 'CANCEL_RESERVED';
-
-            if (hasValidSubscription) {
-                try {
-                    const paybackResponse = await getCurrentPaybackParticipation();
-                    setPayback(paybackResponse);
-                } catch (error) {
-                    console.error('[PAYBACK API ERROR]', error);
-                    setPayback(null);
-                }
-            } else {
-                setPayback(null);
-            }
-        } catch (error) {
-            console.error('[SUBSCRIPTION API ERROR]', error);
-            setSubscription(null);
-            setPayback(null);
-        } finally {
-            setIsSubscriptionLoading(false);
+        if (!hasValidSubscription) {
+            return {
+                subscriptionResponse,
+                paybackResponse: null,
+            };
         }
+
+        try {
+            const paybackResponse = await getCurrentPaybackParticipation();
+
+            return {
+                subscriptionResponse,
+                paybackResponse,
+            };
+        } catch (error) {
+            console.error('[PAYBACK API ERROR]', error);
+
+            return {
+                subscriptionResponse,
+                paybackResponse: null,
+            };
+        }
+    }, []);
+
+    const applySubscriptionAndPayback = ({
+                                             subscriptionResponse,
+                                             paybackResponse,
+                                         }) => {
+        setSubscription(subscriptionResponse);
+        setPayback(paybackResponse);
     };
 
     const handleSubscribe = async () => {
         try {
             setIsSubscriptionActionLoading(true);
+            setIsSubscriptionLoading(true);
+
             await subscribePremium();
-            await fetchSubscriptionAndPayback();
+
+            const result = await loadSubscriptionAndPayback();
+            applySubscriptionAndPayback(result);
         } catch (error) {
             console.error('[SUBSCRIBE API ERROR]', error);
             alert(error.message ?? '구독 신청에 실패했습니다.');
         } finally {
             setIsSubscriptionActionLoading(false);
+            setIsSubscriptionLoading(false);
         }
     };
 
@@ -179,140 +229,213 @@ const MyPage = () => {
 
         try {
             setIsSubscriptionActionLoading(true);
+            setIsSubscriptionLoading(true);
+
             await cancelSubscription();
-            await fetchSubscriptionAndPayback();
+
+            const result = await loadSubscriptionAndPayback();
+            applySubscriptionAndPayback(result);
         } catch (error) {
             console.error('[SUBSCRIPTION CANCEL API ERROR]', error);
             alert(error.message ?? '구독 취소에 실패했습니다.');
         } finally {
             setIsSubscriptionActionLoading(false);
+            setIsSubscriptionLoading(false);
         }
     };
 
     const handleResumeSubscription = async () => {
         try {
             setIsSubscriptionActionLoading(true);
+            setIsSubscriptionLoading(true);
+
             await resumeSubscription();
-            await fetchSubscriptionAndPayback();
+
+            const result = await loadSubscriptionAndPayback();
+            applySubscriptionAndPayback(result);
         } catch (error) {
             console.error('[SUBSCRIPTION RESUME API ERROR]', error);
             alert(error.message ?? '구독 재개에 실패했습니다.');
         } finally {
             setIsSubscriptionActionLoading(false);
+            setIsSubscriptionLoading(false);
         }
     };
 
     useEffect(() => {
+        let isMounted = true;
+
         const fetchStreak = async () => {
             const cachedStreak = getCachedStreak(memberId);
 
             if (cachedStreak) {
-                setStreak(normalizeStreak(cachedStreak));
-                setIsStreakLoading(false);
                 return;
             }
 
             try {
-                setIsStreakLoading(true);
-
                 const streakResponse = await getMyStreak({
-                    memberId: memberId,
+                    memberId,
                     useCache: true,
                 });
 
+                if (!isMounted) {
+                    return;
+                }
+
                 setStreak(normalizeStreak(streakResponse));
             } catch (error) {
+                if (!isMounted) {
+                    return;
+                }
+
                 console.error('[STREAK API ERROR]', error);
                 setStreak(DEFAULT_STREAK);
             } finally {
-                setIsStreakLoading(false);
+                if (isMounted) {
+                    setIsStreakLoading(false);
+                }
             }
         };
 
         fetchStreak();
-    }, []);
+
+        return () => {
+            isMounted = false;
+        };
+    }, [memberId]);
 
     useEffect(() => {
+        let isMounted = true;
+
         const fetchHeatmap = async () => {
             const { startDate, endDate } = getMonthRange(selectedMonthCount);
 
             const cachedHeatmap = getCachedHeatmap({
-                memberId: memberId,
+                memberId,
                 startDate,
                 endDate,
             });
 
             if (cachedHeatmap) {
-                setHeatmapItems(normalizeHeatmapItems(cachedHeatmap));
-                setIsHeatmapLoading(false);
                 return;
             }
 
             try {
-                setIsHeatmapLoading(true);
-
                 const heatmapResponse = await getMyHeatmap({
-                    memberId: memberId,
+                    memberId,
                     startDate,
                     endDate,
                     useCache: true,
                 });
 
+                if (!isMounted) {
+                    return;
+                }
+
                 setHeatmapItems(normalizeHeatmapItems(heatmapResponse));
             } catch (error) {
+                if (!isMounted) {
+                    return;
+                }
+
                 console.error('[HEATMAP API ERROR]', error);
                 setHeatmapItems([]);
             } finally {
-                setIsHeatmapLoading(false);
+                if (isMounted) {
+                    setIsHeatmapLoading(false);
+                }
             }
         };
 
         fetchHeatmap();
-    }, [selectedMonthCount]);
+
+        return () => {
+            isMounted = false;
+        };
+    }, [memberId, selectedMonthCount]);
 
     useEffect(() => {
+        let isMounted = true;
+
         const fetchRecentTils = async () => {
-            const cachedRecentTils = getCachedRecentTils({
-                page: 0,
-                size: 4,
-                sort: 'LATEST',
-            });
+            if (!memberId) {
+                return;
+            }
+
+            const cachedRecentTils = getCachedMyRecentTils(memberId);
 
             if (cachedRecentTils) {
-                setRecentTils(normalizeTilList(cachedRecentTils));
-                setIsTilLoading(false);
                 return;
             }
 
             try {
-                setIsTilLoading(true);
+                const tilResponse = await getMemberTils(memberId, 0, 4);
 
-                const tilResponse = await getRecentTils({
-                    page: 0,
-                    size: 4,
-                    sort: 'LATEST',
-                    useCache: true,
-                });
+                if (!isMounted) {
+                    return;
+                }
 
+                setCachedMyRecentTils(memberId, tilResponse);
                 setRecentTils(normalizeTilList(tilResponse));
             } catch (error) {
-                console.error('[TIL API ERROR]', error);
+                if (!isMounted) {
+                    return;
+                }
+
+                console.error('[MY RECENT TIL API ERROR]', error);
                 setRecentTils([]);
             } finally {
-                setIsTilLoading(false);
+                if (isMounted) {
+                    setIsTilLoading(false);
+                }
             }
         };
 
         fetchRecentTils();
-    }, []);
+
+        return () => {
+            isMounted = false;
+        };
+    }, [memberId]);
 
     useEffect(() => {
         if (!isLoggedIn()) {
             navigate('/login', { replace: true });
             return;
         }
+
+        let isMounted = true;
+
+        const fetchSubscriptionAndPayback = async () => {
+            try {
+                const result = await loadSubscriptionAndPayback();
+
+                if (!isMounted) {
+                    return;
+                }
+
+                applySubscriptionAndPayback(result);
+            } catch (error) {
+                if (!isMounted) {
+                    return;
+                }
+
+                console.error('[SUBSCRIPTION API ERROR]', error);
+                setSubscription(null);
+                setPayback(null);
+            } finally {
+                if (isMounted) {
+                    setIsSubscriptionLoading(false);
+                }
+            }
+        };
+
         fetchSubscriptionAndPayback();
-    }, [navigate]);
+
+        return () => {
+            isMounted = false;
+        };
+    }, [navigate, loadSubscriptionAndPayback]);
 
     return (
         <>
@@ -333,6 +456,7 @@ const MyPage = () => {
                         onChangeMonthCount={setSelectedMonthCount}
                         isLoading={isHeatmapLoading}
                     />
+
                     <WeeklyReportSection />
                 </div>
 
@@ -350,6 +474,7 @@ const MyPage = () => {
                     <RecentTilSection
                         recentTils={recentTils}
                         isLoading={isTilLoading}
+                        memberId={memberId}
                     />
                 </div>
             </section>

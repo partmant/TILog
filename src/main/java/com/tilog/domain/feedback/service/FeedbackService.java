@@ -8,6 +8,8 @@ import com.tilog.domain.feedback.entity.MentorFeedback;
 import com.tilog.domain.feedback.entity.Status;
 import com.tilog.domain.member.entity.Member;
 import com.tilog.domain.member.entity.MemberRole;
+import com.tilog.domain.notification.entity.NotificationType;
+import com.tilog.domain.notification.service.NotificationService;
 import com.tilog.domain.post.entity.Post;
 import com.tilog.domain.member.repository.MemberRepository;
 import com.tilog.domain.feedback.repository.MentorFeedbackRepository;
@@ -25,7 +27,7 @@ public class FeedbackService {
     private final MentorFeedbackRepository mentorFeedbackRepository;
     private final MemberRepository memberRepository;
     private final TilPostRepository tilPostRepository;
-
+    private final NotificationService notificationService;
 
     public void requestFeedback(FeedbackRequestDtoRequest feedbackRequestDtoRequest) {   // 피드백 요청
         Member member = memberRepository.findById(feedbackRequestDtoRequest.getRequestorId())
@@ -64,6 +66,24 @@ public class FeedbackService {
         if(!feedbackWriteRequestDto.getMentorId().equals(findFeedback.getMentor().getId())){
             throw new IllegalArgumentException("해당 피드백의 담당 멘토가 아닙니다.");
         }
+
+        findFeedback.updateFeedback(feedbackWriteRequestDto.getTechnicalScore(),
+                feedbackWriteRequestDto.getFlowScore(),
+                feedbackWriteRequestDto.getDesignScore(),
+                feedbackWriteRequestDto.getComment());
+
+        Long receiverId = findFeedback.getRequestor().getId(); // 알림을 받을 일반 유저 ID
+        Long senderId = findFeedback.getMentor().getId();      // 알림을 보내는 멘토 ID
+        Long relatedEntityId = findFeedback.getTil().getId();  // 어떤 게시글에 대한 피드백인지
+
+        notificationService.send(
+                receiverId,
+                senderId,
+                NotificationType.FEEDBACK,
+                relatedEntityId,
+                "TIL" // 관련된 엔티티 타입 (프론트엔드 라우팅용)
+        );
+
 
         findFeedback.updateFeedback(feedbackWriteRequestDto.getTechnicalScore(), feedbackWriteRequestDto.getFlowScore(), feedbackWriteRequestDto.getDesignScore(), feedbackWriteRequestDto.getComment());
     }

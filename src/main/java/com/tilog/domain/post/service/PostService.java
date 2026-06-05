@@ -14,6 +14,7 @@ import com.tilog.domain.tag.entity.PostTag;
 import com.tilog.domain.tag.entity.Tag;
 import com.tilog.domain.tag.repository.PostTagRepository;
 import com.tilog.domain.tag.repository.TagRepository;
+import com.tilog.global.client.GeminiClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -49,6 +50,7 @@ public class PostService {
     private final PostImageRepository postImageRepository;
     private final TagRepository tagRepository;
     private final PostTagRepository postTagRepository;
+    private final GeminiClient geminiClient;
 
     // JWT 인증 필터 적용 후 사용하는 게시글 목록 조회
     public List<PostQueryDto.ListResponse> getPostList(Long loginMemberId) {
@@ -94,6 +96,30 @@ public class PostService {
                 .toList();
 
         return PostQueryDto.DetailResponse.from(post, tagNames, isOwner);
+    }
+
+    // 게시글 핵심 요약 생성
+    public PostQueryDto.SummaryResponse summarizePost(Long postId, Long loginMemberId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Post not found."));
+
+        if (post.getIsDeleted()) {
+            throw new IllegalArgumentException("Deleted post.");
+        }
+
+        boolean isOwner = post.getMember().getId().equals(loginMemberId);
+
+        if (post.getVisibility() == Visibility.PRIVATE && !isOwner) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Private post.");
+        }
+
+        List<String> tagNames = postTagRepository.findByPost_Id(postId).stream()
+                .map(postTag -> postTag.getTag().getName())
+                .toList();
+
+        // 게시글 제목/본문/태그를 Gemini에 전달하여 핵심 요약 생성
+        String summary = geminiClient.generatePostSummary(post.getTitle(), post.getContent(), tagNames);
+        return new PostQueryDto.SummaryResponse(summary);
     }
 
     // JWT 인증 필터 적용 후 사용하는 게시글 작성

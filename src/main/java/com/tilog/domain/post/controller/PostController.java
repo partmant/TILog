@@ -35,6 +35,13 @@ public class PostController {
         return postService.getPostDetail(postId, increaseViewCount, loginMemberId);
     }
 
+    // 게시글 핵심 요약 생성
+    @PostMapping("/{postId}/summary")
+    public PostQueryDto.SummaryResponse summarizePost(@PathVariable("postId") Long postId) {
+        Long loginMemberId = SecurityUtil.getCurrentMemberId();
+        return postService.summarizePost(postId, loginMemberId);
+    }
+
     // 게시글 작성
     @PostMapping
     public Long createPost(@RequestBody PostCommandDto.Create request) {

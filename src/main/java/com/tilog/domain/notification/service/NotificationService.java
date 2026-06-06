@@ -145,12 +145,28 @@ public class NotificationService {
         notificationRepository.deleteAllByReceiverId(memberId);
     }
 
+    /**
+     * 시스템 알림 발송 — sender 없는 서버 발신 알림 (AI 리포트 완료 등)
+     */
+    @Transactional
+    public void sendSystem(Long receiverId, NotificationType type,
+                           String message, Long relatedEntityId, String relatedEntityType) {
+        Member receiver = memberRepository.findById(receiverId)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+        Notification notification = notificationRepository.save(
+                Notification.create(receiver, null, type, message, relatedEntityId, relatedEntityType));
+
+        sendToClient(receiverId, NotificationResponse.from(notification));
+    }
+
     private String buildMessage(String senderNickname, NotificationType type) {
         return switch (type) {
-            case COMMENT -> senderNickname + "님이 회원님의 TIL에 댓글을 남겼습니다.";
-            case LIKE    -> senderNickname + "님이 회원님의 TIL을 좋아합니다.";
-            case FOLLOW  -> senderNickname + "님이 회원님을 팔로우하기 시작했습니다.";
+            case COMMENT  -> senderNickname + "님이 회원님의 TIL에 댓글을 남겼습니다.";
+            case LIKE     -> senderNickname + "님이 회원님의 TIL을 좋아합니다.";
+            case FOLLOW   -> senderNickname + "님이 회원님을 팔로우하기 시작했습니다.";
             case FEEDBACK -> senderNickname + " 멘토님이 회원님의 TIL에 피드백을 남겼습니다!";
+            case AI_REPORT -> "주간 성장 리포트가 생성되었습니다."; // sendSystem() 경로에서는 호출 안 됨
         };
     }
 }

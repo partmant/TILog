@@ -44,6 +44,7 @@ public enum ErrorCode {
 
     // AI Report
     AI_ANALYSIS_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "AI 분석 생성에 실패했습니다."),
+    NO_POST_THIS_WEEK(HttpStatus.BAD_REQUEST, "해당 주에 작성한 TIL이 없어 리포트를 생성할 수 없습니다."),
 
     // Common
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "게시글을 찾을 수 없습니다."),

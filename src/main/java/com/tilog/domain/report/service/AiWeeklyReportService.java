@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tilog.domain.member.entity.Member;
 import com.tilog.domain.member.repository.MemberRepository;
+import com.tilog.domain.notification.entity.NotificationType;
+import com.tilog.domain.notification.service.NotificationService;
 import com.tilog.domain.post.entity.Difficulty;
 import com.tilog.domain.post.repository.PostRepository;
 import com.tilog.domain.report.dto.AiAnalysisResult;
@@ -36,6 +38,7 @@ public class AiWeeklyReportService {
     private final AiWeeklyReportRepository aiWeeklyReportRepository;
     private final MemberRepository memberRepository;
     private final GeminiClient geminiClient;
+    private final NotificationService notificationService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     /** 특정 주 리포트 조회 — 없으면 Optional.empty() */
@@ -75,6 +78,11 @@ public class AiWeeklyReportService {
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
         WeeklySummaryData summaryData    = buildWeeklySummary(memberId, from, to);
+
+        if (summaryData.getTotalPosts() == 0) {
+            throw new CustomException(ErrorCode.NO_POST_THIS_WEEK);
+        }
+
         TechStackDistributionData techData = buildTechStackDistribution(memberId, from, to);
         CumulativeStatsData cumulativeData = buildCumulativeStats(memberId);
 
@@ -105,7 +113,17 @@ public class AiWeeklyReportService {
                 member, weekStartDate, weekEndDate, summaryData, techData, cumulativeData, ruleComment);
         report.applyAiAnalysis(aiAnalysisJson);
 
-        return toResponse(aiWeeklyReportRepository.save(report));
+        AiWeeklyReport saved = aiWeeklyReportRepository.save(report);
+
+        notificationService.sendSystem(
+                memberId,
+                NotificationType.AI_REPORT,
+                "주간 성장 리포트가 완성됐어요! 지금 바로 확인해보세요 ✨",
+                saved.getReportId(),
+                "AI_WEEKLY_REPORT"
+        );
+
+        return toResponse(saved);
     }
 
     // ===== 집계 =====

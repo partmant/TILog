@@ -43,6 +43,12 @@ public class Post {
     @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
 
+    @Column(name = "ai_summary", columnDefinition = "TEXT")
+    private String aiSummary;
+
+    @Column(name = "ai_summary_generated_at")
+    private LocalDateTime aiSummaryGeneratedAt;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "difficulty")
     private Difficulty difficulty = Difficulty.NORMAL;
@@ -89,6 +95,18 @@ public class Post {
         this.difficulty = difficulty == null ? Difficulty.NORMAL : difficulty;
         this.visibility = visibility == null ? Visibility.PUBLIC : visibility;
         this.studyTime = studyTime;
+    }
+
+    // AI 요약 저장
+    public void applyAiSummary(String aiSummary) {
+        this.aiSummary = aiSummary;
+        this.aiSummaryGeneratedAt = LocalDateTime.now();
+    }
+
+    // 게시글 수정 시 기존 AI 요약 초기화
+    public void clearAiSummary() {
+        this.aiSummary = null;
+        this.aiSummaryGeneratedAt = null;
     }
 
     // 게시글 조회수 증가 메서드

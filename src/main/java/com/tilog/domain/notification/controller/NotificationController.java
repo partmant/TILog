@@ -3,9 +3,12 @@ package com.tilog.domain.notification.controller;
 import com.tilog.domain.notification.dto.NotificationResponse;
 import com.tilog.global.response.ApiResponse;
 import com.tilog.domain.notification.service.NotificationService;
+import com.tilog.global.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
 
@@ -59,5 +62,12 @@ public class NotificationController {
     public ResponseEntity<ApiResponse<Void>> deleteAllNotifications() {
         notificationService.deleteAllNotifications();
         return ResponseEntity.ok(ApiResponse.<Void>success("전체 알림이 삭제되었습니다."));
+    }
+
+    @GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public ResponseEntity<SseEmitter> subscribe(){  // 클라이언트 실시간 알림 구독(SSE 연결)
+        Long memberId = SecurityUtil.getCurrentMemberId();
+        SseEmitter sseEmitter = notificationService.subscribe(memberId);
+        return ResponseEntity.ok(sseEmitter);
     }
 }

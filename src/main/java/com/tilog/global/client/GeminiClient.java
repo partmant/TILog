@@ -16,6 +16,7 @@ import org.springframework.web.client.RestClient;
 
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 
 @Slf4j
 @Component
@@ -73,6 +74,48 @@ public class GeminiClient {
         }
     }
 
+    // 게시글 상세의 핵심 요약 생성
+    public String generatePostSummary(String title, String content, List<String> tagNames) {
+        try {
+            Map<String, Object> requestBody = Map.of(
+                    "contents", List.of(Map.of("parts", List.of(Map.of("text", buildPostSummaryPrompt(title, content, tagNames))))),
+                    "generationConfig", Map.of(
+                            "responseMimeType", "application/json",
+                            "responseSchema", Map.of(
+                                    "type", "OBJECT",
+                                    "properties", Map.of("summary", Map.of("type", "STRING")),
+                                    "required", List.of("summary")
+                            )
+                    )
+            );
+
+            String responseBody = restClient.post()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/v1beta/models/" + model + ":generateContent")
+                            .queryParam("key", apiKey)
+                            .build())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(requestBody)
+                    .retrieve()
+                    .body(String.class);
+
+            JsonNode root = objectMapper.readTree(responseBody);
+            String text = root
+                    .path("candidates").get(0)
+                    .path("content").path("parts").get(0)
+                    .path("text").asText();
+
+            return objectMapper.readTree(text).path("summary").asText();
+
+        } catch (CustomException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Gemini post summary failed: {}", e.getMessage());
+            throw new CustomException(ErrorCode.AI_ANALYSIS_FAILED);
+        }
+    }
+
+    // 주간레포트 프롬프트 빌드
     private String buildPrompt(WeeklyReportContext context) throws JsonProcessingException {
         WeeklyReportContext.UserContext user = context.getUser();
         boolean hasUserInfo = user != null
@@ -119,7 +162,7 @@ public class GeminiClient {
                                               - [EASY/NORMAL 비중이 높을 때]:
                                                 현재 단계는 핵심 개념들의 기초 뼈대를 탄탄하게 다지고 넓게 확장하는 '리프레시 및 스펙트럼 확장 주간'임을 짚어주세요.
                                                 다만, 여기에 머무르지 않고 실무 역량을 한 단계 더 끌어올리기 위해서는 다음 주에 중요도가 높은 핵심 주제 하나를 정해 'HARD(심화 트러블슈팅, 아키텍처 깊이 파고들기)' 난이도에 도전해 보는 것을 권장한다고 자연스럽게 빌드업하세요.
-                                              - [HARD 비중이 높을 때]: 
+                                              - [HARD 비중이 높을 때]:
                                                 문제를 깊이 있게 파고들어 끝까지 해결해 내는 '딥다이브(Deep-Dive) 주간'이었음을 인정해 주고 담백하게 칭찬해주세요.
                                               - 요약하자면, 현재 학습 스펙트럼의 장점을 데이터 기반으로 짚어준 뒤, 다음 단계로 나아가기 위한 '난이도 밸런스 가이드'를 제안하는 톤을 유지하세요. 채찍질이나 과도한 칭찬 모두 금지합니다.
                 3. [Career Alignment Audit]: %s
@@ -271,5 +314,44 @@ public class GeminiClient {
                 "properties", Map.of("ai_weekly_report", aiWeeklyReport),
                 "required", List.of("ai_weekly_report")
         );
+    }
+
+    // 게시글 제목/본문/태그를 요약 프롬프트로 변환
+    private String buildPostSummaryPrompt(String title, String content, List<String> tagNames) {
+        StringJoiner tagJoiner = new StringJoiner(", ");
+        if (tagNames != null) {
+            tagNames.stream()
+                    .filter(tagName -> tagName != null && !tagName.isBlank())
+                    .forEach(tagJoiner::add);
+        }
+
+        return """
+                당신은 개발 학습 기록을 복습하기 쉽게 요약하는 튜터입니다.
+                아래 TIL 게시글을 읽고 핵심 개념만 한국어로 요약하세요.
+
+                제목:
+                %s
+
+                태그:
+                %s
+
+                본문:
+                %s
+
+                요구사항:
+                - 게시글에 실제로 있는 내용만 사용
+                - 핵심 개념 2~4개를 자연스러운 문장으로 정리
+                - 불필요한 칭찬, 추측, 새 학습 주제 제안은 제외
+                - 250자 이내
+                - JSON 형식으로만 응답
+                """.formatted(
+                safeText(title),
+                tagJoiner.length() == 0 ? "없음" : tagJoiner.toString(),
+                safeText(content)
+        );
+    }
+
+    private String safeText(String text) {
+        return text == null || text.isBlank() ? "없음" : text;
     }
 }

@@ -14,9 +14,9 @@ public class FeedbackDetailResponseDto {
     private Long mentorId;
 
     private Status status;
-    private int technicalScore;
-    private int flowScore;
-    private int designScore;
+    private Integer technicalScore;
+    private Integer flowScore;
+    private Integer designScore;
     private String comment;
     private LocalDateTime requestedAt;
     private LocalDateTime completedAt;

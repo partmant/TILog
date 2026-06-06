@@ -117,4 +117,6 @@ public interface PostRepository extends JpaRepository<Post, Long>, PostRepositor
         "AND p.isDeleted = false " +
         "GROUP BY pt.tag.name")
     List<Object[]> findCumulativeTagDistribution(@Param("memberId") Long memberId);
+
+    List<Post> findByMember_IdAndIsDeletedFalseOrderByCreatedAtDesc(Long memberId); // 특정 회원의 삭제되지 않은 게시글 목록 (최신순 정렬)
 }

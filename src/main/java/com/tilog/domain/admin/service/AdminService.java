@@ -1,11 +1,9 @@
 package com.tilog.domain.admin.service;
 
-import com.tilog.domain.admin.dto.MemberRoleChangeRequest;
-import com.tilog.domain.admin.dto.AdminMemberDetailResponse;
-import com.tilog.domain.admin.dto.AdminMemberListResponse;
-import com.tilog.domain.admin.dto.MemberSanctionRequestDto;
+import com.tilog.domain.admin.dto.*;
 import com.tilog.domain.comment.entity.TilComment;
 import com.tilog.domain.comment.repository.TilCommentRepository;
+import com.tilog.domain.feedback.entity.Status;
 import com.tilog.domain.member.entity.Member;
 import com.tilog.domain.member.entity.MemberRole;
 import com.tilog.domain.member.entity.MemberSanction;
@@ -14,13 +12,21 @@ import com.tilog.domain.post.entity.Post;
 import com.tilog.domain.member.repository.MemberRepository;
 import com.tilog.domain.post.repository.TilPostRepository;
 import com.tilog.domain.report.entity.Report;
+import com.tilog.domain.report.entity.ReportProcess;
+import com.tilog.domain.report.entity.TargetAction;
 import com.tilog.domain.report.entity.TargetType;
+import com.tilog.domain.report.repository.ReportProcessRepository;
 import com.tilog.domain.report.repository.ReportRepository;
+import com.tilog.domain.report.dto.ReportResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional(readOnly = true)
@@ -31,7 +37,7 @@ public class AdminService {
     private final ReportRepository reportRepository;
     private final TilCommentRepository tilCommentRepository;
     private final MemberSanctionRepository memberSanctionRepository;
-
+    private final ReportProcessRepository reportProcessRepository;
 
     public Page<AdminMemberListResponse> getMemberList(Pageable pageable) {  // 회원 목록 페이징 조회
         Page<Member> memberData = memberRepository.findAll(pageable);
@@ -80,7 +86,9 @@ public class AdminService {
         Report report = reportRepository.findById(reportId)
                 .orElseThrow(() -> new IllegalArgumentException("신고 정보가 존재하지 않습니다."));
 
-        report.completeReport();
+        if (report.getStatus() == Status.PROCESSED) {
+            throw new IllegalStateException("이미 처리가 완료된 신고입니다.");
+        }
 
         Member reportedMember = null;
 
@@ -99,7 +107,66 @@ public class AdminService {
             throw new IllegalArgumentException("알 수 없는 신고 대상입니다.");
         }
 
-        MemberSanction memberSanction = new MemberSanction(reportedMember, null, memberSanctionRequestDto.getSanctionType(), memberSanctionRequestDto.getReasonType(), memberSanctionRequestDto.getContent());
+        Member admin = memberRepository.findById(memberSanctionRequestDto.getAdminId())
+                .orElseThrow(() -> new IllegalArgumentException("관리자 정보를 찾을 수 없습니다."));
+
+        report.completeReport();
+
+        ReportProcess process = ReportProcess.builder()
+                .targetType(report.getTargetType())
+                .targetId(report.getTargetId())
+                .admin(admin)
+                .processContent("회원 제재 완료: " + memberSanctionRequestDto.getContent())
+                .targetAction(TargetAction.HIDE)
+                .build();
+        reportProcessRepository.save(process);
+
+        // 4. 회원 제재 기록 저장
+        MemberSanction memberSanction = MemberSanction.builder()
+                .member(reportedMember)
+                .admin(admin)
+                .process(process) // 🔥 process와 연결!
+                .sanctionType(memberSanctionRequestDto.getSanctionType())
+                .reasonType(memberSanctionRequestDto.getReasonType())
+                .content(memberSanctionRequestDto.getContent())
+                .createdAt(LocalDateTime.now())
+                .startAt(LocalDateTime.now())
+                .build();
+
         memberSanctionRepository.save(memberSanction);
+    }
+
+    public List<ReportResponseDto> getRecentReports() {     // 최근 신고 4건
+        return reportRepository.findTop4ByOrderByCreatedAtDesc()
+                .stream()
+                .map(report -> {
+                    // 1. 신고자 닉네임 찾기
+                    String reporterName = report.getReporter() != null
+                            ? report.getReporter().getNickname()
+                            : "알 수 없음";
+
+                    // 2. 피신고자(신고 당한 사람) 닉네임 찾기
+                    String reportedName = "알 수 없음";
+                    if (report.getTargetType() == TargetType.TIL_POST) {
+                        reportedName = tilPostRepository.findById(report.getTargetId())
+                                .map(post -> post.getMember().getNickname())
+                                .orElse("삭제된 글/회원");
+                    } else if (report.getTargetType() == TargetType.TIL_COMMENT) {
+                        reportedName = tilCommentRepository.findById(report.getTargetId())
+                                .map(comment -> comment.getMember().getNickname())
+                                .orElse("삭제된 댓글/회원");
+                    }
+
+                    // 3. DTO로 묶어서 반환 (record의 of 메서드 사용)
+                    return ReportResponseDto.of(report, reporterName, reportedName);
+                })
+                .toList();
+    }
+
+    public Map<String, Long> getReportStatistics() {
+        long pending = reportRepository.countByStatus(Status.PENDING);
+        long processed = reportProcessRepository.count();
+
+        return Map.of("pending", pending, "processed", processed);
     }
 }

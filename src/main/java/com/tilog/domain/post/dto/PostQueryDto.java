@@ -76,4 +76,7 @@ public class PostQueryDto {
                     .build();
         }
     }
+
+    public record SummaryResponse(String summary) {
+    }
 }

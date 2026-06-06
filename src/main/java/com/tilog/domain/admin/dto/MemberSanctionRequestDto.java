@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class MemberSanctionRequestDto {
+    private Long adminId;
     private SanctionType sanctionType;
     private ReasonType reasonType;
     private String content;

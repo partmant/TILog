@@ -1,18 +1,24 @@
 package com.tilog.domain.report.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tilog.domain.member.entity.Member;
+import com.tilog.domain.member.repository.MemberRepository;
+import com.tilog.domain.post.entity.Difficulty;
+import com.tilog.domain.post.repository.PostRepository;
+import com.tilog.domain.report.dto.AiAnalysisResult;
 import com.tilog.domain.report.dto.AiWeeklyReportResponse;
 import com.tilog.domain.report.dto.CumulativeStatsData;
 import com.tilog.domain.report.dto.TechStackDistributionData;
 import com.tilog.domain.report.dto.WeeklyReportContext;
 import com.tilog.domain.report.dto.WeeklySummaryData;
 import com.tilog.domain.report.entity.AiWeeklyReport;
-import com.tilog.domain.member.entity.Member;
-import com.tilog.domain.post.entity.Difficulty;
 import com.tilog.domain.report.repository.AiWeeklyReportRepository;
-import com.tilog.domain.post.repository.PostRepository;
 import com.tilog.global.client.GeminiClient;
-import jakarta.persistence.EntityManager;
+import com.tilog.global.exception.CustomException;
+import com.tilog.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +26,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -27,8 +34,9 @@ public class AiWeeklyReportService {
 
     private final PostRepository postRepository;
     private final AiWeeklyReportRepository aiWeeklyReportRepository;
-    private final EntityManager entityManager;
+    private final MemberRepository memberRepository;
     private final GeminiClient geminiClient;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /** 특정 주 리포트 조회 — 없으면 Optional.empty() */
     public Optional<AiWeeklyReportResponse> findReport(Long memberId, LocalDate weekStartDate) {
@@ -63,32 +71,39 @@ public class AiWeeklyReportService {
         LocalDateTime from = weekStartDate.atStartOfDay();
         LocalDateTime to   = weekEndDate.atTime(23, 59, 59);
 
-        WeeklySummaryData summaryData = buildWeeklySummary(memberId, from, to);
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+        WeeklySummaryData summaryData    = buildWeeklySummary(memberId, from, to);
         TechStackDistributionData techData = buildTechStackDistribution(memberId, from, to);
         CumulativeStatsData cumulativeData = buildCumulativeStats(memberId);
 
-        // 직전 주 리포트 1건 — 직전 주 대비 비교용
         WeeklySummaryData lastWeekSummary = aiWeeklyReportRepository
                 .findTopByMemberIdAndWeekStartDateBeforeOrderByWeekStartDateDesc(memberId, weekStartDate)
                 .map(AiWeeklyReport::getWeeklySummaryData)
                 .orElse(null);
 
-        // 이번 주에 처음 등장한 태그 = 누적 횟수 - 이번 주 횟수 == 0
-        // (cumulativeData는 til_post 전체 집계이므로 리포트 스킵 주차 태그 누락 없음)
         List<String> newTags = findNewTags(techData.getTags(), cumulativeData.getTagTotals());
 
         String ruleComment = RuleBasedCommentGenerator.generate(
                 summaryData, techData, lastWeekSummary, newTags);
 
-        // Gemini AI 분석 — 실패 시 CustomException 발생하여 저장되지 않음
-        WeeklyReportContext context = buildContext(summaryData, techData, cumulativeData, lastWeekSummary, newTags);
-        String aiAnalysis = geminiClient.generateAiAnalysis(context);
+        WeeklyReportContext context = buildContext(member, summaryData, techData, cumulativeData, lastWeekSummary, newTags);
 
-        Member member = entityManager.getReference(Member.class, memberId);
+        // Gemini 호출 — 실패 시 CustomException 발생하여 저장되지 않음
+        AiAnalysisResult aiResult = geminiClient.generateAiAnalysis(context);
+
+        String aiAnalysisJson;
+        try {
+            aiAnalysisJson = objectMapper.writeValueAsString(aiResult);
+        } catch (JsonProcessingException e) {
+            log.error("AI 분석 결과 직렬화 실패: {}", e.getMessage());
+            throw new CustomException(ErrorCode.AI_ANALYSIS_FAILED);
+        }
 
         AiWeeklyReport report = new AiWeeklyReport(
                 member, weekStartDate, weekEndDate, summaryData, techData, cumulativeData, ruleComment);
-        report.applyAiAnalysis(aiAnalysis);
+        report.applyAiAnalysis(aiAnalysisJson);
 
         return toResponse(aiWeeklyReportRepository.save(report));
     }
@@ -185,7 +200,8 @@ public class AiWeeklyReportService {
 
     // ===== Gemini 컨텍스트 빌드 =====
 
-    private WeeklyReportContext buildContext(WeeklySummaryData summaryData,
+    private WeeklyReportContext buildContext(Member member,
+                                              WeeklySummaryData summaryData,
                                               TechStackDistributionData techData,
                                               CumulativeStatsData cumulativeData,
                                               WeeklySummaryData lastWeekSummary,
@@ -203,7 +219,14 @@ public class AiWeeklyReportService {
                     / lastWeekSummary.getTotalLearningTimeMinutes() * 100);
         }
 
+        String statusLabel = member.getCurrentStatus() != null ? member.getCurrentStatus().getLabel() : null;
+        String jobLabel    = member.getTargetJob()     != null ? member.getTargetJob().getLabel()     : null;
+
         return WeeklyReportContext.builder()
+                .user(WeeklyReportContext.UserContext.builder()
+                        .currentStatus(statusLabel)
+                        .targetJob(jobLabel)
+                        .build())
                 .thisWeek(WeeklyReportContext.ThisWeekStats.builder()
                         .totalPosts(summaryData.getTotalPosts())
                         .totalLearningTimeMinutes(summaryData.getTotalLearningTimeMinutes())
@@ -228,7 +251,6 @@ public class AiWeeklyReportService {
 
     // ===== 유틸 =====
 
-    // 누적 횟수 - 이번 주 횟수 == 0 이면 이번 주에 처음 등장한 태그
     private List<String> findNewTags(Map<String, Integer> thisWeekTags, Map<String, Integer> cumulativeTags) {
         if (thisWeekTags == null) return Collections.emptyList();
         return thisWeekTags.entrySet().stream()
@@ -239,6 +261,22 @@ public class AiWeeklyReportService {
     }
 
     private AiWeeklyReportResponse toResponse(AiWeeklyReport report) {
+        String aiAnalysisJson = report.getAiAnalysisComment();
+        AiAnalysisResult parsedAiAnalysis = null;
+
+        if (aiAnalysisJson != null && !aiAnalysisJson.isBlank()) {
+            try {
+                parsedAiAnalysis = objectMapper.readValue(aiAnalysisJson, AiAnalysisResult.class);
+            } catch (JsonProcessingException e) {
+                log.warn("AI 분석 파싱 실패 (reportId={}): {}", report.getReportId(), e.getMessage());
+            }
+        }
+
+        String currentStatus = null;
+        if (report.getMember() != null && report.getMember().getCurrentStatus() != null) {
+            currentStatus = report.getMember().getCurrentStatus().name();
+        }
+
         return AiWeeklyReportResponse.builder()
                 .reportId(report.getReportId())
                 .weekStartDate(report.getWeekStartDate())
@@ -247,7 +285,9 @@ public class AiWeeklyReportService {
                 .techStackDistribution(report.getTechStackDistributionData())
                 .cumulativeData(report.getCumulativeData())
                 .ruleBasedComment(report.getRuleBasedComment())
-                .aiAnalysisComment(report.getAiAnalysisComment())
+                .aiAnalysisComment(aiAnalysisJson)
+                .parsedAiAnalysis(parsedAiAnalysis)
+                .currentStatus(currentStatus)
                 .createdAt(report.getCreatedAt())
                 .build();
     }

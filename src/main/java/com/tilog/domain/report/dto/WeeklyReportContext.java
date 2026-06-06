@@ -16,6 +16,9 @@ import java.util.Map;
 @AllArgsConstructor
 public class WeeklyReportContext {
 
+    @JsonProperty("user")
+    private UserContext user;
+
     @JsonProperty("this_week")
     private ThisWeekStats thisWeek;
 
@@ -24,6 +27,19 @@ public class WeeklyReportContext {
 
     @JsonProperty("cumulative_stats")
     private CumulativeStats cumulativeStats;
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class UserContext {
+        /** null 허용 — 미입력 시 Gemini 방어 모드 프롬프트 적용 */
+        @JsonProperty("current_status")
+        private String currentStatus;
+
+        @JsonProperty("target_job")
+        private String targetJob;
+    }
 
     @Getter
     @Builder

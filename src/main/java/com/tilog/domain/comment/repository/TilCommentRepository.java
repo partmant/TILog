@@ -21,4 +21,7 @@ public interface TilCommentRepository extends JpaRepository<TilComment, Long> {
     // 특정 댓글의 대댓글 목록
     @Query("SELECT c FROM TilComment c WHERE c.parentComment.commentId = :parentCommentId AND c.isDeleted = false ORDER BY c.createdAt ASC")
     List<TilComment> findRepliesByParentId(@Param("parentCommentId") Long parentCommentId);
+
+    // 게시글의 삭제되지 않은 댓글 수 조회
+    long countByPost_IdAndIsDeletedFalse(Long postId);
 }

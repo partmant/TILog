@@ -1,5 +1,6 @@
 package com.tilog.domain.post.service;
 
+import com.tilog.domain.bookmark.repository.TilBookmarkRepository;
 import com.tilog.domain.member.entity.Member;
 import com.tilog.domain.member.repository.MemberRepository;
 import com.tilog.domain.post.dto.PostCommandDto;
@@ -51,6 +52,7 @@ public class PostService {
     private final TagRepository tagRepository;
     private final PostTagRepository postTagRepository;
     private final GeminiClient geminiClient;
+    private final TilBookmarkRepository tilBookmarkRepository;
 
     // JWT 인증 필터 적용 후 사용하는 게시글 목록 조회
     public List<PostQueryDto.ListResponse> getPostList(Long loginMemberId) {
@@ -95,7 +97,11 @@ public class PostService {
                 .map(postTag -> postTag.getTag().getName())
                 .toList();
 
-        return PostQueryDto.DetailResponse.from(post, tagNames, isOwner);
+        // 즐겨찾기 여부 확인
+        boolean isBookmarked = loginMemberId != null &&
+                tilBookmarkRepository.existsByPost_IdAndMember_Id(postId, loginMemberId);
+
+        return PostQueryDto.DetailResponse.from(post, tagNames, isOwner, isBookmarked);
     }
 
     // 게시글 핵심 요약 생성

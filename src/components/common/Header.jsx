@@ -7,6 +7,7 @@ const NOTIFICATION_LABEL = {
     COMMENT: "댓글",
     LIKE: "좋아요",
     FOLLOW: "팔로우",
+    AI_REPORT: "AI 리포트",
 };
 
 // 휴지통 아이콘

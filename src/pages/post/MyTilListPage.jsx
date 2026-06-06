@@ -10,7 +10,7 @@ function MyTilListPage() {
     const navigate = useNavigate();
     const searchWrapperRef = useRef(null);
 
-    // 페이지 진입 시 최상단으로 스크롤
+    // 페이지 진입 및 페이지 번호 변경 시 최상단으로 스크롤
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: "instant" });
     }, []);
@@ -31,6 +31,11 @@ function MyTilListPage() {
         toggleAdvanced,
         resetConditions,
     } = useMyTilList();
+
+    // 페이지 번호 변경 시 최상단으로 스크롤
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: "instant" });
+    }, [currentPage]);
 
     // 상세검색 패널 외부 클릭 시 닫기
     useEffect(() => {

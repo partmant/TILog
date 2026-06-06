@@ -3,6 +3,7 @@ package com.tilog.domain.post.controller;
 import com.tilog.domain.post.dto.TilPostSearchCondition;
 import com.tilog.domain.post.dto.TilPostSummaryDto;
 import com.tilog.domain.post.service.TilSearchService;
+import com.tilog.global.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -40,6 +41,24 @@ public class TilSearchController {
     public ResponseEntity<Page<TilPostSummaryDto>> search(
             @ModelAttribute TilPostSearchCondition condition,
             @PageableDefault(size = 10) Pageable pageable) {
+
+        Page<TilPostSummaryDto> result = tilSearchService.search(condition, pageable);
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * GET /api/tils/me
+     *
+     * 로그인한 사용자의 TIL 검색 (PUBLIC + PRIVATE 포함, DRAFT 제외)
+     * nickname 파라미터는 무시되고 JWT에서 추출한 memberId로 필터링
+     */
+    @GetMapping("/me")
+    public ResponseEntity<Page<TilPostSummaryDto>> searchMyTils(
+            @ModelAttribute TilPostSearchCondition condition,
+            @PageableDefault(size = 10) Pageable pageable) {
+
+        Long memberId = SecurityUtil.getCurrentMemberId();
+        condition.setMemberId(memberId);
 
         Page<TilPostSummaryDto> result = tilSearchService.search(condition, pageable);
         return ResponseEntity.ok(result);

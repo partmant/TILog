@@ -37,4 +37,10 @@ public class TilPostSearchCondition {
     /** 정렬 기준 (기본: LATEST) */
     @Builder.Default
     private TilSortType sort = TilSortType.LATEST;
+
+    /**
+     * 내 TIL 검색 시 사용 — 설정 시 PUBLIC 필터 우회하고 해당 회원 게시글만 조회
+     * (TilSearchController /me 엔드포인트에서 SecurityUtil로 주입)
+     */
+    private Long memberId;
 }

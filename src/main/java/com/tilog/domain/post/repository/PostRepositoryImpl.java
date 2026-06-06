@@ -124,9 +124,22 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     // ===== WHERE 조건 조합 =====
 
     private Predicate[] buildConditions(TilPostSearchCondition cond) {
+        // memberId가 있으면 내 TIL 검색 — PUBLIC 필터 우회, DRAFT만 제외
+        if (cond.getMemberId() != null) {
+            return new Predicate[]{
+                    qPost.member.id.eq(cond.getMemberId()),
+                    qPost.visibility.ne(Visibility.DRAFT),
+                    qPost.isDeleted.isFalse(),
+                    keywordContains(cond.getKeyword()),
+                    tagNameExists(cond.getTagName()),
+                    difficultyEq(cond.getDifficulty()),
+                    createdAtBetween(cond.getFrom(), cond.getTo())
+            };
+        }
+        // 일반 공개 검색
         return new Predicate[]{
                 qPost.visibility.eq(Visibility.PUBLIC),
-                qPost.isDeleted.isFalse(),              // Post.isDeleted
+                qPost.isDeleted.isFalse(),
                 keywordContains(cond.getKeyword()),
                 nicknameEq(cond.getNickname()),
                 tagNameExists(cond.getTagName()),
@@ -191,6 +204,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                                             qComment.isDeleted.isFalse())),  // TilComment.isDeleted
                     qPost.createdAt.desc()
             };
+            case VIEWS -> new OrderSpecifier[]{qPost.viewCount.desc(), qPost.createdAt.desc()};
             default -> new OrderSpecifier[]{qPost.createdAt.desc()};
         };
     }

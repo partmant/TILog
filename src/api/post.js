@@ -77,6 +77,43 @@ export const searchPostPage = async ({
     };
 };
 
+// 내 TIL 검색 및 페이징 조회 API (/api/tils/me — 인증 필요)
+export const searchMyPostPage = async ({
+    keyword,
+    tagName,
+    from,
+    to,
+    difficulty,
+    sort = "LATEST",
+    page = 0,
+    size = 10,
+} = {}) => {
+    const response = await api.get("/api/tils/me", {
+        params: {
+            keyword,
+            tagName,
+            from,
+            to,
+            difficulty,
+            sort,
+            page,
+            size,
+        },
+    });
+
+    const pageData = response.data;
+
+    return {
+        posts: pageData.content.map(mapPostSummary),
+        page: pageData.number,
+        size: pageData.size,
+        totalPages: pageData.totalPages,
+        totalElements: pageData.totalElements,
+        first: pageData.first,
+        last: pageData.last,
+    };
+};
+
 // 게시글 검색 목록 조회 API
 export const searchPosts = async (params = {}) => {
     const pageData = await searchPostPage(params);

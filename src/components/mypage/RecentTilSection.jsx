@@ -24,7 +24,7 @@ const RecentTilSection = ({
             return;
         }
 
-        navigate(`/members/${memberId}/tils`);
+        navigate('/mypage/tils');
     };
 
     const handleMoveDetail = (til) => {

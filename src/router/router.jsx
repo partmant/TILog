@@ -32,6 +32,9 @@ import PrivateRoute from "./PrivateRoute";
 // 팔로잉한 피드 목록
 import MemberTilListPage from "../pages/post/MemberTilListPage";
 
+// 내 TIL 전체 보기
+import MyTilListPage from "../pages/post/MyTilListPage";
+
 const router = createBrowserRouter([
     // =========================
     // 공개 페이지
@@ -73,6 +76,8 @@ const router = createBrowserRouter([
         children: [
         // 마이 페이지 경로
         { path: "/mypage", element: <MyPage /> },
+        // 내 TIL 전체 보기 경로
+        { path: "/mypage/tils", element: <MyTilListPage /> },
         // 주간 리포트 상세 페이지 경로
         { path: "/weekly-report", element: <WeeklyReportDetailPage /> },
         // 게시글 작성 페이지 경로

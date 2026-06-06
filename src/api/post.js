@@ -123,3 +123,10 @@ export const uploadPostImage = async (formData) => {
     );
     return response.data;
 };
+
+
+ // 게시글 또는 댓글 신고하기 API
+export const submitReport = async (reportData) => {
+    const response = await api.post('/api/reports', reportData);
+    return response.data;
+};

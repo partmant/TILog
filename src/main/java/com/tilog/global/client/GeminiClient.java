@@ -46,7 +46,6 @@ public class GeminiClient {
                             "responseSchema", buildResponseSchema()
                     )
             );
-
             String responseBody = restClient.post()
                     .uri(uriBuilder -> uriBuilder
                             .path("/v1beta/models/" + model + ":generateContent")
@@ -92,6 +91,7 @@ public class GeminiClient {
                   "오직 주어진 데이터 분포만 보고 '현재 어떤 파트 위주로 공부하고 있는지' 객관적 성향만 담백하게 분석해 " +
                   "[BIAS_WARNING] 대신 [INITIAL_STAGE] 상태로 넘기세요.";
 
+        String portfolioInstruction = buildPortfolioAdviceInstruction(user != null ? user.getCurrentStatus() : null);
         String thisWeekJson     = objectMapper.writeValueAsString(context.getThisWeek());
         String comparedJson     = objectMapper.writeValueAsString(context.getComparedToLastWeek());
         String cumulativeJson   = objectMapper.writeValueAsString(context.getCumulativeStats());
@@ -111,18 +111,83 @@ public class GeminiClient {
 
                 [Instructions & Guardrails]
                 1. 현실적이고 전문적인 개발자 서적/테크 블로그 톤앤매너를 유지하세요. "열심히 하셨네요" 같은 모호한 문장은 금지합니다.
-                2. [Focus & Intensity Review]: 학습 시간 대비 게시글 수, 'HARD' 난이도 비중을 체크하여 유저가 단순히 얕은 개념(Easy)만 많이 정리한 것인지, 하나의 개념을 깊게 파고든 것(Hard, 긴 몰입시간)인지 인과관계를 추론하여 짚어주세요.
+                2. [Focus & Intensity Review]: ① [focus_area] (이번 주 집중한 기술 아키텍처 분석):
+                                                - 이번 주 유저가 사용한 상세 기술 스택 분포(tag_distribution)와 카테고리를 연계하여, 실무 아키텍처 관점에서 어떤 영역에 집중했는지 정밀 분석하세요.
+                                                - 단순히 "Spring을 공부했습니다"가 아니라, 유저가 선택한 목표 직무(예: FULLSTACK)와 연결하여 "백엔드 프레임워크(Spring)와 데이터 접근 계층(JPA)의 인터랙션에 집중하며 서버 사이드 아키텍처의 기반을 다진 주간"과 같이 실무적이고 입체적인 기술 맥락으로 재해석하여 작성하세요.
+                                              ② [intensity_review] (몰입 시간과 난이도 조합을 통한 학습 깊이 진단):
+                                              - 이번 주 난이도 분포 데이터(EASY, NORMAL, HARD)를 기반으로 유저의 이번 주 학습 성향을 '객관적이고 담백하게' 진단하세요.(채찍질이나 영혼 없는 과도한 칭찬은 금지합니다.)
+                                              - [EASY/NORMAL 비중이 높을 때]:
+                                                현재 단계는 핵심 개념들의 기초 뼈대를 탄탄하게 다지고 넓게 확장하는 '리프레시 및 스펙트럼 확장 주간'임을 짚어주세요.
+                                                다만, 여기에 머무르지 않고 실무 역량을 한 단계 더 끌어올리기 위해서는 다음 주에 중요도가 높은 핵심 주제 하나를 정해 'HARD(심화 트러블슈팅, 아키텍처 깊이 파고들기)' 난이도에 도전해 보는 것을 권장한다고 자연스럽게 빌드업하세요.
+                                              - [HARD 비중이 높을 때]: 
+                                                문제를 깊이 있게 파고들어 끝까지 해결해 내는 '딥다이브(Deep-Dive) 주간'이었음을 인정해 주고 담백하게 칭찬해주세요.
+                                              - 요약하자면, 현재 학습 스펙트럼의 장점을 데이터 기반으로 짚어준 뒤, 다음 단계로 나아가기 위한 '난이도 밸런스 가이드'를 제안하는 톤을 유지하세요. 채찍질이나 과도한 칭찬 모두 금지합니다.
                 3. [Career Alignment Audit]: %s
-                4. [Practical Portfolio Advice]: 유저의 현재 신분이 '취준생'인 경우 이력서에 즉시 녹일 수 있는 매력적인 키워드와 예상 면접 질문을, '재직자'인 경우 실무 아키텍처 설계나 리팩토링 관점의 키워드를 제안하세요. (정보가 없다면 기술 자체의 범용 기술 면접 질문 출제)
+                4. [Practical Portfolio Advice]: %s
                 5. [Next Week Roadmap]: 이번 주 공부한 기술 스택과 연계했을 때 가장 시너지가 나는 다음 단계의 기술 스택 3가지를 명확한 실무적 근거와 함께 추천하세요.
                 6. [Weekly Persona Title 제약 조건]:
                    - '영토를 확장 중인 백엔드 전사', '지식의 마법사' 같은 유치하거나 판타지 게임 같은 오글거리는 비유적 표현은 엄격히 금지합니다.
                    - 현업 개발 용어(예: 딥다이브, 스케일아웃, 아키텍처, 파이프라인), 채용 시장 용어(예: T자형 인재, 올라운더, 스페셜리스트), 또는 담백한 데이터 요약 형태로 작성하세요.
                    - 글자 수는 15자 내외로 UI 대시보드 카드 타이틀에 딱 들어맞게 간결해야 합니다.
+                7. [OTHER 카테고리 분석 규칙 - 필수 필독]:
+                 - 기술 카테고리 분포(category_distribution) 데이터 중 'OTHER' 항목이 높게 나타날 수 있습니다. 이는 시스템 분류상 백엔드/프론트엔드에 속하지 않는 [CS 지식(자료구조, 알고리즘, 네트워크), 보안, 데이터베이스 인프라, 형상관리(Git)] 등이 포함되어 있기 때문입니다.
+                 - 절대로 'OTHER'라는 단어만 보고 "기타 영역에 치우쳐 있다"거나 "중요하지 않은 학습을 하고 있다"고 평가하지 마십시오.
+                 - 'OTHER' 비율이 높다면, 반드시 세부 기술 스택 분포(tag_distribution 또는 tag_totals)를 역추적하여 어떤 기술 태그가 들어있는지 확인하세요.
+                   - 만약 자료구조, 알고리즘, 네트워크 등이 있다면 -> "탄탄한 컴퓨터 공학(CS) 엔지니어링 기본기를 다지는 고부가가치 학습을 했다"고 분석하세요.
+                   - 만약 Spring Security, OAuth, JWT 등이 들어있다면 -> "애플리케이션의 안정성을 높이는 보안 아키텍처 수립에 집중했다"고 분석하세요.
+                 - 즉, 겉모습인 카테고리명(OTHER)에 갇히지 말고, 실제 알맹이인 '기술 스택 태그'를 기준으로 학습의 진짜 가치를 판단하여 [focus_area]와 [intensity_review]를 작성해야 합니다.
+                 8. [JSON 항목별 분량 및 글자 수 제한 규칙 - UI 최적화]:
+                   - 대시보드 화면의 카드 레이아웃 균형을 위해, AI는 반드시 다음 지정된 글자 수(공백 포함, 한글 기준) 범위를 엄격히 준수하여 응답해야 합니다.\s
+                   - 문장은 중간에 끊기지 않고 완결된 문장형태로 마쳐야 합니다.
+                   [weekly_persona]
+                  - title: 10자 ~ 15자 내외 (UI 타이틀 텍스트 한 줄 제한)
+                  - total_evaluation: 150자 ~ 200자 내외 (약 3~4문장)
+            
+                  [deep_tech_analysis]
+                  - focus_area: 150자 ~ 200자 내외 (기술 아키텍처 맥락 서술, 약 3~4문장)
+                  - intensity_review: 150자 ~ 200자 내외 (난이도 및 학습 깊이 진단, 약 3~4문장)
+            
+                  [career_alignment_audit]
+                  - status: BALANCED / BIAS_WARNING / INITIAL_STAGE 중 딱 하나만 출력 (영어 대문자 고정)
+                  - audit_comment: 150자 ~ 200자 내외 (역량 밸런스 피드백, 약 3~4문장)
+            
+                  [practical_portfolio_advice]
+                  - resume_keyword: 30자 ~ 50자 내외 (이력서용  핵심 기술 키워드)
+                  - interview_question: 60자 ~ 100자 내외 (구체적이고 날카로운 예상 질문 1개)
+            
+                  [next_week_roadmap]
+                  - action_item: 100자 ~ 130자 내외 (다음 주 실천 과제 가이드, 약 2문장)
+                  - recommended_tech_stacks (리스트 내부 각 항목):
+                    * tech_name: 10자 내외 (기술 스택명 혹은 개념명 단어)
+                    * reason: 60자 ~ 80자 내외 (해당 기술을 추천하는 실무적 근거 1줄)
+            
+                  [mentor_cheering_message]
+                  - mentor_cheering_message: 50자 ~ 80자 내외 (간결하고 따뜻한 격려 문구 1~2문장)
 
                 [Output Format Constraint]
                 반드시 지정된 JSON 스키마 구조에 맞춰 완벽한 순수 JSON 데이터만 반환하세요. 앞뒤 마크다운 기호(```json)나 인사말은 절대 포함하지 마십시오.
-                """.formatted(userContextSection, thisWeekJson, comparedJson, cumulativeJson, auditInstruction);
+                """.formatted(userContextSection, thisWeekJson, comparedJson, cumulativeJson, auditInstruction, portfolioInstruction);
+    }
+
+    private String buildPortfolioAdviceInstruction(String currentStatusLabel) {
+        if (currentStatusLabel == null) {
+            return "클라이언트 미팅이나 제안서에서 본인의 기술적 전문성을 어필할 수 있는 기술적 셀링 포인트 문구를 resume_keyword로, " +
+                   "실제 외주/개발 프로젝트 요구사항 분석 시 반드시 검토해야 할 기술적 제약사항 및 예외 처리 질문을 interview_question으로 작성하세요.";
+        }
+        return switch (currentStatusLabel) {
+            case "취준생", "이직준비자" ->
+                    "이력서/포트폴리오에 즉시 녹일 수 있는 매력적인 핵심 기술 역량 문구를 resume_keyword로, " +
+                    "실제 채용 과정에서 마주할 법한 날카로운 기술 면접 예상 질문을 interview_question으로 작성하세요.";
+            case "재직자" ->
+                    "실무 프로덕션 레벨에서 리팩토링, 아키텍처 개선, 성능 최적화 관점으로 접근할 수 있는 기술 키워드를 resume_keyword로, " +
+                    "팀 내 코드 리뷰나 사내 기술 세미나에서 깊이 있게 논의하기 좋은 아키텍처 토론 주제를 interview_question으로 작성하세요.";
+            case "학생" ->
+                    "전공 학업, 대외 활동, 토이 프로젝트에 활용하기 좋은 CS 및 기반 기술 개념 키워드를 resume_keyword로, " +
+                    "개발 동아리 면접이나 전공 지식 검증을 위한 핵심 이론 질문을 interview_question으로 작성하세요.";
+            default ->
+                    "클라이언트 미팅이나 제안서에서 본인의 기술적 전문성을 어필할 수 있는 기술적 셀링 포인트 문구를 resume_keyword로, " +
+                    "실제 외주/개발 프로젝트 요구사항 분석 시 반드시 검토해야 할 기술적 제약사항 및 예외 처리 질문을 interview_question으로 작성하세요.";
+        };
     }
 
     private Map<String, Object> buildResponseSchema() {

@@ -28,6 +28,8 @@ public class AiWeeklyReportResponse {
     private String aiAnalysisComment;
     /** aiAnalysisComment를 서버에서 미리 파싱한 구조체 — 프론트엔드는 이 필드를 사용 */
     private AiAnalysisResult parsedAiAnalysis;
+    /** 유저의 현재 신분 enum 코드 (JOB_SEEKER / STUDENT / EMPLOYED / CAREER_CHANGE / FREELANCER / null) — 프론트 포폴 섹션 타이틀 분기용 */
+    private String currentStatus;
 
     private LocalDateTime createdAt;
 }

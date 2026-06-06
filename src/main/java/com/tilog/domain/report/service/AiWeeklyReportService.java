@@ -272,6 +272,11 @@ public class AiWeeklyReportService {
             }
         }
 
+        String currentStatus = null;
+        if (report.getMember() != null && report.getMember().getCurrentStatus() != null) {
+            currentStatus = report.getMember().getCurrentStatus().name();
+        }
+
         return AiWeeklyReportResponse.builder()
                 .reportId(report.getReportId())
                 .weekStartDate(report.getWeekStartDate())
@@ -282,6 +287,7 @@ public class AiWeeklyReportService {
                 .ruleBasedComment(report.getRuleBasedComment())
                 .aiAnalysisComment(aiAnalysisJson)
                 .parsedAiAnalysis(parsedAiAnalysis)
+                .currentStatus(currentStatus)
                 .createdAt(report.getCreatedAt())
                 .build();
     }

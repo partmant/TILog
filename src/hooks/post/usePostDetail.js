@@ -16,6 +16,10 @@ import { isLoggedIn } from "../../utils/authUtils";
 
 const POST_DETAIL_LOGIN_MESSAGE = "상세 조회하려면 로그인이 필요합니다.";
 
+// 게시글 요약 중복 요청 방지용 임시 캐시
+const postSummaryCache = new Map();
+const pendingPostSummaryRequests = new Map();
+
 export function usePostDetail() {
     // =========================
     // 라우팅 관련
@@ -138,6 +142,14 @@ export function usePostDetail() {
         if (!loggedIn) return;
 
         let ignore = false;
+        const cachedSummary = postSummaryCache.get(postId);
+
+        if (cachedSummary !== undefined) {
+            setPostSummary(cachedSummary);
+            setPostSummaryError("");
+            setPostSummaryLoading(false);
+            return;
+        }
 
         const fetchPostSummary = async () => {
             setPostSummary("");
@@ -145,9 +157,16 @@ export function usePostDetail() {
             setPostSummaryLoading(true);
 
             try {
-                const data = await generatePostSummary(postId);
+                // 같은 게시글 요약 요청이 진행 중이면 기존 요청을 재사용
+                const request = pendingPostSummaryRequests.get(postId) || generatePostSummary(postId);
+                pendingPostSummaryRequests.set(postId, request);
+
+                const data = await request;
+                const summary = data?.summary || "";
+                postSummaryCache.set(postId, summary);
+
                 if (!ignore) {
-                    setPostSummary(data?.summary || "");
+                    setPostSummary(summary);
                 }
             } catch (error) {
                 console.error(error);
@@ -157,6 +176,7 @@ export function usePostDetail() {
                     );
                 }
             } finally {
+                pendingPostSummaryRequests.delete(postId);
                 if (!ignore) {
                     setPostSummaryLoading(false);
                 }

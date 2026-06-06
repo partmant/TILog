@@ -75,6 +75,11 @@ public class AiWeeklyReportService {
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
         WeeklySummaryData summaryData    = buildWeeklySummary(memberId, from, to);
+
+        if (summaryData.getTotalPosts() == 0) {
+            throw new CustomException(ErrorCode.NO_POST_THIS_WEEK);
+        }
+
         TechStackDistributionData techData = buildTechStackDistribution(memberId, from, to);
         CumulativeStatsData cumulativeData = buildCumulativeStats(memberId);
 

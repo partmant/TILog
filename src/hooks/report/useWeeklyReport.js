@@ -12,7 +12,7 @@ const getLastMonday = () => {
     return toDateString(result);
 };
 
-// status: 'loading' | 'idle' | 'generating' | 'done' | 'error'
+// status: 'loading' | 'idle' | 'generating' | 'done' | 'error' | 'noPost'
 export const useWeeklyReport = () => {
     const lastMonday = getLastMonday();
     const [report, setReport] = useState(null);
@@ -41,7 +41,14 @@ export const useWeeklyReport = () => {
             const data = await generateWeeklyReport(lastMonday);
             setReport(data);
             setStatus('done');
-        } catch {
+        } catch (err) {
+            try {
+                const body = JSON.parse(err.message);
+                if (body?.message?.includes('TIL이 없어')) {
+                    setStatus('noPost');
+                    return;
+                }
+            } catch {}
             setStatus('error');
         }
     }, [lastMonday]);

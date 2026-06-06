@@ -101,6 +101,12 @@ const WeeklyReportSection = () => {
                 </div>
             )}
 
+            {status === 'noPost' && (
+                <div className="wr-state-box">
+                    <p className="wr-state-desc">해당 주에 작성한 TIL이 없어서<br />주간 성장 리포트를 생성할 수 없어요 😢</p>
+                </div>
+            )}
+
             {status === 'error' && (
                 <div className="wr-state-box">
                     <p className="wr-state-desc">지금은 리포트를 생성할 수 없어요. 나중에 다시 시도해주세요.</p>

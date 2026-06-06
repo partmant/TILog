@@ -29,7 +29,7 @@ const formatWeekRange = (weekStartDate) => {
     return `${start.getFullYear()}년 ${fmt(start)} ~ ${fmt(end)}`;
 };
 
-// status: 'loading' | 'done' | 'noReport' | 'generating' | 'error'
+// status: 'loading' | 'done' | 'noReport' | 'generating' | 'error' | 'noPost'
 const WeeklyReportDetailPage = () => {
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
@@ -69,7 +69,14 @@ const WeeklyReportDetailPage = () => {
             const data = await generateWeeklyReport(weekStart);
             setReport(data);
             setStatus('done');
-        } catch {
+        } catch (err) {
+            try {
+                const body = JSON.parse(err.message);
+                if (body?.message?.includes('TIL이 없어')) {
+                    setStatus('noPost');
+                    return;
+                }
+            } catch {}
             setStatus('error');
         }
     };
@@ -111,6 +118,12 @@ const WeeklyReportDetailPage = () => {
                     <div className="rd-center-state">
                         <div className="rd-spinner" />
                         <p>리포트를 불러오는 중입니다...</p>
+                    </div>
+                )}
+
+                {status === 'noPost' && (
+                    <div className="rd-center-state">
+                        <p className="rd-empty-title">해당 주에 작성한 TIL이 없어서<br />주간 성장 리포트를 생성할 수 없어요 😢</p>
                     </div>
                 )}
 

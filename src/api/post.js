@@ -36,6 +36,7 @@ const mapPostSummary = (post) => ({
     commentCount: post.commentCount,
     viewCount: post.viewCount,
     studyTime: post.studyTime,
+    isBookmarked: post.isBookmarked ?? false,
 });
 
 // 게시글 검색 및 페이징 조회 API

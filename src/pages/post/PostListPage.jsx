@@ -1,8 +1,46 @@
 import { useEffect, useRef } from "react";
 import { usePostList } from "../../hooks/post";
+import { useBookmark } from "../../hooks/post/useBookmark";
+import { useToast } from "../../hooks/useToast";
 import { difficultyStyle, difficultyBorderStyle } from "../../constants/post";
 import SearchBar from "../../components/search/SearchBar.jsx";
 import AdvancedSearchPanel from "../../components/search/AdvancedSearchPanel.jsx";
+import Toast from "../../components/common/Toast.jsx";
+
+// 즐겨찾기 아이콘 컴포넌트
+const BookmarkIcon = ({ isBookmarked, onClick, disabled }) => (
+    <button
+        type="button"
+        onClick={onClick}
+        disabled={disabled}
+        aria-label={isBookmarked ? "즐겨찾기 해제" : "즐겨찾기 등록"}
+        style={{
+            background: "none",
+            border: "none",
+            cursor: disabled ? "not-allowed" : "pointer",
+            padding: "4px",
+            borderRadius: "50%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            opacity: disabled ? 0.5 : 1,
+            transition: "transform 0.15s",
+            flexShrink: 0,
+        }}
+    >
+        {isBookmarked ? (
+            // 등록 상태: 노란색 채움 별
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="26" height="26" fill="#f59e0b">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+        ) : (
+            // 미등록 상태: 회색 테두리 별
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#9ca3af" strokeWidth="1.8">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+        )}
+    </button>
+);
 
 // 게시글 목록 페이지
 function PostListPage() {
@@ -23,7 +61,11 @@ function PostListPage() {
         setCondition,
         toggleAdvanced,
         resetConditions,
+        handleBookmarkChange,
     } = usePostList();
+
+    const { toast, showToast } = useToast();
+    const { handleToggleBookmark, loadingPostId } = useBookmark(handleBookmarkChange, showToast);
 
     // 페이지 번호 변경 시 최상단으로 스크롤
     useEffect(() => {
@@ -56,6 +98,8 @@ function PostListPage() {
     );
 
     return (
+        <>
+        <Toast toast={toast} />
         <main className="space-y-7">
             {/* 상단 검색/소개 영역 */}
             <section className="rounded-3xl border-2 border-cyan-400 bg-gradient-to-r from-purple-50 to-cyan-50 p-8">
@@ -149,26 +193,37 @@ function PostListPage() {
                                     difficultyBorderStyle[post.difficulty] || difficultyBorderStyle.NORMAL
                                 }`}
                             >
-                                <div className="flex items-center justify-between gap-5">
+                                {/* 태그 행: 태그(좌) + 즐겨찾기 별(우) */}
+                                <div className="mb-2 flex min-h-[28px] items-center justify-between gap-2">
+                                    <div className="flex flex-wrap gap-2">
+                                        {(post.tagNames || []).map((tag) => (
+                                            <button
+                                                key={tag}
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleSearchTag(tag);
+                                                }}
+                                                className="rounded-full bg-purple-100 px-3 py-1 text-xs font-bold text-purple-600"
+                                            >
+                                                #{tag}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <BookmarkIcon
+                                        isBookmarked={post.isBookmarked}
+                                        disabled={loadingPostId === post.postId}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleToggleBookmark(post.postId, post.isBookmarked);
+                                        }}
+                                    />
+                                </div>
+
+                                {/* 제목 + 메타 + 난이도 배지 */}
+                                <div className="flex items-start justify-between gap-4">
                                     <div className="min-w-0">
-                                        <div className="mb-2 flex flex-wrap gap-2">
-                                            {(post.tagNames || []).map((tag) => (
-                                                <button
-                                                    key={tag}
-                                                    type="button"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleSearchTag(tag);
-                                                    }}
-                                                    className="rounded-full bg-purple-100 px-3 py-1 text-xs font-bold text-purple-600"
-                                                >
-                                                    #{tag}
-                                                </button>
-                                            ))}
-                                        </div>
-
                                         <h4 className="text-lg font-bold">{post.title}</h4>
-
                                         <p className="mt-2 text-sm text-gray-500">
                                             난이도 {post.difficulty}
                                             · 작성자 {post.nickname}
@@ -177,7 +232,6 @@ function PostListPage() {
                                             · 좋아요 {post.likeCount}개
                                         </p>
                                     </div>
-
                                     <span
                                         className={`shrink-0 rounded-full px-7 py-2 text-sm font-bold ${
                                             difficultyStyle[post.difficulty] || difficultyStyle.NORMAL
@@ -256,6 +310,7 @@ function PostListPage() {
                 </aside>
             </section>
         </main>
+        </>
     );
 }
 

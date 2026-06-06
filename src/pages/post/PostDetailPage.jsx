@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
@@ -8,6 +8,41 @@ import "highlight.js/styles/github-dark.css";
 import {usePostDetail} from "../../hooks/post";
 import {difficultyStyle} from "../../constants/post";
 import {submitReport} from "../../api/post";
+import {useBookmark} from "../../hooks/post/useBookmark";
+import {useToast} from "../../hooks/useToast";
+import Toast from "../../components/common/Toast.jsx";
+
+// 상세 페이지용 즐겨찾기 별 버튼
+const DetailBookmarkIcon = ({ isBookmarked, onClick, disabled }) => (
+    <button
+        type="button"
+        onClick={onClick}
+        disabled={disabled}
+        aria-label={isBookmarked ? "즐겨찾기 해제" : "즐겨찾기 등록"}
+        style={{
+            background: "none",
+            border: "none",
+            cursor: disabled ? "not-allowed" : "pointer",
+            padding: "6px",
+            borderRadius: "50%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            opacity: disabled ? 0.5 : 1,
+            transition: "transform 0.15s",
+        }}
+    >
+        {isBookmarked ? (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="28" height="28" fill="#f59e0b">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+        ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#9ca3af" strokeWidth="1.8">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+        )}
+    </button>
+);
 
 // 게시글 상세 페이지
 function PostDetailPage() {
@@ -59,6 +94,18 @@ function PostDetailPage() {
         handleDeleteComment,
     } = usePostDetail();
 
+    // 즐겨찾기 상태
+    const [isBookmarked, setIsBookmarked] = useState(false);
+    useEffect(() => {
+        if (post) setIsBookmarked(post.isBookmarked ?? false);
+    }, [post?.postId]);
+
+    const { toast, showToast } = useToast();
+    const { handleToggleBookmark, loadingPostId: bookmarkLoadingPostId } = useBookmark(
+        (postId, bookmarked) => setIsBookmarked(bookmarked),
+        showToast
+    );
+
     const [isReportModalOpen, setIsReportModalOpen] = useState(false);
     const [reportData, setReportData] = useState({
         reasonType: 'ETC',
@@ -98,19 +145,28 @@ function PostDetailPage() {
     }
 
     return (
+        <>
+        <Toast toast={toast} />
         <main className="rounded-3xl bg-white/90 p-8 shadow-sm">
             {/* 상세 페이지 전체 레이아웃 */}
             <div className="grid grid-cols-[1fr_320px] gap-8">
                 {/* 왼쪽 게시글 본문 영역 */}
                 <article className="rounded-3xl border border-gray-200 bg-white p-8 shadow-sm">
-                    {/* 난이도 배지 */}
-                    <span
-                        className={`inline-flex rounded-full px-5 py-2 text-sm font-bold ${
-                            difficultyStyle[post.difficulty] || difficultyStyle.NORMAL
-                        }`}
-                    >
-                        {post.difficulty}
-                    </span>
+                    {/* 상단 행: 난이도 배지(좌) + 즐겨찾기 버튼(우) */}
+                    <div className="flex items-center justify-between">
+                        <span
+                            className={`inline-flex rounded-full px-5 py-2 text-sm font-bold ${
+                                difficultyStyle[post.difficulty] || difficultyStyle.NORMAL
+                            }`}
+                        >
+                            {post.difficulty}
+                        </span>
+                        <DetailBookmarkIcon
+                            isBookmarked={isBookmarked}
+                            disabled={bookmarkLoadingPostId === post.postId}
+                            onClick={() => handleToggleBookmark(post.postId, isBookmarked)}
+                        />
+                    </div>
 
                     {/* 게시글 제목 */}
                     <h2 className="mt-4 text-4xl font-bold text-slate-900">
@@ -582,8 +638,8 @@ function PostDetailPage() {
                 </div>
             )}
         </main>
-    )
-        ;
+        </>
+    );
 }
 
 export default PostDetailPage;

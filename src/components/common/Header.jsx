@@ -59,6 +59,7 @@ const Header = () => {
         followers, followings, followLoading,
         followPanelRef, handleToggleFollowPanel,
         handleNavigateToMemberTil,
+        handleUnfollowFromPanel,
     } = useHeader();
 
     return (
@@ -92,6 +93,11 @@ const Header = () => {
                     <NavLink to="/mypage" className={({ isActive }) =>
                         isActive ? "app-header-nav-link active" : "app-header-nav-link"}>
                         마이페이지
+                    </NavLink>
+                )}
+                {user?.role === 'ADMIN' && (
+                    <NavLink to="/admin" className={({ isActive }) => isActive ? "app-header-nav-link active text-error" : "app-header-nav-link"}>
+                        관리자
                     </NavLink>
                 )}
             </nav>
@@ -166,13 +172,22 @@ const Header = () => {
                                                         {member.nickname}
                                                     </span>
                                                     {followTab === "followings" && (
-                                                        <button
-                                                            type="button"
-                                                            className="header-panel-til-btn"
-                                                            onClick={() => handleNavigateToMemberTil(member.memberId)}
-                                                        >
-                                                            TIL 보기
-                                                        </button>
+                                                        <>
+                                                            <button
+                                                                type="button"
+                                                                className="header-panel-til-btn"
+                                                                onClick={() => handleNavigateToMemberTil(member.memberId)}
+                                                            >
+                                                                TIL 보기
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                className="header-panel-unfollow-btn"
+                                                                onClick={() => handleUnfollowFromPanel(member.memberId)}
+                                                            >
+                                                                취소
+                                                            </button>
+                                                        </>
                                                     )}
                                                 </li>
                                             ));

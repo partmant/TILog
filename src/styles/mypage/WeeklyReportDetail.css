@@ -737,6 +737,107 @@
     font-weight: 600;
 }
 
+/* PDF 저장 버튼 */
+.rd-export-btn {
+    padding: 8px 18px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #8b5cf6, #22d3ee);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 900;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    white-space: nowrap;
+}
+
+.rd-export-btn:hover {
+    opacity: 0.88;
+}
+
+/* 인쇄 / PDF 저장 */
+@media print {
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* 페이지 전체를 투명화하고 rd-shell만 표시 — 사이트 네비/헤더 자동 제거 */
+    body * {
+        visibility: hidden;
+    }
+
+    .rd-shell,
+    .rd-shell * {
+        visibility: visible;
+    }
+
+    .rd-shell {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        border: none;
+        box-shadow: none;
+        backdrop-filter: none;
+        border-radius: 0;
+        padding: 20px 28px;
+        background: #fff;
+    }
+
+    /* 주간 이동 버튼, PDF 버튼 숨김 (뒤로가기 포함) */
+    .rd-header,
+    .rd-page-title-sub {
+        display: none !important;
+    }
+
+    .rd-page-title {
+        border-bottom-color: #e5e7eb;
+        margin-bottom: 16px;
+        padding-bottom: 14px;
+    }
+
+    /* 그라데이션 텍스트 → 단색 폴백 */
+    .rd-page-title-text,
+    .rd-ai-panel h3 {
+        background: none !important;
+        -webkit-text-fill-color: #7c3aed !important;
+        color: #7c3aed !important;
+    }
+
+    /* 작은 카드만 break-inside: avoid (큰 컨테이너에 걸면 빈 페이지 발생) */
+    .rd-stat-card,
+    .rd-roadmap-stack-card,
+    .rd-ai-tech-item {
+        box-shadow: none;
+        break-inside: avoid;
+    }
+
+    .rd-panel,
+    .rd-ai-section {
+        box-shadow: none;
+    }
+
+    .rd-stat-cards,
+    .rd-charts-row {
+        break-inside: avoid;
+    }
+
+    .rd-ai-panel {
+        break-before: auto;
+    }
+
+    .rd-ai-section {
+        break-inside: avoid;
+    }
+
+    .rd-ai-cheer {
+        border: 1px solid #8b5cf6;
+    }
+}
+
 /* 반응형 */
 @media (max-width: 640px) {
     .rd-shell {

@@ -100,6 +100,11 @@ const WeeklyReportDetailPage = () => {
                             다음 주 →
                         </button>
                     </div>
+                    {status === 'done' && report && (
+                        <button className="rd-export-btn" onClick={() => window.print()}>
+                            PDF 저장
+                        </button>
+                    )}
                 </div>
 
                 {status === 'loading' && (

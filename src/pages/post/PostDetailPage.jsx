@@ -1,11 +1,13 @@
+import React, {useState} from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 
 import "highlight.js/styles/github-dark.css";
 
-import { usePostDetail } from "../../hooks/post";
-import { difficultyStyle } from "../../constants/post";
+import {usePostDetail} from "../../hooks/post";
+import {difficultyStyle} from "../../constants/post";
+import {submitReport} from "../../api/post";
 
 // 게시글 상세 페이지
 function PostDetailPage() {
@@ -57,6 +59,35 @@ function PostDetailPage() {
         handleDeleteComment,
     } = usePostDetail();
 
+    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+    const [reportData, setReportData] = useState({
+        reasonType: 'ETC',
+        reasonDetail: ''
+    });
+
+    const handleReportSubmit = async () => {
+        if (!reportData.reasonDetail.trim()) {
+            alert('상세 신고 사유를 입력해주세요.');
+            return;
+        }
+
+        try {
+            await submitReport({
+                targetType: 'TIL_POST',
+                targetId: post.postId,
+                reasonType: reportData.reasonType,
+                reasonDetail: reportData.reasonDetail
+            });
+
+            alert('신고가 성공적으로 접수되었습니다. 관리자 검토 후 조치됩니다.');
+            setIsReportModalOpen(false);
+            setReportData({reasonType: 'ETC', reasonDetail: ''}); // 폼 초기화
+        } catch (error) {
+            console.error(error);
+            alert('신고 접수에 실패했습니다.');
+        }
+    };
+
     // 게시글 로딩 상태
     if (!post) {
         return (
@@ -102,7 +133,7 @@ function PostDetailPage() {
                     </p>
 
                     {/* 구분선 */}
-                    <div className="my-8 h-px bg-gray-200" />
+                    <div className="my-8 h-px bg-gray-200"/>
 
                     {/* Markdown 본문 영역 */}
                     <section className="min-h-[260px]">
@@ -112,7 +143,7 @@ function PostDetailPage() {
                                 rehypePlugins={[rehypeHighlight]}
                                 components={{
                                     // Markdown 이미지 표시 스타일
-                                    img: ({ node, ...props }) => (
+                                    img: ({node, ...props}) => (
                                         <img
                                             {...props}
                                             className="my-4 max-w-full rounded-xl object-contain"
@@ -197,22 +228,32 @@ function PostDetailPage() {
 
                         {/* 팔로우 버튼 - 다른 사람 게시글일 때만 표시 */}
                         {!post.owner && (
-                            <button
-                                type="button"
-                                onClick={handleToggleFollow}
-                                className={`rounded-2xl px-8 py-3 font-bold transition ${
-                                    followInfo.following
-                                        ? "bg-purple-500 text-white hover:bg-purple-600"
-                                        : "bg-purple-50 text-purple-500 hover:bg-purple-100"
-                                }`}
-                            >
-                                {followInfo.following ? "팔로잉 ✓" : "+ 팔로우"}
-                            </button>
+                            <>
+                                <button
+                                    type="button"
+                                    onClick={handleToggleFollow}
+                                    className={`rounded-2xl px-8 py-3 font-bold transition ${
+                                        followInfo.following
+                                            ? "bg-purple-500 text-white hover:bg-purple-600"
+                                            : "bg-purple-50 text-purple-500 hover:bg-purple-100"
+                                    }`}
+                                >
+                                    {followInfo.following ? "팔로잉 ✓" : "+ 팔로우"}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsReportModalOpen(true)}
+                                    className="ml-auto rounded-2xl border border-red-100 bg-red-50 px-6 py-3 font-bold text-red-500 transition hover:bg-red-100"
+                                >
+                                    🚨 신고하기
+                                </button>
+                            </>
                         )}
                     </div>
                 </article>
 
-                {/* 오른쪽 댓글 / 보조 패널 */}
+                {/* 오른쪽 댓글 / 보조 패널 */
+                }
                 <aside className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
                     {/* 댓글 헤더 */}
                     <div className="flex items-center justify-between">
@@ -417,7 +458,7 @@ function PostDetailPage() {
                                 이전
                             </button>
 
-                            {Array.from({ length: commentPageInfo.totalPages }, (_, index) => (
+                            {Array.from({length: commentPageInfo.totalPages}, (_, index) => (
                                 <button
                                     key={index}
                                     type="button"
@@ -489,8 +530,60 @@ function PostDetailPage() {
                     </section>
                 </aside>
             </div>
+            {isReportModalOpen && (
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+                    <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+                        <h3 className="text-xl font-bold text-slate-900 mb-4">게시글 신고하기</h3>
+
+                        <div className="flex flex-col gap-4">
+                            <div>
+                                <label className="block text-sm font-bold text-slate-700 mb-2">신고 사유 선택</label>
+                                <select
+                                    value={reportData.reasonType}
+                                    onChange={(e) => setReportData({...reportData, reasonType: e.target.value})}
+                                    className="w-full rounded-xl border border-gray-200 p-3 text-sm outline-none focus:border-purple-500"
+                                >
+                                    <option value="ABUSE">욕설/비방 (ABUSE)</option>
+                                    <option value="AD">광고/홍보 (AD)</option>
+                                    <option value="ADULT">음란물 (ADULT)</option>
+                                    <option value="PERSONAL_INFO">개인정보 노출 (PERSONAL_INFO)</option>
+                                    <option value="SPAM">도배/스팸 (SPAM)</option>
+                                    <option value="ETC">기타 (ETC)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-bold text-slate-700 mb-2">상세 내용 작성</label>
+                                <textarea
+                                    rows={4}
+                                    value={reportData.reasonDetail}
+                                    onChange={(e) => setReportData({...reportData, reasonDetail: e.target.value})}
+                                    placeholder="신고하시는 상세 사유를 적어주세요. (관리자 검토 시 활용됩니다)"
+                                    className="w-full resize-none rounded-xl border border-gray-200 p-3 text-sm outline-none focus:border-purple-500"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="mt-6 flex justify-end gap-3">
+                            <button
+                                onClick={() => setIsReportModalOpen(false)}
+                                className="rounded-xl bg-gray-100 px-5 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-200"
+                            >
+                                취소
+                            </button>
+                            <button
+                                onClick={handleReportSubmit}
+                                className="rounded-xl bg-red-500 px-5 py-2.5 text-sm font-bold text-white hover:bg-red-600"
+                            >
+                                신고 접수
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </main>
-    );
+    )
+        ;
 }
 
 export default PostDetailPage;

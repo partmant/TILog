@@ -99,6 +99,7 @@ public class PostService {
     }
 
     // 게시글 핵심 요약 생성
+    @Transactional
     public PostQueryDto.SummaryResponse summarizePost(Long postId, Long loginMemberId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("Post not found."));
@@ -113,12 +114,19 @@ public class PostService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Private post.");
         }
 
+        // 저장된 AI 요약이 있으면 Gemini를 다시 호출하지 않음
+        if (post.getAiSummary() != null && !post.getAiSummary().isBlank()) {
+            return new PostQueryDto.SummaryResponse(post.getAiSummary());
+        }
+
         List<String> tagNames = postTagRepository.findByPost_Id(postId).stream()
                 .map(postTag -> postTag.getTag().getName())
                 .toList();
 
         // 게시글 제목/본문/태그를 Gemini에 전달하여 핵심 요약 생성
         String summary = geminiClient.generatePostSummary(post.getTitle(), post.getContent(), tagNames);
+        post.applyAiSummary(summary);
+
         return new PostQueryDto.SummaryResponse(summary);
     }
 
@@ -169,6 +177,7 @@ public class PostService {
                 request.getVisibility(),
                 request.getStudyTime()
         );
+        post.clearAiSummary();
 
         // 게시글 태그 갱신
         postTagRepository.deleteByPost_Id(post.getId());

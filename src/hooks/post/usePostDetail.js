@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { getPostDetail, deletePost, generatePostSummary, } from "../../api/post";
@@ -10,8 +10,11 @@ import { getLikeInfo, likePost, unlikePost, } from "../../api/like";
 import { follow, unfollow, isFollowing, } from "../../api/follow";
 
 import { getPostEditPath, postListPath, } from "../../constants/post";
+import { isLoggedIn } from "../../utils/authUtils";
 
 // 게시글 상세 페이지 관련 로직 관리 Hook
+
+const POST_DETAIL_LOGIN_MESSAGE = "상세 조회하려면 로그인이 필요합니다.";
 
 export function usePostDetail() {
     // =========================
@@ -23,6 +26,17 @@ export function usePostDetail() {
 
     // 페이지 이동 객체
     const navigate = useNavigate();
+
+    const loggedIn = isLoggedIn();
+    const redirectedToLoginRef = useRef(false);
+
+    const redirectToLogin = useCallback(() => {
+        if (redirectedToLoginRef.current) return;
+
+        redirectedToLoginRef.current = true;
+        alert(POST_DETAIL_LOGIN_MESSAGE);
+        navigate("/login", { replace: true });
+    }, [navigate]);
 
     // =========================
     // 상태 관리
@@ -94,16 +108,35 @@ export function usePostDetail() {
 
     // 게시글 상세 조회
     useEffect(() => {
+        if (!loggedIn) {
+            redirectToLogin();
+        }
+    }, [loggedIn, redirectToLogin]);
+
+    useEffect(() => {
+        if (!loggedIn) return;
+
         const fetchPostDetail = async () => {
-            const data = await getPostDetail(postId);
-            setPost(data);
+            try {
+                const data = await getPostDetail(postId);
+                setPost(data);
+            } catch (error) {
+                if (error.response?.status === 401) {
+                    redirectToLogin();
+                    return;
+                }
+
+                throw error;
+            }
         };
 
         fetchPostDetail();
-    }, [postId]);
+    }, [postId, loggedIn, redirectToLogin]);
 
     // 게시글 핵심 요약 조회
     useEffect(() => {
+        if (!loggedIn) return;
+
         let ignore = false;
 
         const fetchPostSummary = async () => {
@@ -135,7 +168,7 @@ export function usePostDetail() {
         return () => {
             ignore = true;
         };
-    }, [postId]);
+    }, [postId, loggedIn]);
 
     // 게시글 댓글 및 대댓글 목록 재조회
     const refreshCommentsWithReplies = async (targetPage = commentPage) => {
@@ -170,18 +203,22 @@ export function usePostDetail() {
 
     // 게시글 댓글 및 대댓글 목록 조회
     useEffect(() => {
+        if (!loggedIn) return;
+
         refreshCommentsWithReplies();
-    }, [postId, commentPage]);
+    }, [postId, commentPage, loggedIn]);
 
     // 게시글 좋아요 정보 조회
     useEffect(() => {
+        if (!loggedIn) return;
+
         const fetchLikeInfo = async () => {
             const data = await getLikeInfo(postId);
             setLikeInfo(data);
         };
 
         fetchLikeInfo();
-    }, [postId]);
+    }, [postId, loggedIn]);
 
     // 팔로우 여부 조회 (다른 사람 게시글일 때만)
     useEffect(() => {

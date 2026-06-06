@@ -295,14 +295,14 @@ function FeedPage() {
 
                         <div className="mt-8">
                             <h4 className="font-bold">
-                                추천 학습 주제
+                                오늘의 TIL 소재
                             </h4>
 
                             <ul className="mt-4 space-y-4 text-sm font-semibold text-gray-700">
-                                <li># JWT 인증 흐름</li>
-                                <li># JPA 연관관계</li>
-                                <li># React Hook</li>
-                                <li># 쿼리 최적화</li>
+                                <li># 오늘 만난 에러</li>
+                                <li># 새로 이해한 개념</li>
+                                <li># 리팩토링한 이유</li>
+                                <li># 내일 다시 볼 질문</li>
                             </ul>
                         </div>
                     </aside>

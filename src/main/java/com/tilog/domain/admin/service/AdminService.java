@@ -141,9 +141,9 @@ public class AdminService {
                 .stream()
                 .map(report -> {
                     // 1. 신고자 닉네임 찾기
-                    String reporterName = memberRepository.findById(report.getReportId())
-                            .map(Member::getNickname)
-                            .orElse("알 수 없음");
+                    String reporterName = report.getReporter() != null
+                            ? report.getReporter().getNickname()
+                            : "알 수 없음";
 
                     // 2. 피신고자(신고 당한 사람) 닉네임 찾기
                     String reportedName = "알 수 없음";

@@ -24,6 +24,9 @@ function PostDetailPage() {
 
     const {
         post,
+        postSummary,
+        postSummaryLoading,
+        postSummaryError,
         pagedComments,
         repliesMap,
         likeInfo,
@@ -153,14 +156,16 @@ function PostDetailPage() {
                         </div>
                     </section>
 
-                    {/* 핵심 요약 박스 - 현재는 본문 하단 보조 UI */}
+                    {/* 핵심 요약 박스 - Gemini 요약 결과 표시 */}
                     <section className="mt-10 rounded-2xl border border-gray-200 bg-slate-50 p-6">
                         <h3 className="font-bold text-slate-900">
                             핵심 요약
                         </h3>
 
                         <p className="mt-3 text-sm font-semibold leading-7 text-slate-600">
-                            오늘 학습한 내용을 바탕으로 복습할 핵심 개념을 정리해보세요.
+                            {postSummaryLoading
+                                ? "AI가 게시글의 핵심 개념을 요약하고 있습니다."
+                                : postSummaryError || postSummary || "요약할 내용을 찾지 못했습니다."}
                         </p>
                     </section>
 

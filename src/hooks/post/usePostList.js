@@ -187,6 +187,15 @@ export function usePostList() {
         setSearchKeyword('');
     };
 
+    // 즐겨찾기 상태 즉시 갱신 (전체 재조회 없이 해당 게시글만 업데이트)
+    const handleBookmarkChange = (postId, isBookmarked) => {
+        setPosts((prev) =>
+            prev.map((post) =>
+                post.postId === postId ? { ...post, isBookmarked } : post
+            )
+        );
+    };
+
     return {
         posts,
         pageInfo,
@@ -206,5 +215,6 @@ export function usePostList() {
         setCondition,
         toggleAdvanced,
         resetConditions,
+        handleBookmarkChange,
     };
 }

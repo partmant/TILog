@@ -14,6 +14,7 @@ import org.springframework.web.client.RestClient;
 
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 
 @Slf4j
 @Component
@@ -77,6 +78,47 @@ public class GeminiClient {
         }
     }
 
+    // 게시글 상세의 핵심 요약 생성
+    public String generatePostSummary(String title, String content, List<String> tagNames) {
+        try {
+            Map<String, Object> requestBody = Map.of(
+                    "contents", List.of(Map.of("parts", List.of(Map.of("text", buildPostSummaryPrompt(title, content, tagNames))))),
+                    "generationConfig", Map.of(
+                            "responseMimeType", "application/json",
+                            "responseSchema", Map.of(
+                                    "type", "OBJECT",
+                                    "properties", Map.of("summary", Map.of("type", "STRING")),
+                                    "required", List.of("summary")
+                            )
+                    )
+            );
+
+            String responseBody = restClient.post()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/v1beta/models/" + model + ":generateContent")
+                            .queryParam("key", apiKey)
+                            .build())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(requestBody)
+                    .retrieve()
+                    .body(String.class);
+
+            JsonNode root = objectMapper.readTree(responseBody);
+            String text = root
+                    .path("candidates").get(0)
+                    .path("content").path("parts").get(0)
+                    .path("text").asText();
+
+            return objectMapper.readTree(text).path("summary").asText();
+
+        } catch (CustomException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Gemini post summary failed: {}", e.getMessage());
+            throw new CustomException(ErrorCode.AI_ANALYSIS_FAILED);
+        }
+    }
+
     private String buildPrompt(String contextJson) {
         return """
                 당신은 개발자 성장 코치입니다. 아래 개발자의 주간 TIL(Today I Learned) 작성 데이터를 분석하여
@@ -94,5 +136,44 @@ public class GeminiClient {
 
                 JSON 형식으로 응답하세요.
                 """.formatted(contextJson);
+    }
+
+    // 게시글 제목/본문/태그를 요약 프롬프트로 변환
+    private String buildPostSummaryPrompt(String title, String content, List<String> tagNames) {
+        StringJoiner tagJoiner = new StringJoiner(", ");
+        if (tagNames != null) {
+            tagNames.stream()
+                    .filter(tagName -> tagName != null && !tagName.isBlank())
+                    .forEach(tagJoiner::add);
+        }
+
+        return """
+                당신은 개발 학습 기록을 복습하기 쉽게 요약하는 튜터입니다.
+                아래 TIL 게시글을 읽고 핵심 개념만 한국어로 요약하세요.
+
+                제목:
+                %s
+
+                태그:
+                %s
+
+                본문:
+                %s
+
+                요구사항:
+                - 게시글에 실제로 있는 내용만 사용
+                - 핵심 개념 2~4개를 자연스러운 문장으로 정리
+                - 불필요한 칭찬, 추측, 새 학습 주제 제안은 제외
+                - 250자 이내
+                - JSON 형식으로만 응답
+                """.formatted(
+                safeText(title),
+                tagJoiner.length() == 0 ? "없음" : tagJoiner.toString(),
+                safeText(content)
+        );
+    }
+
+    private String safeText(String text) {
+        return text == null || text.isBlank() ? "없음" : text;
     }
 }

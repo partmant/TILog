@@ -146,7 +146,7 @@ function MyTilListPage() {
                 </div>
             </div>
 
-            <section className="grid grid-cols-[1fr_280px] gap-7">
+            <section className="grid grid-cols-[1fr_280px] items-start gap-7">
             {/* TIL 목록 */}
             <div className="rounded-3xl bg-white p-8 shadow-sm">
                 <h3 className="mb-6 text-xl font-bold">
@@ -250,7 +250,7 @@ function MyTilListPage() {
             </div>
 
             {/* 우측 보조 정보 */}
-            <aside className="rounded-3xl bg-white p-7 shadow-sm">
+            <aside className="sticky top-4 self-start rounded-3xl bg-white p-7 shadow-sm">
                 <h3 className="text-xl font-bold">보조 정보</h3>
 
                 <div className="mt-6 space-y-4">

@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getWeeklyReport, generateWeeklyReport } from '../api/weeklyReportApi';
 import { toDateString } from '../utils/mypageUtils';
+import { getMemberId } from '../utils/authUtils';
+import { saveGeneratingFlag, clearGeneratingFlag } from '../hooks/report/useWeeklyReport';
 import DifficultyPieChart from '../components/report/DifficultyPieChart';
 import CategoryDoughnutChart from '../components/report/CategoryDoughnutChart';
 import TechStackBarChart from '../components/report/TechStackBarChart';
@@ -65,11 +67,14 @@ const WeeklyReportDetailPage = () => {
 
     const handleGenerate = async () => {
         setStatus('generating');
+        saveGeneratingFlag(getMemberId(), weekStart);
         try {
             const data = await generateWeeklyReport(weekStart);
             setReport(data);
             setStatus('done');
+            clearGeneratingFlag();
         } catch (err) {
+            clearGeneratingFlag();
             try {
                 const body = JSON.parse(err.message);
                 if (body?.message?.includes('TIL이 없어')) {
@@ -169,9 +174,9 @@ const PORTFOLIO_ITEM_LABELS = {
     CAREER_CHANGE: { resumeKeyword: '추천 이력서 키워드',    interviewQuestion: '기술 면접 질문' },
     EMPLOYED:      { resumeKeyword: '아키텍처 개선',    interviewQuestion: '코드 리뷰 주제' },
     STUDENT:       { resumeKeyword: '추천 프로젝트 키워드',  interviewQuestion: '전공 지식 퀴즈' },
-    FREELANCER:    { resumeKeyword: '기술 셀링 포인트', interviewQuestion: '요구사항 검증' },
+    FREELANCER:    { resumeKeyword: '기술 셀링 포인트', interviewQuestion: '프로젝트 기술 점검' },
 };
-const DEFAULT_PORTFOLIO_LABELS = { resumeKeyword: '기술 셀링 포인트', interviewQuestion: '요구사항 검증' };
+const DEFAULT_PORTFOLIO_LABELS = { resumeKeyword: '실무 역량 키워드', interviewQuestion: '프로젝트 기술 점검' };
 
 const ReportContent = ({ report }) => {
     const {

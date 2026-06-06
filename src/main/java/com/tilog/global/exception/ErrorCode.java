@@ -17,6 +17,9 @@ public enum ErrorCode {
     ALREADY_LIKED(HttpStatus.CONFLICT, "이미 좋아요한 게시글입니다."),
     LIKE_NOT_FOUND(HttpStatus.NOT_FOUND, "좋아요 내역을 찾을 수 없습니다."),
 
+    // Bookmark
+    POST_NOT_FOUND_FOR_BOOKMARK(HttpStatus.NOT_FOUND, "즐겨찾기 대상 게시글을 찾을 수 없습니다."),
+
     // Follow
     SELF_FOLLOW_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "자기 자신을 팔로우할 수 없습니다."),
     ALREADY_FOLLOWING(HttpStatus.CONFLICT, "이미 팔로우한 사용자입니다."),

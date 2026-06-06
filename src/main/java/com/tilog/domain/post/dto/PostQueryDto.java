@@ -1,5 +1,6 @@
 package com.tilog.domain.post.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.tilog.domain.post.entity.Post;
 import lombok.Builder;
 import lombok.Getter;
@@ -59,7 +60,11 @@ public class PostQueryDto {
         // 본인 체크 용
         private boolean isOwner;
 
-        public static DetailResponse from(Post post, List<String> tagNames, boolean isOwner) {
+        // 즐겨찾기 여부
+        @JsonProperty("isBookmarked")
+        private boolean isBookmarked;
+
+        public static DetailResponse from(Post post, List<String> tagNames, boolean isOwner, boolean isBookmarked) {
             return DetailResponse.builder()
                     .postId(post.getId())
                     .memberId(post.getMember().getId())
@@ -73,6 +78,7 @@ public class PostQueryDto {
                     .studyTime(post.getStudyTime())
                     .tagNames(tagNames)
                     .isOwner(isOwner)
+                    .isBookmarked(isBookmarked)
                     .build();
         }
     }

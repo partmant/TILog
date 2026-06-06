@@ -112,6 +112,15 @@ const WeeklyReportSection = () => {
 
             {status === 'done' && report && (
                 <div className="wr-summary">
+
+                    {/* 페르소나 타이틀 */}
+                    {report.parsedAiAnalysis?.weekly_persona?.title && (
+                        <div className="wr-persona-banner">
+                            이번 주 나는: <strong>{report.parsedAiAnalysis.weekly_persona.title}</strong>
+                        </div>
+                    )}
+
+                    {/* stat 3개 */}
                     <div className="wr-stats">
                         <div className="wr-stat">
                             <span className="wr-stat-value">{report.weeklySummary?.totalPosts ?? 0}</span>
@@ -127,13 +136,24 @@ const WeeklyReportSection = () => {
                         </div>
                     </div>
 
+                    {/* 난이도 바 */}
                     {report.weeklySummary?.difficultyDistribution && (
                         <DifficultyBar distribution={report.weeklySummary.difficultyDistribution} />
                     )}
 
+                    {/* 규칙 기반 코멘트 */}
                     {report.ruleBasedComment && (
                         <blockquote className="wr-comment">{report.ruleBasedComment}</blockquote>
                     )}
+
+                    {/* AI 격려 메시지 티저 */}
+                    {report.parsedAiAnalysis?.mentor_cheering_message && (
+                        <div className="wr-cheer">
+                            <span>💌</span>
+                            <p>{report.parsedAiAnalysis.mentor_cheering_message}</p>
+                        </div>
+                    )}
+
                 </div>
             )}
         </section>

@@ -186,6 +186,48 @@
     border-radius: 3px;
 }
 
+/* 페르소나 배너 */
+.wr-persona-banner {
+    padding: 11px 18px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+    border: 1px solid #ddd6fe;
+    font-size: 13px;
+    font-weight: 700;
+    color: #6b21a8;
+    text-align: center;
+}
+
+.wr-persona-banner strong {
+    color: #7c3aed;
+    font-size: 15px;
+    font-weight: 900;
+}
+
+/* AI 격려 메시지 티저 */
+.wr-cheer {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #8b5cf6, #22d3ee);
+}
+
+.wr-cheer > span {
+    font-size: 18px;
+    flex-shrink: 0;
+    line-height: 1.5;
+}
+
+.wr-cheer p {
+    margin: 0;
+    font-size: 13px;
+    color: #fff;
+    line-height: 1.65;
+    font-weight: 600;
+}
+
 /* 코멘트 */
 .wr-comment {
     margin: 0;

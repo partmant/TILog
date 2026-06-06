@@ -78,6 +78,11 @@ const WeeklyReportDetailPage = () => {
         <div className="rd-page">
             <div className="rd-shell">
 
+                <div className="rd-page-title">
+                    <h1 className="rd-page-title-text">주간 성장 리포트</h1>
+                    <p className="rd-page-title-sub">AI가 분석한 나의 학습 기록</p>
+                </div>
+
                 <div className="rd-header">
                     <button className="rd-back-btn" onClick={() => navigate('/mypage')}>
                         ← 마이페이지
@@ -95,6 +100,11 @@ const WeeklyReportDetailPage = () => {
                             다음 주 →
                         </button>
                     </div>
+                    {status === 'done' && report && (
+                        <button className="rd-export-btn" onClick={() => window.print()}>
+                            PDF 저장
+                        </button>
+                    )}
                 </div>
 
                 {status === 'loading' && (
@@ -135,15 +145,32 @@ const WeeklyReportDetailPage = () => {
 
 const RANK_MEDAL = ['🥇', '🥈', '🥉'];
 
+const CAREER_STATUS_META = {
+    BALANCED:      { label: '균형', className: 'rd-badge-balanced' },
+    BIAS_WARNING:  { label: '편중 주의', className: 'rd-badge-warning' },
+    INITIAL_STAGE: { label: '시작 단계', className: 'rd-badge-initial' },
+};
+
+const PORTFOLIO_ITEM_LABELS = {
+    JOB_SEEKER:    { resumeKeyword: '추천 이력서 키워드',    interviewQuestion: '기술 면접 질문' },
+    CAREER_CHANGE: { resumeKeyword: '추천 이력서 키워드',    interviewQuestion: '기술 면접 질문' },
+    EMPLOYED:      { resumeKeyword: '아키텍처 개선',    interviewQuestion: '코드 리뷰 주제' },
+    STUDENT:       { resumeKeyword: '추천 프로젝트 키워드',  interviewQuestion: '전공 지식 퀴즈' },
+    FREELANCER:    { resumeKeyword: '기술 셀링 포인트', interviewQuestion: '요구사항 검증' },
+};
+const DEFAULT_PORTFOLIO_LABELS = { resumeKeyword: '기술 셀링 포인트', interviewQuestion: '요구사항 검증' };
+
 const ReportContent = ({ report }) => {
-    const { weeklySummary, techStackDistribution, cumulativeData, ruleBasedComment, aiAnalysisComment } = report;
+    const {
+        weeklySummary, techStackDistribution, cumulativeData,
+        ruleBasedComment, aiAnalysisComment, parsedAiAnalysis, currentStatus,
+    } = report;
 
     const categories     = techStackDistribution?.categories || {};
     const tags           = techStackDistribution?.tags || {};
     const difficultyDist = weeklySummary?.difficultyDistribution || {};
     const cumulativeTags = cumulativeData?.tagTotals || {};
 
-    // 1행 stat 카드용
     const thisWeekPosts   = weeklySummary?.totalPosts ?? 0;
     const thisWeekMinutes = weeklySummary?.totalLearningTimeMinutes ?? 0;
     const cumPosts        = cumulativeData?.totalPosts ?? 0;
@@ -152,17 +179,25 @@ const ReportContent = ({ report }) => {
     const thisWeekTopCat  = Object.entries(categories).sort((a, b) => b[1] - a[1])[0]?.[0] || '-';
     const catSub          = thisWeekTopCat === cumTopCat ? '이번 주도 동일' : `이번 주 ${thisWeekTopCat}`;
 
-    // 2행 Top3 카드용
     const top3Tags = Object.entries(cumulativeTags).sort((a, b) => b[1] - a[1]).slice(0, 3);
 
     const hasDifficulty = Object.values(difficultyDist).some((v) => v > 0);
     const hasCategories = Object.keys(categories).length > 0;
     const hasTags       = Object.keys(tags).length > 0 || Object.keys(cumulativeTags).length > 0;
 
+    const personaTitle = parsedAiAnalysis?.weekly_persona?.title;
+
     return (
         <div className="rd-content">
 
-            {/* 1행: 누적 stat 카드 (큰 숫자) + 이번 주 서브 */}
+            {/* 페르소나 배너 */}
+            {personaTitle && (
+                <div className="rd-persona-banner">
+                    이번 주 나는: <strong>{personaTitle}</strong>
+                </div>
+            )}
+
+            {/* 1행: stat 카드 */}
             <div className="rd-stat-cards">
                 <div className="rd-stat-card">
                     <span className="rd-stat-label-top">이번 주 TIL</span>
@@ -182,6 +217,11 @@ const ReportContent = ({ report }) => {
                     <span className="rd-stat-sub">{catSub}</span>
                 </div>
             </div>
+
+            {/* 규칙 기반 코멘트 — stat 카드 바로 아래 */}
+            {ruleBasedComment && (
+                <blockquote className="rd-rule-comment">{ruleBasedComment}</blockquote>
+            )}
 
             {/* 2행: 파이차트 | 도넛차트 | Top3 태그 */}
             <div className="rd-charts-row">
@@ -219,15 +259,7 @@ const ReportContent = ({ report }) => {
                 </div>
             </div>
 
-            {/* 3행 규칙 기반 코멘트 */}
-            {ruleBasedComment && (
-                <div className="rd-panel">
-                    <h3>💬 활동 요약 </h3>
-                    <blockquote className="rd-rule-comment">{ruleBasedComment}</blockquote>
-                </div>
-            )}
-
-            {/* 4행: 기술 스택 막대 + 누적 기준선 */}
+            {/* 3행: 기술 스택 막대 + 누적 기준선 */}
             {hasTags && (
                 <div className="rd-panel">
                     <h3>기술 스택 분포</h3>
@@ -238,12 +270,12 @@ const ReportContent = ({ report }) => {
                 </div>
             )}
 
-
-
             {/* AI 심층 분석 */}
             <div className="rd-panel rd-ai-panel">
                 <h3>🤖 AI 심층 분석</h3>
-                {aiAnalysisComment ? (
+                {parsedAiAnalysis ? (
+                    <AiAnalysisSection ai={parsedAiAnalysis} currentStatus={currentStatus} />
+                ) : aiAnalysisComment ? (
                     <p className="rd-ai-comment">{aiAnalysisComment}</p>
                 ) : (
                     <div className="rd-ai-placeholder">
@@ -251,6 +283,119 @@ const ReportContent = ({ report }) => {
                     </div>
                 )}
             </div>
+
+        </div>
+    );
+};
+
+const AiAnalysisSection = ({ ai, currentStatus }) => {
+    const persona   = ai.weekly_persona;
+    const tech      = ai.deep_tech_analysis;
+    const career    = ai.career_alignment_audit;
+    const portfolio = ai.practical_portfolio_advice;
+    const roadmap   = ai.next_week_roadmap;
+    const cheer     = ai.mentor_cheering_message;
+
+    const careerMeta = CAREER_STATUS_META[career?.status] ?? { label: career?.status, className: 'rd-badge-initial' };
+    const portfolioItemLabels = PORTFOLIO_ITEM_LABELS[currentStatus] ?? DEFAULT_PORTFOLIO_LABELS;
+
+    return (
+        <div className="rd-ai-sections">
+
+            {/* 총평 */}
+            {persona?.total_evaluation && (
+                <div className="rd-ai-section rd-ai-section--evaluation">
+                    <p className="rd-ai-evaluation">{persona.total_evaluation}</p>
+                </div>
+            )}
+
+            {/* 기술 집중 분석 */}
+            {(tech?.focus_area || tech?.intensity_review) && (
+                <div className="rd-ai-section">
+                    <span className="rd-ai-section-label">기술 집중 분석</span>
+                    <div className="rd-ai-tech-grid">
+                        {tech.focus_area && (
+                            <div className="rd-ai-tech-item rd-ai-tech-item--blue">
+                                <span className="rd-ai-item-title">집중 영역</span>
+                                <p>{tech.focus_area}</p>
+                            </div>
+                        )}
+                        {tech.intensity_review && (
+                            <div className="rd-ai-tech-item rd-ai-tech-item--purple">
+                                <span className="rd-ai-item-title">학습 깊이</span>
+                                <p>{tech.intensity_review}</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* 커리어 진단 */}
+            {career && (
+                <div className="rd-ai-section rd-ai-section--career">
+                    <span className="rd-ai-section-label">커리어 진단</span>
+                    <div className="rd-ai-career-row">
+                        <span className={`rd-career-badge ${careerMeta.className}`}>{careerMeta.label}</span>
+                        {career.audit_comment && (
+                            <p className="rd-ai-career-comment">{career.audit_comment}</p>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* 포트폴리오 팁 */}
+            {(portfolio?.resume_keyword || portfolio?.interview_question) && (
+                <div className="rd-ai-section">
+                    <span className="rd-ai-section-label">포트폴리오 팁</span>
+                    {portfolio.resume_keyword && (
+                        <div className="rd-ai-portfolio-item">
+                            <span className="rd-ai-item-title">{portfolioItemLabels.resumeKeyword}</span>
+                            <div className="rd-resume-hashtags">
+                                {portfolio.resume_keyword.split(',').map((kw) => kw.trim()).filter(Boolean).map((kw) => (
+                                    <span key={kw} className="rd-resume-tag">#{kw}</span>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                    {portfolio.interview_question && (
+                        <div className="rd-ai-portfolio-item">
+                            <span className="rd-ai-item-title">{portfolioItemLabels.interviewQuestion}</span>
+                            <p className="rd-interview-q">"{portfolio.interview_question}"</p>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* 다음 주 로드맵 */}
+            {roadmap && (
+                <div className="rd-ai-section rd-ai-section--roadmap">
+                    <span className="rd-ai-section-label">다음 주 로드맵</span>
+                    {roadmap.action_item && (
+                        <p className="rd-ai-action">{roadmap.action_item}</p>
+                    )}
+                    {roadmap.recommended_tech_stacks?.length > 0 && (
+                        <>
+                        <span className="rd-ai-item-title">추천 기술 스택</span>
+                        <div className="rd-roadmap-stack-grid">
+                            {roadmap.recommended_tech_stacks.map((s) => (
+                                <div key={s.tech_name} className="rd-roadmap-stack-card">
+                                    <span className="rd-roadmap-stack-name">{s.tech_name}</span>
+                                    {s.reason && <p className="rd-roadmap-stack-reason">{s.reason}</p>}
+                                </div>
+                            ))}
+                        </div>
+                        </>
+                    )}
+                </div>
+            )}
+
+            {/* 격려 메시지 */}
+            {cheer && (
+                <div className="rd-ai-cheer">
+                    <span>💌</span>
+                    <p>{cheer}</p>
+                </div>
+            )}
 
         </div>
     );

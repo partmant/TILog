@@ -1,9 +1,11 @@
 package com.tilog.domain.member.controller;
 
 import com.tilog.domain.member.dto.MemberResponse;
+import com.tilog.domain.member.dto.UpdateProfileRequest;
 import com.tilog.domain.member.service.MemberService;
 import com.tilog.global.response.ApiResponse;
 import com.tilog.global.security.SecurityUtil;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -39,5 +41,13 @@ public class MemberController {
     public ResponseEntity<ApiResponse<List<MemberResponse>>> getMentors(){
         List<MemberResponse> mentors = memberService.getMentors();
         return ResponseEntity.ok(ApiResponse.success(mentors));
+    }
+
+    @PatchMapping("/me")
+    public ApiResponse<MemberResponse> updateProfile(
+            @RequestBody @Valid UpdateProfileRequest request
+    ) {
+        Long memberId = SecurityUtil.getCurrentMemberId();
+        return ApiResponse.success(memberService.updateProfile(memberId, request));
     }
 }

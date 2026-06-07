@@ -2,10 +2,12 @@ package com.tilog.domain.member.service;
 
 import com.tilog.domain.auth.dto.SignUpRequest;
 import com.tilog.domain.member.dto.MemberResponse;
+import com.tilog.domain.member.dto.UpdateProfileRequest;
 import com.tilog.domain.member.entity.Member;
 import com.tilog.domain.member.entity.MemberRole;
 import com.tilog.global.exception.MemberException;
 import com.tilog.domain.member.repository.MemberRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -57,6 +59,22 @@ public class MemberService {
     public MemberResponse getMyInfo(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException("존재하지 않는 회원입니다."));
+        return MemberResponse.from(member);
+    }
+
+    @Transactional
+    public MemberResponse updateProfile(Long memberId, @Valid UpdateProfileRequest request) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException("존재하지 않는 회원입니다."));
+
+        // 닉네임 중복 체크 (본인 제외)
+        if (request.nickname() != null && !request.nickname().isBlank()
+                && !member.getNickname().equals(request.nickname())
+                && memberRepository.existsByNickname(request.nickname())) {
+            throw new MemberException("이미 사용 중인 닉네임입니다.");
+        }
+
+        member.updateProfile(request.nickname(), request.currentStatus(), request.targetJob());
         return MemberResponse.from(member);
     }
 

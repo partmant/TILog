@@ -37,6 +37,15 @@ export const getMyProfile = async ({ useCache = true } = {}) => {
     saveProfileCache(data);
     return data;
 };
+//프로필 정보 업데이트
+export const updateProfile = async ({ nickname, currentStatus, targetJob }) => {
+    const data = await request('/api/members/me', {
+        method: 'PATCH',
+        body: JSON.stringify({ nickname, currentStatus, targetJob }),
+    });
+    clearProfileCache(data);
+    return data;
+};
 
 // 프로필 이미지 업로드
 export const updateProfileImage = async (file) => {
@@ -47,6 +56,7 @@ export const updateProfileImage = async (file) => {
         method: 'PATCH',
         body: formData,
     });
+
 
     // 캐시 갱신
     saveProfileCache(data);

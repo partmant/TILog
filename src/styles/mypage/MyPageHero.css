@@ -174,4 +174,26 @@
         padding-right: 0;
         font-size: 22px;
     }
+
+    .mypage-edit-profile-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 14px;
+        padding: 7px 16px;
+        border: 1.5px solid rgba(255, 255, 255, 0.7);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.15);
+        color: #ffffff;
+        font-size: 13px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: background 0.15s, transform 0.1s;
+    }
+
+    .mypage-edit-profile-btn:hover {
+        background: rgba(255, 255, 255, 0.28);
+        transform: translateY(-1px);
+    }
+
 }

@@ -6,6 +6,7 @@
 - **프로젝트 기간**: 2026.05.28 ~ 2026.06.07
 - **팀 구성**: 6인 (백엔드·프론트엔드 통합)
 - **담당**: 마이페이지 전반(작성 이력·스트릭·잔디 히트맵, 구독·페이백, 프로필) · 로그인 연동 · 프로젝트 초기 세팅
+- **시연 영상**: _(유튜브 업로드 후 링크 추가 예정)_
 
 > 본 저장소는 6인 팀 프로젝트의 백엔드/프론트엔드 코드를 개인 포트폴리오 용도로 하나의 저장소에
 > 옮겨온 사본이며, 각 폴더(`backend/`, `frontend/`)의 원본 커밋 이력을 그대로 유지했습니다.
@@ -102,6 +103,55 @@ TILog는 작성 이력을 스트릭과 잔디 히트맵으로 시각화해 습�
 
 ---
 
+## 🖼 주요 화면
+
+### 로그인 · 회원가입
+
+<p>
+  <img src="images/login.png" width="45%">
+  <img src="images/signup.png" width="45%">
+</p>
+
+### 메인 피드 · TIL 상세
+
+<p>
+  <img src="images/main-feed.png" width="45%">
+  <img src="images/til-detail.png" width="45%">
+</p>
+
+- TIL 상세 화면에서는 멘토 피드백 요청·확인을 사이드 패널로 함께 제공합니다.
+
+### 마이페이지 [담당]
+
+<p>
+  <img src="images/mypage.png" width="45%">
+  <img src="images/mypage-report-favorites.png" width="45%">
+</p>
+
+- 작성 이력·연속 작성일수(스트릭)·잔디 히트맵, 구독/페이백 현황을 한 화면에서 확인합니다.
+- AI 주간 리포트 요약, 최근 작성한 TIL, 즐겨찾기한 TIL도 마이페이지에서 바로 확인할 수 있습니다.
+
+### AI 주간 성장 리포트
+
+![AI 주간 성장 리포트 상세](images/weekly-report-detail.png)
+
+- 난이도/카테고리 분포, 기술 스택 TOP3, 규칙 기반 코멘트와 Gemini 기반 심층 분석을 함께 제공합니다.
+
+### 멘토 피드백
+
+![멘토 피드백 목록](images/feedback-list.png)
+
+### 관리자
+
+<p>
+  <img src="images/admin-dashboard.png" width="45%">
+  <img src="images/admin-member-management.png" width="45%">
+</p>
+
+추가 화면과 전체 사용 흐름은 시연 영상에서 확인할 수 있습니다. _(링크 추가 예정)_
+
+---
+
 ## 기술 스택
 
 ### Backend
@@ -130,6 +180,18 @@ TILog는 작성 이력을 스트릭과 잔디 히트맵으로 시각화해 습�
 | DB | MySQL |
 | AI | Google Gemini API |
 | 실시간 알림 | SSE |
+
+### 아키텍처
+
+![TILog 시스템 아키텍처](images/architecture.png)
+
+React 프론트엔드와 Spring Boot API 서버가 REST API(JWT 인증)로 통신하고, 활동 데이터는 MySQL에
+저장합니다. 저장된 활동 기록을 바탕으로 Gemini API가 주간 성장 리포트를 생성하며, 멘토 피드백·
+팔로우·좋아요 알림은 SSE로 실시간 전송됩니다.
+
+### ERD
+
+![TILog ERD](images/erd.png)
 
 ---
 

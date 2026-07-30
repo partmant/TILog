@@ -1,0 +1,333 @@
+
+.auth-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+    background:
+        radial-gradient(circle at 8% 4%, rgba(139, 92, 246, 0.2), transparent 32%),
+        radial-gradient(circle at 88% 14%, rgba(34, 211, 238, 0.2), transparent 30%),
+        linear-gradient(135deg, #faf7ff 0%, #effcff 100%);
+}
+
+
+.auth-card {
+    display: flex;
+    width: 100%;
+    max-width: 900px;
+    min-height: 520px;
+    border-radius: 28px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 20px 60px rgba(124, 58, 237, 0.12);
+}
+
+/* 브랜딩 패널 (보라-청록 그라디언트) */
+.auth-brand-panel {
+    position: relative;
+    width: 42%;
+    padding: 52px 44px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    overflow: hidden;
+    background: linear-gradient(145deg, #7c3aed 0%, #4f86f7 60%, #22d3ee 100%);
+    flex-shrink: 0;
+}
+
+.auth-brand-panel--right {
+    justify-content: center;
+}
+
+.auth-brand-blob1 {
+    position: absolute;
+    top: -60px;
+    left: -60px;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    pointer-events: none;
+}
+
+.auth-brand-blob2 {
+    position: absolute;
+    top: 40px;
+    right: -80px;
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.07);
+    pointer-events: none;
+}
+
+.auth-brand-blob3 {
+    position: absolute;
+    bottom: -80px;
+    right: -60px;
+    width: 240px;
+    height: 240px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    pointer-events: none;
+}
+
+.auth-brand-content {
+    position: relative;
+    z-index: 1;
+}
+
+.auth-brand-title {
+    margin: 0 0 16px 0;
+    color: #fff;
+    font-size: 32px;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    line-height: 1.25;
+}
+
+.auth-brand-subtitle {
+    margin: 0 0 28px 0;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.auth-brand-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.25);
+    margin: 0 0 20px 0;
+}
+
+.auth-brand-feature-heading {
+    margin: 0 0 12px 0;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.auth-brand-features {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.auth-brand-features li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 13px;
+}
+
+.auth-brand-features li span {
+    color: #a5f3fc;
+    font-weight: 800;
+}
+
+/* 폼 패널 */
+.auth-form-panel {
+    flex: 1;
+    padding: 52px 52px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.auth-form-title {
+    margin: 0 0 6px 0;
+    font-size: 28px;
+    font-weight: 900;
+    color: #111827;
+    letter-spacing: -0.03em;
+}
+
+.auth-form-subtitle {
+    margin: 0 0 28px 0;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+/* 입력 필드 */
+.auth-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.auth-field label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #374151;
+}
+
+.auth-input {
+    width: 100%;
+    height: 48px;
+    padding: 0 14px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 12px;
+    background: #fff;
+    font-size: 14px;
+    color: #111827;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    box-sizing: border-box;
+}
+
+.auth-input::placeholder {
+    color: #9ca3af;
+}
+
+.auth-input:focus {
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
+}
+
+/* 그리드 행 */
+.auth-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+/* 체크박스 */
+.auth-checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.auth-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #6b7280;
+    cursor: pointer;
+}
+
+/* 로그인 옵션 행 */
+.auth-options-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* 버튼 */
+.auth-submit-btn {
+    width: 100%;
+    height: 50px;
+    border: 0;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #8b5cf6 0%, #22d3ee 100%);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 10px 24px rgba(124, 58, 237, 0.22);
+    transition: opacity 0.15s, transform 0.1s;
+}
+
+.auth-submit-btn:hover {
+    opacity: 0.92;
+}
+
+.auth-submit-btn:active {
+    transform: scale(0.98);
+}
+
+.auth-submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.auth-google-btn {
+    width: 100%;
+    height: 48px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 14px;
+    background: #fff;
+    color: #374151;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.auth-google-btn:hover {
+    background: #f9fafb;
+}
+
+.auth-text-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: #7c3aed;
+    cursor: pointer;
+}
+
+.auth-text-btn:hover {
+    color: #6d28d9;
+}
+
+.auth-forgot-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #7c3aed;
+    cursor: pointer;
+}
+
+.auth-switch-text {
+    text-align: center;
+    font-size: 13px;
+    color: #6b7280;
+    margin: 0;
+}
+
+.auth-error {
+    text-align: center;
+    font-size: 13px;
+    color: #ef4444;
+    margin: 0;
+}
+
+/* 폼 내 간격 */
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+@media (max-width: 720px) {
+    .auth-card {
+        flex-direction: column;
+        max-width: 480px;
+    }
+
+    .auth-brand-panel {
+        width: 100%;
+        min-height: 180px;
+        justify-content: center;
+    }
+
+    .auth-form-panel {
+        padding: 36px 28px;
+    }
+
+    .auth-row {
+        grid-template-columns: 1fr;
+    }
+}

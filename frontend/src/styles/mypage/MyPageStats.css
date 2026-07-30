@@ -1,0 +1,111 @@
+.mypage-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 22px;
+    margin: 28px 0;
+}
+
+.mypage-stat-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    min-height: 132px;
+    padding: 24px;
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+    background: #ffffff;
+    box-shadow: 0 8px 28px rgba(15, 23, 42, 0.04);
+}
+
+.mypage-stat-icon {
+    display: grid;
+    flex: 0 0 68px;
+    width: 68px;
+    height: 68px;
+    place-items: center;
+    border-radius: 50%;
+    font-size: 26px;
+    font-weight: 900;
+}
+
+.mypage-stat-icon.purple {
+    background: #ede9fe;
+    color: #8b5cf6;
+}
+
+.mypage-stat-icon.blue {
+    background: #e0f2fe;
+    color: #3b82f6;
+}
+
+.mypage-stat-icon.orange {
+    background: #ffedd5;
+    color: #f97316;
+}
+
+.mypage-stat-icon.green {
+    background: #dcfce7;
+    color: #22c55e;
+}
+
+.mypage-stat-info p {
+    margin: 0 0 7px;
+    color: #374151;
+    font-size: 14px;
+    font-weight: 900;
+}
+
+.mypage-stat-info strong {
+    display: block;
+    color: #111827;
+    font-size: 34px;
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+}
+
+.mypage-stat-info strong span {
+    margin-left: 4px;
+    color: #374151;
+    font-size: 16px;
+    letter-spacing: 0;
+}
+
+.mypage-stat-info small {
+    display: block;
+    margin-top: 9px;
+    color: #6b7280;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.mypage-stat-skeleton {
+    min-height: 132px;
+    border-radius: 18px;
+    background:
+            linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 37%, #f3f4f6 63%);
+    background-size: 400% 100%;
+    animation: mypage-skeleton 1.4s ease infinite;
+}
+
+@keyframes mypage-skeleton {
+    0% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0 50%;
+    }
+}
+
+@media (max-width: 1180px) {
+    .mypage-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 760px) {
+    .mypage-stats {
+        grid-template-columns: 1fr;
+    }
+}

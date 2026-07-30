@@ -1,0 +1,199 @@
+.mypage-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 178px;
+    margin-top: 14px;
+    padding: 30px 40px;
+    border-radius: 28px;
+    background:
+            radial-gradient(circle at 85% 10%, rgba(255, 255, 255, 0.22), transparent 28%),
+            linear-gradient(135deg, #7c3aed 0%, #6366f1 48%, #22d3ee 100%);
+    color: #ffffff;
+    overflow: hidden;
+}
+
+.mypage-hero-left {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+}
+
+.mypage-avatar {
+    position: relative;
+    display: grid;
+    width: 104px;
+    height: 104px;
+    place-items: center;
+    border: 4px solid rgba(255, 255, 255, 0.92);
+    border-radius: 50%;
+    background: #e8e8e8;
+    box-shadow: 0 18px 35px rgba(15, 23, 42, 0.24);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.mypage-avatar span {
+    color: #ffffff;
+    font-size: 22px;
+    font-weight: 900;
+}
+
+/* 버튼 형태로 변환 */
+.mypage-avatar-btn {
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.15s ease;
+}
+
+.mypage-avatar-btn:hover {
+    transform: scale(1.04);
+}
+
+.mypage-avatar-btn:hover .mypage-avatar-overlay {
+    opacity: 1;
+}
+
+/* 프로필 이미지 */
+.mypage-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+/* 호버 오버레이 */
+.mypage-avatar-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.52);
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 900;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+}
+
+.mypage-avatar-btn.uploading .mypage-avatar-overlay {
+    opacity: 1;
+}
+
+/* 파일 입력 숨김 */
+.mypage-avatar-file-input {
+    display: none;
+}
+
+.mypage-profile-title {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.mypage-profile-title h1 {
+    margin: 0;
+    font-size: 36px;
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+}
+
+.mypage-profile-title span {
+    padding: 8px 13px;
+    border-radius: 999px;
+    background: rgba(88, 28, 135, 0.62);
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.mypage-hero-left p {
+    margin: 14px 0 18px;
+    font-size: 17px;
+    font-weight: 800;
+}
+
+.mypage-profile-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.mypage-profile-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: rgba(255, 255, 255, 0.92);
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.mypage-profile-meta span::before {
+    content: '';
+    width: 11px;
+    height: 11px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.95);
+}
+
+.mypage-hero blockquote {
+    margin: 0;
+    padding-right: 42px;
+    font-size: 28px;
+    line-height: 1.55;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+}
+
+@media (max-width: 760px) {
+    .mypage-hero {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 24px;
+    }
+
+    .mypage-hero-left {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .mypage-profile-title {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .mypage-profile-title h1 {
+        font-size: 30px;
+    }
+
+    .mypage-hero blockquote {
+        padding-right: 0;
+        font-size: 22px;
+    }
+
+    .mypage-edit-profile-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 14px;
+        padding: 7px 16px;
+        border: 1.5px solid rgba(255, 255, 255, 0.7);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.15);
+        color: #ffffff;
+        font-size: 13px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: background 0.15s, transform 0.1s;
+    }
+
+    .mypage-edit-profile-btn:hover {
+        background: rgba(255, 255, 255, 0.28);
+        transform: translateY(-1px);
+    }
+
+}

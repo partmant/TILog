@@ -1,0 +1,47 @@
+# Local Secret
+src/main/resources/application-local.yaml
+
+HELP.md
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+# 데이터베이스 접속 정보 및 보안 키가 담긴 파일들
+application-*.yml
+application-*.properties
+
+# 로그 파일
+*.log
+
+# 런타임에 생성되는 폴더/파일
+out/
+*.class

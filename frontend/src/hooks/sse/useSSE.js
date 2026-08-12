@@ -10,7 +10,9 @@ export const useSSE = (isLoggedIn) => {
         if (!isLoggedIn) return;
 
         const token = localStorage.getItem("accessToken");
-        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+        // ||를 쓰면 배포 환경의 VITE_API_BASE_URL=""(상대 경로)가 falsy로 취급돼
+        // 항상 localhost:8080으로 빠지므로 반드시 ??(nullish coalescing)를 사용해야 한다.
+        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080';
 
         // EventSourcePolyfill을 사용하면 헤더에 JWT 토큰을 담을 수 있습니다!
         const eventSource = new EventSourcePolyfill(`${API_BASE_URL}/api/notifications/subscribe`, {

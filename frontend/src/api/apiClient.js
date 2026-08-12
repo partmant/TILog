@@ -1,4 +1,6 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+// ||를 쓰면 배포 환경의 VITE_API_BASE_URL=""(상대 경로)가 falsy로 취급돼
+// 항상 localhost:8080으로 빠지므로 반드시 ??(nullish coalescing)를 사용해야 한다.
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080';
 
 export const request = async (url, options = {}) => {
     const token = localStorage.getItem('accessToken');

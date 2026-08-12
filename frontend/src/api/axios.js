@@ -1,8 +1,11 @@
 import axios from "axios";
 
 // 공통 axios 인스턴스 생성
+// 배포 환경(VITE_API_BASE_URL="")에서는 baseURL을 빈 문자열(상대 경로)로 둬서
+// nginx가 /api/를 백엔드로 프록시하도록 한다. ||를 쓰면 ""가 falsy라 항상
+// localhost:8080으로 빠지므로 반드시 ??(nullish coalescing)를 사용해야 한다.
 const api = axios.create({
-    baseURL: "http://localhost:8080",
+    baseURL: import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080",
     withCredentials: true,
 });
 

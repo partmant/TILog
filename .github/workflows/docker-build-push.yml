@@ -1,7 +1,9 @@
 name: Docker Build & Push
 
-# main 브랜치에 push되면 백엔드 Docker 이미지를 빌드해 GHCR에 푸시하고,
-# 배포 서버에 SSH로 접속해 새 이미지로 컨테이너를 갱신한다.
+# main 브랜치에 push되면 백엔드/프론트엔드 Docker 이미지를 모두 빌드해 GHCR에 푸시하고,
+# 배포 서버에 SSH로 접속해 새 이미지로 두 컨테이너를 함께 갱신한다.
+# (원래 프론트는 QuoteGuard 관례를 따라 수동 빌드/푸시로 시작했으나, 배포 때마다
+# 수동 재배포가 반복되는 게 번거로워 백엔드와 동일하게 CI로 편입했다.)
 # 테스트는 Dockerfile 빌드 단계(-DskipTests)에서 실행하지 않으므로,
 # 이 워크플로우는 빌드/배포만 담당하고 테스트 검증은 별도 워크플로우(PR 단계 등)에서 처리한다.
 #
@@ -14,9 +16,10 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: partmant/tilog-back
+  IMAGE_NAME_FRONT: partmant/tilog-front
 
 concurrency:
-  group: docker-build-push-back-${{ github.ref }}
+  group: docker-build-push-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -61,12 +64,58 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+  build-and-push-frontend:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image-tag: ${{ steps.meta.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract image metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONT }}
+          tags: |
+            type=raw,value=latest
+            type=sha,format=long
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          # 상대 경로(빈 문자열)로 빌드해야 nginx가 /api를 백엔드로 프록시한다.
+          # (직접 지정하지 않으면 Dockerfile의 ARG 기본값도 ""라 생략해도 되지만,
+          # 배포용 빌드라는 걸 명시적으로 드러내기 위해 남겨둔다.)
+          build-args: |
+            VITE_API_BASE_URL=
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
   deploy:
     name: Deploy to server
-    needs: build-and-push
+    needs: [build-and-push, build-and-push-frontend]
     runs-on: ubuntu-latest
     steps:
-      # GHCR 패키지(tilog-back)를 public으로 설정해야 배포 서버에서
+      # GHCR 패키지(tilog-back, tilog-front)를 public으로 설정해야 배포 서버에서
       # 별도 docker login 없이 바로 pull 가능하다 (QuoteGuard와 동일한 설정 필요).
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.2.0
@@ -80,12 +129,18 @@ jobs:
             cd ${{ secrets.DEPLOY_PATH }}
             # QuoteGuard와 같은 서버/.env를 공유하므로 변수명이 겹치지 않도록
             # TILOG_ 접두사를 사용한다 (QuoteGuard는 BACKEND_IMAGE 사용).
-            IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}"
+            BACK_IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}"
+            FRONT_IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONT }}:sha-${{ github.sha }}"
             if grep -q '^TILOG_BACKEND_IMAGE=' .env; then
-              sed -i "s#^TILOG_BACKEND_IMAGE=.*#TILOG_BACKEND_IMAGE=${IMAGE}#" .env
+              sed -i "s#^TILOG_BACKEND_IMAGE=.*#TILOG_BACKEND_IMAGE=${BACK_IMAGE}#" .env
             else
-              echo "TILOG_BACKEND_IMAGE=${IMAGE}" >> .env
+              echo "TILOG_BACKEND_IMAGE=${BACK_IMAGE}" >> .env
             fi
-            docker compose pull tilog
-            docker compose up -d tilog
+            if grep -q '^TILOG_FRONTEND_IMAGE=' .env; then
+              sed -i "s#^TILOG_FRONTEND_IMAGE=.*#TILOG_FRONTEND_IMAGE=${FRONT_IMAGE}#" .env
+            else
+              echo "TILOG_FRONTEND_IMAGE=${FRONT_IMAGE}" >> .env
+            fi
+            docker compose pull tilog tilog-front
+            docker compose up -d tilog tilog-front
             docker image prune -f

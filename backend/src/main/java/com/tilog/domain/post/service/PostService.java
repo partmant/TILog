@@ -1,6 +1,7 @@
 package com.tilog.domain.post.service;
 
 import com.tilog.domain.bookmark.repository.TilBookmarkRepository;
+import com.tilog.domain.demo.DemoFixedAiReportProvider;
 import com.tilog.domain.member.entity.Member;
 import com.tilog.domain.member.repository.MemberRepository;
 import com.tilog.domain.post.dto.PostCommandDto;
@@ -17,6 +18,7 @@ import com.tilog.domain.tag.repository.PostTagRepository;
 import com.tilog.domain.tag.repository.TagRepository;
 import com.tilog.global.client.GeminiClient;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,6 +44,12 @@ public class PostService {
 
     // Markdown 이미지 문법에서 이미지 URL 추출
     private static final Pattern MARKDOWN_IMAGE_PATTERN = Pattern.compile("!\\[[^\\]]*]\\(([^\\s)]+)(?:\\s+\"[^\"]*\")?\\)");
+
+    @Value("${demo.enabled:false}")
+    private boolean demoEnabled;
+
+    @Value("${demo.account.email:demo@tilog.kr}")
+    private String demoEmail;
 
     // HTML img 태그에서 이미지 URL 추출
     private static final Pattern HTML_IMAGE_PATTERN = Pattern.compile("<img[^>]+src=[\"']([^\"']+)[\"']", Pattern.CASE_INSENSITIVE);
@@ -125,12 +133,18 @@ public class PostService {
             return new PostQueryDto.SummaryResponse(post.getAiSummary());
         }
 
-        List<String> tagNames = postTagRepository.findByPost_Id(postId).stream()
-                .map(postTag -> postTag.getTag().getName())
-                .toList();
-
-        // 게시글 제목/본문/태그를 Gemini에 전달하여 핵심 요약 생성
-        String summary = geminiClient.generatePostSummary(post.getTitle(), post.getContent(), tagNames);
+        // 공개 데모 계정은 반복 호출로 인한 Gemini API 비용을 막기 위해 실제 호출 대신 고정 응답을 사용한다.
+        boolean isDemoAccount = demoEnabled && demoEmail.equalsIgnoreCase(post.getMember().getEmail());
+        String summary;
+        if (isDemoAccount) {
+            summary = DemoFixedAiReportProvider.fixedPostSummary();
+        } else {
+            List<String> tagNames = postTagRepository.findByPost_Id(postId).stream()
+                    .map(postTag -> postTag.getTag().getName())
+                    .toList();
+            // 게시글 제목/본문/태그를 Gemini에 전달하여 핵심 요약 생성
+            summary = geminiClient.generatePostSummary(post.getTitle(), post.getContent(), tagNames);
+        }
         post.applyAiSummary(summary);
 
         return new PostQueryDto.SummaryResponse(summary);

@@ -4,6 +4,7 @@ import com.tilog.domain.bookmark.entity.TilBookmark;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -29,4 +30,9 @@ public interface TilBookmarkRepository extends JpaRepository<TilBookmark, Long> 
 
     /** 즐겨찾기 전체 조회 (검색/정렬용 인메모리 처리) */
     List<TilBookmark> findByMember_IdOrderByCreatedAtDesc(Long memberId);
+
+    // 게시글 하드 삭제 전 즐겨찾기 일괄 삭제 (데모 계정 데이터 초기화용)
+    @Modifying
+    @Query("DELETE FROM TilBookmark b WHERE b.post.id = :postId")
+    void deleteByPost_Id(@Param("postId") Long postId);
 }

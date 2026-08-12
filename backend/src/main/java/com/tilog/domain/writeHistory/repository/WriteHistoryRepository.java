@@ -2,6 +2,9 @@ package com.tilog.domain.writeHistory.repository;
 
 import com.tilog.domain.writeHistory.entity.WriteHistory;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -22,4 +25,9 @@ public interface WriteHistoryRepository extends JpaRepository<WriteHistory, Long
             LocalDate endDate,
             int writeCount
     );
+
+    // 스트릭/잔디 히트맵 초기화용 (데모 계정 데이터 초기화)
+    @Modifying
+    @Query("DELETE FROM WriteHistory w WHERE w.member.id = :memberId")
+    void deleteByMember_Id(@Param("memberId") Long memberId);
 }

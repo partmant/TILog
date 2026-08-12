@@ -1,11 +1,15 @@
 server:
-  port: 8080
+  # 배포 서버에서 QuoteGuard 백엔드(8080)와 같은 EC2를 공유하므로 포트가 겹치지 않도록
+  # SERVER_PORT 환경변수로 재정의 가능하게 둔다 (로컬 개발 기본값은 그대로 8080).
+  port: ${SERVER_PORT:8080}
 
 spring:
   application:
     name: tilog-backend
   datasource:
-    url: jdbc:mysql://localhost:3306/tilog?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    # DB_HOST/DB_PORT는 배포 서버의 Docker 네트워크 구성(host 네트워킹 여부)에 따라
+    # 값이 달라질 수 있어 환경변수로 분리했다 (로컬 개발 기본값은 localhost:3306 유지).
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/tilog?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -33,3 +37,16 @@ gemini:
   api:
     key: ${GOOGLE_GEMINI_API_KEY:}
     model: gemini-2.5-flash
+
+# 포트폴리오 공개 데모 계정 설정
+# - demo.enabled=true일 때만 DemoAccountInitializer/DemoDataResetScheduler가 동작한다.
+# - demo.account.password가 비어 있으면(기본값) 데모 계정이 생성되지 않으므로,
+#   운영 배포 시에는 DEMO_ENABLED/DEMO_ACCOUNT_PASSWORD 환경변수를 반드시 채워야 한다.
+demo:
+  enabled: ${DEMO_ENABLED:false}
+  account:
+    email: ${DEMO_ACCOUNT_EMAIL:demo@tilog.kr}
+    password: ${DEMO_ACCOUNT_PASSWORD:}
+    nickname: ${DEMO_ACCOUNT_NICKNAME:데모_방문자}
+  reset:
+    cron: ${DEMO_RESET_CRON:0 0 0 * * *}   # 매일 자정

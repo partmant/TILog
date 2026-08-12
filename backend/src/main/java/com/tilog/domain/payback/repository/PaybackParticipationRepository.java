@@ -19,6 +19,9 @@ public interface PaybackParticipationRepository extends JpaRepository<PaybackPar
     Optional<PaybackParticipation> findByMemberIdAndPeriodStartDateAndPeriodEndDate(
             Long memberId, LocalDate periodStartDate, LocalDate periodEndDate);
 
+    // 데모 계정 구독/페이백 데이터 초기화용
+    List<PaybackParticipation> findByMemberId(Long memberId);
+
     @Query("""
             SELECT p
             FROM PaybackParticipation p

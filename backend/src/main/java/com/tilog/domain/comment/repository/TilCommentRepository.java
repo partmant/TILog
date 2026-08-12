@@ -2,6 +2,7 @@ package com.tilog.domain.comment.repository;
 
 import com.tilog.domain.comment.entity.TilComment;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -24,4 +25,9 @@ public interface TilCommentRepository extends JpaRepository<TilComment, Long> {
 
     // 게시글의 삭제되지 않은 댓글 수 조회
     long countByPost_IdAndIsDeletedFalse(Long postId);
+
+    // 게시글 하드 삭제 전 하위 댓글 일괄 삭제 (데모 계정 데이터 초기화용)
+    @Modifying
+    @Query("DELETE FROM TilComment c WHERE c.post.id = :postId")
+    void deleteByPost_Id(@Param("postId") Long postId);
 }

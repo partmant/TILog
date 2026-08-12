@@ -2,6 +2,7 @@ package com.tilog.domain.report.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tilog.domain.demo.DemoFixedAiReportProvider;
 import com.tilog.domain.member.entity.Member;
 import com.tilog.domain.member.repository.MemberRepository;
 import com.tilog.domain.notification.entity.NotificationType;
@@ -21,6 +22,7 @@ import com.tilog.global.exception.CustomException;
 import com.tilog.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,6 +42,12 @@ public class AiWeeklyReportService {
     private final GeminiClient geminiClient;
     private final NotificationService notificationService;
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Value("${demo.enabled:false}")
+    private boolean demoEnabled;
+
+    @Value("${demo.account.email:demo@tilog.kr}")
+    private String demoEmail;
 
     /** 특정 주 리포트 조회 — 없으면 Optional.empty() */
     public Optional<AiWeeklyReportResponse> findReport(Long memberId, LocalDate weekStartDate) {
@@ -98,8 +106,11 @@ public class AiWeeklyReportService {
 
         WeeklyReportContext context = buildContext(member, summaryData, techData, cumulativeData, lastWeekSummary, newTags);
 
-        // Gemini 호출 — 실패 시 CustomException 발생하여 저장되지 않음
-        AiAnalysisResult aiResult = geminiClient.generateAiAnalysis(context);
+        // 공개 데모 계정은 반복 호출로 인한 Gemini API 비용을 막기 위해 실제 호출 대신 고정 응답을 사용한다.
+        boolean isDemoAccount = demoEnabled && demoEmail.equalsIgnoreCase(member.getEmail());
+        AiAnalysisResult aiResult = isDemoAccount
+                ? DemoFixedAiReportProvider.fixedResult()
+                : geminiClient.generateAiAnalysis(context);
 
         String aiAnalysisJson;
         try {

@@ -7,3 +7,6 @@
 # OS
 .DS_Store
 Thumbs.db
+
+# 개인 배포 인프라 메모 (RDS/EC2 리소스명, 서버 구성 등)
+DEPLOYMENT.md

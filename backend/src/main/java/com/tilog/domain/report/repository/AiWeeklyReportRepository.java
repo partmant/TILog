@@ -18,4 +18,7 @@ public interface AiWeeklyReportRepository extends JpaRepository<AiWeeklyReport, 
 
     /** 해당 멤버의 가장 최근 리포트 (마이페이지 최신 리포트 조회용) */
     Optional<AiWeeklyReport> findTopByMemberIdOrderByWeekStartDateDesc(Long memberId);
+
+    /** 해당 멤버의 모든 리포트 (데모 계정 데이터 초기화용) */
+    List<AiWeeklyReport> findAllByMemberId(Long memberId);
 }

@@ -9,6 +9,7 @@ import {
     deleteAllNotifications,
 } from "../../api/notification";
 import { getFollowers, getFollowings, unfollow } from "../../api/follow";
+import { isLoggedIn } from "../../utils/authUtils";
 
 export function useHeader() {
     const navigate = useNavigate();
@@ -29,12 +30,19 @@ export function useHeader() {
     const followPanelRef = useRef(null);
 
     // 안 읽은 알림 수 폴링 (30초)
+    // 비로그인 방문자(포트폴리오 방문자 포함)에게는 API를 호출하지 않는다.
+    // 이전에는 무조건 호출 후 401을 catch로 무시했는데, 콘솔에 매 30초마다
+    // 실패한 네트워크 요청 로그가 계속 찍혀 지저분해 보이는 문제가 있었다.
+    // 인터벌 자체는 계속 유지해서, 새로고침 없이 로그인한 경우에도
+    // 다음 폴링 시점(최대 30초 내)에 자연스럽게 값이 채워지도록 한다.
     useEffect(() => {
         const fetchUnread = async () => {
+            if (!isLoggedIn()) return;
+
             try {
                 const count = await getUnreadCount();
                 setUnreadCount(count);
-            } catch { /* 비로그인 무시 */ }
+            } catch { /* 토큰 만료 등 예외적인 경우만 무시 */ }
         };
         fetchUnread();
         const timer = setInterval(fetchUnread, 30000);

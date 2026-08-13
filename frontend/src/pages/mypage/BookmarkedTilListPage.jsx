@@ -88,7 +88,7 @@ function BookmarkedTilListPage() {
         <main className="space-y-7">
             {/* 상단 헤더 배너 */}
             <section className="rounded-3xl border-2 border-amber-300 bg-gradient-to-r from-amber-50 to-yellow-50 p-8">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-between gap-4">
                     <div>
                         <h2 className="text-3xl font-bold">즐겨찾기한 TIL</h2>
                         <p className="mt-2 text-gray-600">
@@ -119,7 +119,7 @@ function BookmarkedTilListPage() {
                     <button
                         type="button"
                         onClick={handleSearch}
-                        className="rounded-xl bg-gradient-to-r from-purple-500 to-cyan-400 px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
+                        className="rounded-xl bg-purple-500 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-purple-600"
                     >
                         검색
                     </button>
@@ -127,8 +127,8 @@ function BookmarkedTilListPage() {
             </div>
 
             {/* 난이도 필터(좌) + 정렬(우) */}
-            <div className="flex items-center justify-between">
-                <div className="flex gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-wrap gap-3">
                     {["ALL", "EASY", "NORMAL", "HARD"].map((d) => (
                         <button
                             key={d}
@@ -169,9 +169,9 @@ function BookmarkedTilListPage() {
                 </div>
             </div>
 
-            <section className="grid grid-cols-[1fr_280px] items-start gap-7">
+            <section className="grid grid-cols-1 items-start gap-7 min-[1180px]:grid-cols-[minmax(0,1fr)_280px]">
                 {/* 즐겨찾기 목록 */}
-                <div className="rounded-3xl bg-white p-8 shadow-sm">
+                <div className="min-w-0 rounded-3xl bg-white p-8 shadow-sm">
                     <h3 className="mb-6 text-xl font-bold">
                         즐겨찾기 {pageInfo.totalElements}개
                     </h3>
@@ -302,7 +302,7 @@ function BookmarkedTilListPage() {
                 </div>
 
                 {/* 우측 보조 정보 */}
-                <aside className="sticky top-4 self-start rounded-3xl bg-white p-7 shadow-sm">
+                <aside className="min-w-0 sticky top-4 self-start rounded-3xl bg-white p-7 shadow-sm">
                     <h3 className="text-xl font-bold">즐겨찾기 현황</h3>
 
                     <div className="mt-6 space-y-4">

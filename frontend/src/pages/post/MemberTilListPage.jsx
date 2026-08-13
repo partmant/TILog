@@ -56,9 +56,9 @@ function MemberTilListPage() {
         <main className="space-y-7">
             {/* 헤더 배너 */}
             <section className="rounded-3xl border-2 border-cyan-400 bg-gradient-to-r from-purple-50 to-cyan-50 p-8">
-                <div className="flex items-center gap-4">
+                <div className="flex flex-wrap items-center gap-4">
                     {/* 아바타 */}
-                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-cyan-400 text-2xl font-bold text-white shadow-md">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-purple-500 text-2xl font-bold text-white shadow-md">
                         {nickname?.charAt(0).toUpperCase() || "?"}
                     </div>
                     <div>
@@ -138,7 +138,7 @@ function MemberTilListPage() {
                                     type="button"
                                     onClick={handleLoadMore}
                                     disabled={loading}
-                                    className="rounded-2xl bg-gradient-to-r from-purple-500 to-cyan-400 px-10 py-3 font-bold text-white transition hover:opacity-90 disabled:opacity-50"
+                                    className="rounded-2xl bg-purple-500 px-10 py-3 font-bold text-white transition hover:bg-purple-600 disabled:opacity-50"
                                 >
                                     {loading ? "불러오는 중..." : "더 보기"}
                                 </button>

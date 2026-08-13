@@ -5,7 +5,7 @@ function Sidebar() {
         [
             "block rounded-xl px-4 py-3 transition",
             isActive
-                ? "bg-gradient-to-r from-purple-500 to-cyan-400"
+                ? "bg-purple-500"
                 : "hover:bg-slate-800",
         ].join(" ");
 

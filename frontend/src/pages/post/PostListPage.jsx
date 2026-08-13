@@ -103,7 +103,7 @@ function PostListPage() {
         <main className="space-y-7">
             {/* 상단 검색/소개 영역 */}
             <section className="rounded-3xl border-2 border-cyan-400 bg-gradient-to-r from-purple-50 to-cyan-50 p-8">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-between gap-5">
                     <div>
                         <h2 className="text-3xl font-bold">TIL 목록</h2>
                         <p className="mt-2 text-gray-600">
@@ -121,7 +121,7 @@ function PostListPage() {
                         />
 
                         {conditions.advanced && (
-                            <div className="absolute right-0 top-full z-20 mt-2 w-[460px]">
+                            <div className="absolute right-0 top-full z-20 mt-2 w-[min(460px,calc(100vw-2.5rem))]">
                                 <AdvancedSearchPanel
                                     conditions={conditions}
                                     onChange={setCondition}
@@ -134,8 +134,8 @@ function PostListPage() {
             </section>
 
             {/* 난이도 필터 (왼쪽) + 정렬 옵션 (오른쪽) */}
-            <div className="flex items-center justify-between">
-                <div className="flex gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-wrap gap-3">
                     {["ALL", "EASY", "NORMAL", "HARD"].map((difficulty) => (
                         <button
                             key={difficulty}
@@ -177,9 +177,9 @@ function PostListPage() {
                 </div>
             </div>
 
-            <section className="grid grid-cols-[1fr_280px] items-start gap-7">
+            <section className="grid grid-cols-1 items-start gap-7 min-[1180px]:grid-cols-[minmax(0,1fr)_280px]">
                 {/* 게시글 목록 영역 */}
-                <div className="rounded-3xl bg-white p-8 shadow-sm">
+                <div className="min-w-0 rounded-3xl bg-white p-8 shadow-sm">
                     <h3 className="mb-6 text-xl font-bold">
                         전체 게시글 {pageInfo.totalElements}개
                     </h3>
@@ -283,7 +283,7 @@ function PostListPage() {
                 </div>
 
                 {/* 우측 보조 정보 */}
-                <aside className="sticky top-4 self-start rounded-3xl bg-white p-7 shadow-sm">
+                <aside className="min-w-0 sticky top-4 self-start rounded-3xl bg-white p-7 shadow-sm">
                     <h3 className="text-xl font-bold">목록 보조 정보</h3>
 
                     <div className="mt-6 space-y-4">

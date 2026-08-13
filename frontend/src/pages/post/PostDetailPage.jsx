@@ -149,9 +149,9 @@ function PostDetailPage() {
         <Toast toast={toast} />
         <main className="rounded-3xl bg-white/90 p-8 shadow-sm">
             {/* 상세 페이지 전체 레이아웃 */}
-            <div className="grid grid-cols-[1fr_320px] gap-8">
+            <div className="grid grid-cols-1 gap-8 min-[1180px]:grid-cols-[minmax(0,1fr)_320px]">
                 {/* 왼쪽 게시글 본문 영역 */}
-                <article className="rounded-3xl border border-gray-200 bg-white p-8 shadow-sm">
+                <article className="min-w-0 rounded-3xl border border-gray-200 bg-white p-8 shadow-sm">
                     {/* 상단 행: 난이도 배지(좌) + 즐겨찾기 버튼(우) */}
                     <div className="flex items-center justify-between">
                         <span
@@ -310,7 +310,7 @@ function PostDetailPage() {
 
                 {/* 오른쪽 댓글 / 보조 패널 */
                 }
-                <aside className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+                <aside className="min-w-0 rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
                     {/* 댓글 헤더 */}
                     <div className="flex items-center justify-between">
                         <h3 className="text-xl font-bold text-slate-900">
@@ -545,7 +545,7 @@ function PostDetailPage() {
                         <button
                             type="button"
                             onClick={handleOpenCommentForm}
-                            className="mt-6 w-full rounded-xl bg-gradient-to-r from-purple-500 to-cyan-400 py-3 font-bold text-white transition hover:opacity-90"
+                            className="mt-6 w-full rounded-xl bg-purple-500 py-3 font-bold text-white transition hover:bg-purple-600"
                         >
                             댓글 작성하기
                         </button>
@@ -565,7 +565,7 @@ function PostDetailPage() {
                             <button
                                 type="button"
                                 onClick={handleCreateComment}
-                                className="mt-3 w-full rounded-xl bg-gradient-to-r from-purple-500 to-cyan-400 py-3 font-bold text-white transition hover:opacity-90"
+                                className="mt-3 w-full rounded-xl bg-purple-500 py-3 font-bold text-white transition hover:bg-purple-600"
                             >
                                 등록하기
                             </button>

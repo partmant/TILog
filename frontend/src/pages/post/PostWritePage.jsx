@@ -85,9 +85,9 @@ function PostWritePage() {
 
                 {/* 게시글 작성 폼 */}
                 <form onSubmit={handleSubmit} className="mt-8">
-                    <div className="grid grid-cols-[1fr_300px] gap-8">
+                    <div className="grid grid-cols-1 gap-8 min-[1180px]:grid-cols-[minmax(0,1fr)_300px]">
                         {/* 왼쪽 입력 영역 */}
-                        <div className="space-y-7">
+                        <div className="min-w-0 space-y-7">
                             {/* 제목 */}
                             <div>
                                 <label className="mb-2 block text-sm font-bold text-gray-700">
@@ -172,7 +172,7 @@ function PostWritePage() {
                         </div>
 
                         {/* 오른쪽 작성 보조 패널 */}
-                        <aside className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+                        <aside className="min-w-0 rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
                             <h3 className="text-xl font-bold">
                                 작성 보조 패널
                             </h3>
@@ -269,7 +269,7 @@ function PostWritePage() {
                     </div>
 
                     {/* 버튼 영역 */}
-                    <div className="mt-10 flex justify-end gap-4">
+                    <div className="mt-10 flex flex-wrap justify-end gap-4">
                         {/* 취소 버튼 */}
                         <button
                             type="button"
@@ -291,7 +291,7 @@ function PostWritePage() {
                         {/* 작성 버튼 */}
                         <button
                             type="submit"
-                            className="rounded-2xl bg-gradient-to-r from-purple-500 to-cyan-400 px-10 py-3 font-bold text-white transition hover:opacity-90"
+                            className="rounded-2xl bg-purple-500 px-10 py-3 font-bold text-white transition hover:bg-purple-600"
                         >
                             {isEditMode ? "수정 완료" : "게시하기"}
                         </button>

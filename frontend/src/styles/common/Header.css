@@ -87,12 +87,16 @@
     padding: 0 32px;
     border: 0;
     border-radius: 14px;
-    background: linear-gradient(135deg, #8b5cf6 0%, #22d3ee 100%);
+    background: #7c3aed;
     color: #ffffff;
     font-size: 15px;
     font-weight: 900;
-    box-shadow: 0 10px 24px rgba(124, 58, 237, 0.22);
     cursor: pointer;
+    transition: background 0.15s;
+}
+
+.app-header-write-button:hover {
+    background: #6d28d9;
 }
 
 .app-header-profile-button {

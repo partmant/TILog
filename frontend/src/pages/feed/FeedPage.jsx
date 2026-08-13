@@ -103,37 +103,35 @@ function FeedPage() {
     return (
         <main className="space-y-7">
             {/* 상단 배너 */}
-            <section className="rounded-3xl bg-gradient-to-r from-purple-500 to-cyan-400 p-8 text-white">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h2 className="text-3xl font-bold">
-                            오늘의 개발 기록을 둘러보세요
-                        </h2>
+            <section className="flex flex-wrap items-center justify-between gap-5 rounded-3xl bg-purple-600 p-8 text-white">
+                <div>
+                    <h2 className="text-3xl font-bold">
+                        오늘의 개발 기록을 둘러보세요
+                    </h2>
 
-                        <p className="mt-3 text-sm font-semibold text-white/90">
-                            다른 개발자의 TIL을 읽고 내 학습 흐름도 함께 쌓아보세요.
-                        </p>
-                    </div>
-
-                    <button
-                        type="button"
-                        onClick={() => navigate("/posts/write")}
-                        className="rounded-xl border border-white/60 bg-gradient-to-r from-purple-500 to-cyan-400 px-8 py-3 font-bold text-white shadow-lg shadow-purple-500/25 transition hover:-translate-y-0.5 hover:from-purple-600 hover:to-cyan-500 hover:shadow-xl hover:shadow-purple-500/35"
-                    >
-                        TIL 작성하기
-                    </button>
+                    <p className="mt-3 text-sm font-semibold text-white/90">
+                        다른 개발자의 TIL을 읽고 내 학습 흐름도 함께 쌓아보세요.
+                    </p>
                 </div>
+
+                <button
+                    type="button"
+                    onClick={() => navigate("/posts/write")}
+                    className="rounded-xl bg-white px-8 py-3 font-bold text-purple-600 shadow-sm transition hover:-translate-y-0.5 hover:bg-purple-50"
+                >
+                    TIL 작성하기
+                </button>
             </section>
 
             {/* 본문 3단 영역 */}
-            <section className={`grid gap-6 ${
+            <section className={`grid grid-cols-1 gap-6 ${
                     canViewChallenge
-                        ? "grid-cols-[230px_1fr_260px]"
-                        : "grid-cols-[230px_1fr]"
+                        ? "min-[1180px]:grid-cols-[230px_1fr_260px]"
+                        : "min-[1180px]:grid-cols-[230px_1fr]"
                 }`}
             >
                 {/* 왼쪽 성장 요약 */}
-                <aside className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+                <aside className="min-w-0 rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
                     <h3 className="text-xl font-bold">
                         내 성장 요약
                     </h3>
@@ -197,7 +195,7 @@ function FeedPage() {
                                         key={tag.tagName}
                                         type="button"
                                         onClick={() => navigate(`/posts?tagName=${encodeURIComponent(tag.tagName)}`)}
-                                        className="rounded-full bg-gradient-to-r from-purple-500 to-cyan-400 px-4 py-2 text-xs font-bold text-white"
+                                        className="rounded-full bg-purple-500 px-4 py-2 text-xs font-bold text-white transition hover:bg-purple-600"
                                     >
                                         #{tag.tagName}
                                         {tag.count > 0 && (
@@ -217,7 +215,7 @@ function FeedPage() {
                 </aside>
 
                 {/* 가운데 최신 피드 */}
-                <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+                <section className="min-w-0 rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
                     <h3 className="text-xl font-bold">
                         최신 TIL 피드
                     </h3>
@@ -268,7 +266,7 @@ function FeedPage() {
 
                 {canViewChallenge && (
                     /* 오른쪽 챌린지 */
-                    <aside className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+                    <aside className="min-w-0 rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
                         <h3 className="text-xl font-bold">
                             오늘의 챌린지
                         </h3>
@@ -285,7 +283,7 @@ function FeedPage() {
 
                             <div className="mt-5 h-3 rounded-full bg-gray-200">
                                 <div
-                                    className="h-3 rounded-full bg-gradient-to-r from-purple-500 to-cyan-400 transition-all"
+                                    className="h-3 rounded-full bg-purple-500 transition-all"
                                     style={{
                                         width: `${isGrowthSummaryLoading ? 0 : challengeProgressRate}%`,
                                     }}

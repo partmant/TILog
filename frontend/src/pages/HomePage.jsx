@@ -18,7 +18,7 @@ function HomePage() {
             </p>
             <button
                 onClick={handleMovePostPage}
-                className="mt-10 rounded-2xl bg-gradient-to-r from-purple-500 to-cyan-400 px-10 py-4 text-lg font-bold text-white shadow-lg transition hover:scale-105"
+                className="mt-10 rounded-2xl bg-purple-500 px-10 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-purple-600"
             >
                 게시글 보러가기
             </button>

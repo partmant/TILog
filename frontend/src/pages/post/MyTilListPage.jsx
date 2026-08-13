@@ -91,7 +91,7 @@ function MyTilListPage() {
                         onToggleAdvanced={toggleAdvanced}
                     />
                     {conditions.advanced && (
-                        <div className="absolute right-0 top-full z-20 mt-2 w-[440px]">
+                        <div className="absolute right-0 top-full z-20 mt-2 w-[min(440px,calc(100vw-2.5rem))]">
                             <AdvancedSearchPanel
                                 conditions={conditions}
                                 onChange={setCondition}
@@ -104,8 +104,8 @@ function MyTilListPage() {
             </div>
 
             {/* 난이도 필터 (왼쪽) + 정렬 옵션 (오른쪽) */}
-            <div className="flex items-center justify-between">
-                <div className="flex gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-wrap gap-3">
                     {["ALL", "EASY", "NORMAL", "HARD"].map((d) => (
                         <button
                             key={d}
@@ -146,9 +146,9 @@ function MyTilListPage() {
                 </div>
             </div>
 
-            <section className="grid grid-cols-[1fr_280px] items-start gap-7">
+            <section className="grid grid-cols-1 items-start gap-7 min-[1180px]:grid-cols-[minmax(0,1fr)_280px]">
             {/* TIL 목록 */}
-            <div className="rounded-3xl bg-white p-8 shadow-sm">
+            <div className="min-w-0 rounded-3xl bg-white p-8 shadow-sm">
                 <h3 className="mb-6 text-xl font-bold">
                     내 TIL {pageInfo.totalElements}개
                 </h3>
@@ -250,7 +250,7 @@ function MyTilListPage() {
             </div>
 
             {/* 우측 보조 정보 */}
-            <aside className="sticky top-4 self-start rounded-3xl bg-white p-7 shadow-sm">
+            <aside className="min-w-0 sticky top-4 self-start rounded-3xl bg-white p-7 shadow-sm">
                 <h3 className="text-xl font-bold">보조 정보</h3>
 
                 <div className="mt-6 space-y-4">

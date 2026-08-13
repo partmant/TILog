@@ -10,10 +10,10 @@ const SearchBar = ({ keyword, advanced, onSearch, onToggleAdvanced }) => {
   const [input, setInput] = useState(keyword ?? '');
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-wrap items-center gap-2">
       <input
         type="text"
-        className="w-64 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100"
+        className="w-64 max-w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100"
         placeholder="제목 또는 본문 키워드 검색"
         value={input}
         onChange={(e) => setInput(e.target.value)}
@@ -21,7 +21,7 @@ const SearchBar = ({ keyword, advanced, onSearch, onToggleAdvanced }) => {
       />
       <button
         type="button"
-        className="rounded-xl bg-gradient-to-r from-purple-500 to-cyan-400 px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
+        className="rounded-xl bg-purple-500 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-purple-600"
         onClick={() => onSearch(input)}
       >
         검색

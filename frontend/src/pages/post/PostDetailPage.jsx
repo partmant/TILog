@@ -83,8 +83,6 @@ function PostDetailPage() {
         handleCloseReplyForm,
         handleCreateComment,
         handleCreateReply,
-        showCommentForm,
-        handleOpenCommentForm,
         editCommentId,
         editCommentContent,
         handleOpenEditComment,
@@ -149,9 +147,9 @@ function PostDetailPage() {
         <Toast toast={toast} />
         <main className="rounded-3xl bg-white/90 p-8 shadow-sm">
             {/* 상세 페이지 전체 레이아웃 */}
-            <div className="grid grid-cols-1 gap-8 min-[1180px]:grid-cols-[minmax(0,1fr)_320px]">
-                {/* 왼쪽 게시글 본문 영역 */}
-                <article className="min-w-0 rounded-3xl border border-gray-200 bg-white p-8 shadow-sm">
+            <div className="space-y-8">
+                {/* 게시글 본문 영역 */}
+                <article className="rounded-3xl border border-gray-200 bg-white p-8 shadow-sm">
                     {/* 상단 행: 난이도 배지(좌) + 즐겨찾기 버튼(우) */}
                     <div className="flex items-center justify-between">
                         <span
@@ -308,12 +306,11 @@ function PostDetailPage() {
                     </div>
                 </article>
 
-                {/* 오른쪽 댓글 / 보조 패널 */
-                }
-                <aside className="min-w-0 rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+                {/* 댓글 영역 - 게시글 본문 아래에 전체 폭으로 배치 */}
+                <section className="rounded-3xl border border-gray-200 bg-white p-8 shadow-sm">
                     {/* 댓글 헤더 */}
                     <div className="flex items-center justify-between">
-                        <h3 className="text-xl font-bold text-slate-900">
+                        <h3 className="text-2xl font-bold text-slate-900">
                             댓글
                         </h3>
 
@@ -322,46 +319,76 @@ function PostDetailPage() {
                         </span>
                     </div>
 
+                    {/* 댓글 작성 - 항상 노출 */}
+                    <div className="mt-5 rounded-2xl border border-gray-100 bg-slate-50 p-5">
+                        <textarea
+                            value={commentContent}
+                            onChange={handleCommentChange}
+                            placeholder="댓글을 입력하세요..."
+                            className="min-h-32 w-full resize-y rounded-xl border border-gray-200 bg-white p-4 text-base leading-relaxed outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100"
+                        />
+
+                        <div className="mt-3 flex justify-end">
+                            <button
+                                type="button"
+                                onClick={handleCreateComment}
+                                className="rounded-xl bg-purple-500 px-8 py-3 font-bold text-white transition hover:bg-purple-600"
+                            >
+                                댓글 등록
+                            </button>
+                        </div>
+                    </div>
+
                     {/* 댓글 목록 */}
-                    <div className="mt-5 space-y-4">
+                    <div className="mt-6 space-y-4">
                         {pagedComments.length > 0 ? (
                             pagedComments.map((comment) => (
                                 <div
                                     key={comment.commentId}
-                                    className="rounded-2xl border border-gray-100 bg-slate-50 p-4"
+                                    className="rounded-2xl border border-gray-100 bg-slate-50 p-5"
                                 >
                                     {/* 작성자 */}
-                                    <p className="text-sm font-bold text-slate-700">
-                                        {comment.nickname}
-                                    </p>
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-purple-500 text-sm font-bold text-white">
+                                            {comment.nickname?.charAt(0).toUpperCase()}
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-bold text-slate-700">
+                                                {comment.nickname}
+                                            </p>
+                                            <p className="text-xs text-gray-400">
+                                                {formatDate(comment.createdAt)}
+                                            </p>
+                                        </div>
+                                    </div>
 
                                     {/* 댓글 내용 or 수정 폼 */}
                                     {editCommentId === comment.commentId ? (
-                                        <div className="mt-2">
+                                        <div className="mt-3">
                                             <textarea
                                                 value={editCommentContent}
                                                 onChange={handleEditCommentChange}
-                                                className="h-20 w-full resize-none rounded-xl border border-purple-100 bg-white p-3 text-sm outline-none"
+                                                className="min-h-24 w-full resize-y rounded-xl border border-purple-200 bg-white p-3 text-base outline-none"
                                             />
                                             <div className="mt-2 flex gap-2">
                                                 <button
                                                     type="button"
                                                     onClick={() => handleUpdateComment(comment.commentId)}
-                                                    className="rounded-lg bg-purple-500 px-4 py-2 text-sm font-bold text-white"
+                                                    className="rounded-lg bg-purple-500 px-4 py-2 text-sm font-bold text-white hover:bg-purple-600"
                                                 >
                                                     저장
                                                 </button>
                                                 <button
                                                     type="button"
                                                     onClick={handleCloseEditComment}
-                                                    className="rounded-lg bg-gray-200 px-4 py-2 text-sm font-bold text-gray-600"
+                                                    className="rounded-lg bg-gray-200 px-4 py-2 text-sm font-bold text-gray-600 hover:bg-gray-300"
                                                 >
                                                     취소
                                                 </button>
                                             </div>
                                         </div>
                                     ) : (
-                                        <p className="mt-2 text-sm text-slate-600">
+                                        <p className="mt-3 text-[15px] leading-relaxed text-slate-600">
                                             {comment.content}
                                         </p>
                                     )}
@@ -372,7 +399,7 @@ function PostDetailPage() {
                                         <button
                                             type="button"
                                             onClick={() => handleOpenReplyForm(comment.commentId)}
-                                            className="text-xs font-bold text-purple-500"
+                                            className="text-xs font-bold text-purple-500 hover:text-purple-600"
                                         >
                                             답글 작성
                                         </button>
@@ -404,11 +431,19 @@ function PostDetailPage() {
                                     {(repliesMap[comment.commentId] || []).map((reply) => (
                                         <div
                                             key={reply.commentId}
-                                            className="mt-3 ml-5 rounded-xl border border-purple-100 bg-white p-3"
+                                            className="mt-3 ml-8 rounded-xl border border-purple-100 bg-white p-4"
                                         >
-                                            <p className="text-xs font-bold text-slate-700">
-                                                {reply.nickname}
-                                            </p>
+                                            <div className="flex items-center gap-2">
+                                                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-purple-400 text-xs font-bold text-white">
+                                                    {reply.nickname?.charAt(0).toUpperCase()}
+                                                </div>
+                                                <p className="text-xs font-bold text-slate-700">
+                                                    {reply.nickname}
+                                                </p>
+                                                <p className="text-xs text-gray-400">
+                                                    {formatDate(reply.createdAt)}
+                                                </p>
+                                            </div>
 
                                             {/* 대댓글 내용 or 수정 폼 */}
                                             {editCommentId === reply.commentId ? (
@@ -416,27 +451,27 @@ function PostDetailPage() {
                                                     <textarea
                                                         value={editCommentContent}
                                                         onChange={handleEditCommentChange}
-                                                        className="h-16 w-full resize-none rounded-xl border border-purple-100 bg-slate-50 p-2 text-sm outline-none"
+                                                        className="min-h-20 w-full resize-y rounded-xl border border-purple-100 bg-slate-50 p-3 text-sm outline-none"
                                                     />
                                                     <div className="mt-2 flex gap-2">
                                                         <button
                                                             type="button"
                                                             onClick={() => handleUpdateComment(reply.commentId)}
-                                                            className="rounded-lg bg-purple-500 px-3 py-1 text-xs font-bold text-white"
+                                                            className="rounded-lg bg-purple-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-purple-600"
                                                         >
                                                             저장
                                                         </button>
                                                         <button
                                                             type="button"
                                                             onClick={handleCloseEditComment}
-                                                            className="rounded-lg bg-gray-200 px-3 py-1 text-xs font-bold text-gray-600"
+                                                            className="rounded-lg bg-gray-200 px-3 py-1.5 text-xs font-bold text-gray-600 hover:bg-gray-300"
                                                         >
                                                             취소
                                                         </button>
                                                     </div>
                                                 </div>
                                             ) : (
-                                                <p className="mt-2 text-sm text-slate-600">
+                                                <p className="mt-2 text-sm leading-relaxed text-slate-600">
                                                     {reply.content}
                                                 </p>
                                             )}
@@ -466,19 +501,19 @@ function PostDetailPage() {
 
                                     {/* 대댓글 작성창 */}
                                     {replyTargetId === comment.commentId && (
-                                        <div className="mt-4 ml-5">
+                                        <div className="mt-4 ml-8">
                                             <textarea
                                                 value={replyContent}
                                                 onChange={handleReplyChange}
                                                 placeholder="대댓글을 입력하세요..."
-                                                className="h-20 w-full resize-none rounded-xl border border-purple-100 bg-white p-3 text-sm outline-none"
+                                                className="min-h-24 w-full resize-y rounded-xl border border-purple-100 bg-white p-3 text-base outline-none"
                                             />
 
                                             <div className="mt-2 flex gap-2">
                                                 <button
                                                     type="button"
                                                     onClick={() => handleCreateReply(comment.commentId)}
-                                                    className="rounded-lg bg-purple-500 px-4 py-2 text-sm font-bold text-white"
+                                                    className="rounded-lg bg-purple-500 px-4 py-2 text-sm font-bold text-white hover:bg-purple-600"
                                                 >
                                                     등록
                                                 </button>
@@ -486,7 +521,7 @@ function PostDetailPage() {
                                                 <button
                                                     type="button"
                                                     onClick={handleCloseReplyForm}
-                                                    className="rounded-lg bg-gray-200 px-4 py-2 text-sm font-bold text-gray-600"
+                                                    className="rounded-lg bg-gray-200 px-4 py-2 text-sm font-bold text-gray-600 hover:bg-gray-300"
                                                 >
                                                     취소
                                                 </button>
@@ -496,15 +531,15 @@ function PostDetailPage() {
                                 </div>
                             ))
                         ) : (
-                            <p className="rounded-2xl border border-gray-100 bg-slate-50 p-4 text-sm text-gray-500">
-                                아직 작성된 댓글이 없습니다.
+                            <p className="rounded-2xl border border-gray-100 bg-slate-50 p-5 text-sm text-gray-500">
+                                아직 작성된 댓글이 없습니다. 첫 댓글을 남겨보세요.
                             </p>
                         )}
                     </div>
 
                     {/* 댓글 페이징 */}
                     {commentPageInfo.totalPages > 0 && (
-                        <div className="mt-5 flex items-center justify-center gap-2">
+                        <div className="mt-6 flex items-center justify-center gap-2">
                             <button
                                 type="button"
                                 disabled={commentPageInfo.first}
@@ -539,52 +574,7 @@ function PostDetailPage() {
                             </button>
                         </div>
                     )}
-
-                    {/* 댓글 작성 */}
-                    {!showCommentForm ? (
-                        <button
-                            type="button"
-                            onClick={handleOpenCommentForm}
-                            className="mt-6 w-full rounded-xl bg-purple-500 py-3 font-bold text-white transition hover:bg-purple-600"
-                        >
-                            댓글 작성하기
-                        </button>
-                    ) : (
-                        <section className="mt-6 rounded-2xl border border-purple-100 bg-purple-50 p-5">
-                            <h4 className="font-bold text-purple-700">
-                                댓글 작성
-                            </h4>
-
-                            <textarea
-                                value={commentContent}
-                                onChange={handleCommentChange}
-                                placeholder="댓글을 입력하세요..."
-                                className="mt-4 h-24 w-full resize-none rounded-xl border border-purple-100 bg-white p-4 text-sm outline-none"
-                            />
-
-                            <button
-                                type="button"
-                                onClick={handleCreateComment}
-                                className="mt-3 w-full rounded-xl bg-purple-500 py-3 font-bold text-white transition hover:bg-purple-600"
-                            >
-                                등록하기
-                            </button>
-                        </section>
-                    )}
-
-                    {/* 관련 TIL - 현재는 UI용 정적 영역 */}
-                    <section className="mt-8">
-                        <h4 className="font-bold text-slate-900">
-                            관련 TIL
-                        </h4>
-
-                        <ul className="mt-4 space-y-3 text-sm font-semibold text-slate-600">
-                            <li>• JWT 토큰 구조 정리</li>
-                            <li>• 로그인 API 구현 흐름</li>
-                            <li>• 권한 처리와 Role 설계</li>
-                        </ul>
-                    </section>
-                </aside>
+                </section>
             </div>
             {isReportModalOpen && (
                 <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm">

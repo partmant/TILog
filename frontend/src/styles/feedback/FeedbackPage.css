@@ -224,11 +224,10 @@
 /* 화면 전체를 덮는 반투명 배경 (이게 없으면 모달이 바닥에 붙습니다) */
 .feedback-modal-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(17, 24, 39, 0.4);
+    /* 100vw/100vh는 스크롤바 두께까지 포함해 실제 뷰포트보다 넓어지는 경우가 있어,
+       모달이 열릴 때 화면이 오른쪽으로 밀리며 가로 스크롤이 생기는 문제가 있었다.
+       inset: 0으로 바꿔 뷰포트 안에 정확히 맞춘다. */
+    inset: 0;
     backdrop-filter: blur(4px);
     display: flex;
     align-items: center;

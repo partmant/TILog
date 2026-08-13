@@ -1,6 +1,7 @@
 package com.tilog.domain.post.controller;
 
 import com.tilog.domain.post.dto.PostCommandDto;
+import com.tilog.domain.post.dto.PostDraftResponse;
 import com.tilog.domain.post.dto.PostQueryDto;
 import com.tilog.domain.post.dto.PostSimpleResponse;
 import com.tilog.domain.post.service.PostService;
@@ -68,5 +69,12 @@ public class PostController {
     public List<PostSimpleResponse> getMySimplePosts() {
         Long loginMemberId = SecurityUtil.getCurrentMemberId();
         return postService.getMySimplePosts(loginMemberId);
+    }
+
+    // 내 임시저장(DRAFT) 게시글 목록 조회
+    @GetMapping("/drafts/me")
+    public List<PostDraftResponse> getMyDrafts() {
+        Long loginMemberId = SecurityUtil.getCurrentMemberId();
+        return postService.getMyDrafts(loginMemberId);
     }
 }

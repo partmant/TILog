@@ -38,6 +38,9 @@ import MyTilListPage from "../pages/post/MyTilListPage";
 // 즐겨찾기 전체 보기
 import BookmarkedTilListPage from "../pages/mypage/BookmarkedTilListPage";
 
+// 임시저장함 전체 보기
+import DraftTilListPage from "../pages/mypage/DraftTilListPage";
+
 const router = createBrowserRouter([
     // =========================
     // 공개 페이지
@@ -83,6 +86,8 @@ const router = createBrowserRouter([
         { path: "/mypage/tils", element: <MyTilListPage /> },
         // 즐겨찾기 전체 보기 경로
         { path: "/mypage/bookmarks", element: <BookmarkedTilListPage /> },
+        // 임시저장함 전체 보기 경로
+        { path: "/mypage/drafts", element: <DraftTilListPage /> },
         // 주간 리포트 상세 페이지 경로
         { path: "/weekly-report", element: <WeeklyReportDetailPage /> },
         // 게시글 작성 페이지 경로

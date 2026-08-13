@@ -154,6 +154,12 @@ export const deletePost = async (postId) => {
     return response.data;
 }
 
+// 내 임시저장(DRAFT) TIL 목록 조회 API
+export const getMyDrafts = async () => {
+    const response = await api.get("/api/posts/drafts/me");
+    return response.data;
+};
+
 // 게시글 이미지 업로드 API
 export const uploadPostImage = async (formData) => {
     const response = await api.post(

@@ -5,6 +5,7 @@ import com.tilog.domain.demo.DemoFixedAiReportProvider;
 import com.tilog.domain.member.entity.Member;
 import com.tilog.domain.member.repository.MemberRepository;
 import com.tilog.domain.post.dto.PostCommandDto;
+import com.tilog.domain.post.dto.PostDraftResponse;
 import com.tilog.domain.post.dto.PostQueryDto;
 import com.tilog.domain.post.dto.PostSimpleResponse;
 import com.tilog.domain.post.entity.Post;
@@ -19,6 +20,7 @@ import com.tilog.domain.tag.repository.TagRepository;
 import com.tilog.global.client.GeminiClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -93,6 +95,11 @@ public class PostService {
 
         if (post.getVisibility() == Visibility.PRIVATE && !isOwner) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Private post.");
+        }
+
+        // 임시저장 글은 작성자 본인만 조회 가능
+        if (post.getVisibility() == Visibility.DRAFT && !isOwner) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Draft post.");
         }
 
         // 게시글 조회수 증가
@@ -324,6 +331,16 @@ public class PostService {
         return postRepository.findByMember_IdAndIsDeletedFalseOrderByCreatedAtDesc(loginMemberId)
                 .stream()
                 .map(PostSimpleResponse::from)
+                .toList();
+    }
+
+    // 내 임시저장(DRAFT) 게시글 목록 조회 — 최근 수정순
+    public List<PostDraftResponse> getMyDrafts(Long loginMemberId) {
+        return postRepository.findByMember_IdAndVisibilityAndIsDeletedFalseOrderByCreatedAtDesc(
+                        loginMemberId, Visibility.DRAFT, Pageable.unpaged())
+                .stream()
+                .sorted((a, b) -> b.getUpdatedAt().compareTo(a.getUpdatedAt()))
+                .map(PostDraftResponse::from)
                 .toList();
     }
 }

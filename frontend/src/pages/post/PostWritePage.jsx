@@ -252,19 +252,6 @@ function PostWritePage() {
                                     내일도 이어가세요
                                 </p>
                             </div>
-
-                            {/* 체크리스트 */}
-                            <div className="mt-7">
-                                <h4 className="font-bold">
-                                    체크리스트
-                                </h4>
-
-                                <ul className="mt-4 space-y-3 text-sm font-semibold text-gray-600">
-                                    <li>☑ 제목을 구체적으로 작성</li>
-                                    <li>☑ 핵심 개념 3개 이상 정리</li>
-                                    <li>☑ 복습할 내용 남기기</li>
-                                </ul>
-                            </div>
                         </aside>
                     </div>
 

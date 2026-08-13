@@ -4,6 +4,7 @@ import MyPageStats from '../components/mypage/MyPageStats';
 import HeatmapSection from '../components/mypage/HeatmapSection';
 import RecentTilSection from '../components/mypage/RecentTilSection';
 import BookmarkedTilSection from '../components/mypage/BookmarkedTilSection';
+import DraftTilSection from '../components/mypage/DraftTilSection';
 import SubscriptionPaybackSection from '../components/mypage/SubscriptionPaybackSection';
 import WeeklyReportSection from '../components/mypage/WeeklyReportSection';
 import { useMyPageStreak } from '../hooks/mypage/useMyPageStreak';
@@ -82,6 +83,8 @@ const MyPage = () => {
                         isLoading={isTilLoading}
                         memberId={memberId}
                     />
+
+                    <DraftTilSection />
 
                     <BookmarkedTilSection />
                 </div>

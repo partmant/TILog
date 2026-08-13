@@ -123,13 +123,13 @@ export function usePostWriteForm() {
     // API 요청
     // =========================
 
-    // 게시글 저장 요청 공통 처리
+    // 게시글 저장 요청 공통 처리 — 저장된(또는 기존) 게시글 id를 반환하고, 이동은 호출부에서 처리
     const savePost = async (visibility) => {
         const editor = editorRef.current?.getInstance();
 
         if (!editor) {
             alert("에디터가 준비되지 않았습니다.");
-            return;
+            return null;
         }
 
         const content = editor.getMarkdown();
@@ -151,11 +151,10 @@ export function usePostWriteForm() {
 
         if (isEditMode) {
             await updatePost(postId, postData);
-            navigate(`/posts/${postId}`);
-            return;
+            return postId;
         }
 
-        await createPost(postData);
+        const newPostId = await createPost(postData);
 
         if (visibility !== "DRAFT") {
             const memberId = getMemberId();
@@ -169,7 +168,7 @@ export function usePostWriteForm() {
             }
         }
 
-        navigate(postListPath);
+        return newPostId;
     };
 
     // 게시글 작성 또는 수정 요청
@@ -177,20 +176,31 @@ export function usePostWriteForm() {
         e.preventDefault();
 
         try {
-            await savePost(form.visibility);
+            const savedPostId = await savePost(form.visibility);
+
+            if (savedPostId == null) return;
+
+            navigate(isEditMode ? `/posts/${savedPostId}` : postListPath);
         } catch (error) {
             console.error(error);
             alert(isEditMode ? "게시글 수정 실패" : "게시글 작성 실패");
         }
     };
 
-    // 임시저장 요청
+    // 임시저장 요청 — 저장 후에도 에디터 화면에 그대로 머무르며 이어서 작성할 수 있게 한다.
+    // 신규 작성 중 최초 임시저장이면, 새로 생성된 글의 수정 경로로 이동해 이후 임시저장/게시가
+    // 같은 글에 이어지도록 한다.
     const handleTempSave = async () => {
         try {
-            // 임시저장은 visibility를 DRAFT로 고정
-            await savePost("DRAFT");
+            const savedPostId = await savePost("DRAFT");
 
-            alert("임시저장되었습니다.");
+            if (savedPostId == null) return;
+
+            alert("임시저장되었습니다. 마이페이지 > 임시저장함에서 이어서 작성할 수 있어요.");
+
+            if (!isEditMode) {
+                navigate(`/posts/${savedPostId}/edit`, { replace: true });
+            }
         } catch (error) {
             console.error(error);
 

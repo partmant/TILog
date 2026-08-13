@@ -1,0 +1,114 @@
+.draft-til-list {
+    display: grid;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.draft-til-item {
+    display: grid;
+    grid-template-columns: 94px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+    min-height: 72px;
+    padding: 13px 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+    background: #ffffff;
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.draft-til-item:hover {
+    transform: translateY(-2px);
+    border-color: rgba(124, 58, 237, 0.35);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+.draft-til-content {
+    min-width: 0;
+}
+
+.draft-til-content strong {
+    display: block;
+    overflow: hidden;
+    color: #111827;
+    font-size: 15px;
+    font-weight: 900;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.draft-til-content p {
+    margin: 7px 0 0;
+    overflow: hidden;
+    color: #6b7280;
+    font-size: 12px;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.draft-til-arrow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #9ca3af;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.draft-til-delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    color: #d1d5db;
+    transition: background 0.15s, color 0.15s;
+}
+
+.draft-til-delete-btn:hover {
+    background: #fee2e2;
+    color: #ef4444;
+}
+
+.draft-til-empty {
+    display: grid;
+    min-height: 180px;
+    place-items: center;
+    border: 1px dashed #d1d5db;
+    border-radius: 18px;
+    background: #faf8ff;
+    color: #6b7280;
+    font-size: 14px;
+    font-weight: 800;
+    text-align: center;
+    padding: 24px;
+    line-height: 1.8;
+}
+
+.draft-til-loading {
+    display: grid;
+    min-height: 120px;
+    place-items: center;
+    border: 1px dashed #d1d5db;
+    border-radius: 18px;
+    background: #f9fafb;
+    color: #6b7280;
+    font-size: 14px;
+    font-weight: 900;
+}
+
+.draft-til-error {
+    display: grid;
+    min-height: 100px;
+    place-items: center;
+    border: 1px dashed #fca5a5;
+    border-radius: 18px;
+    background: #fff5f5;
+    color: #ef4444;
+    font-size: 14px;
+    font-weight: 800;
+}

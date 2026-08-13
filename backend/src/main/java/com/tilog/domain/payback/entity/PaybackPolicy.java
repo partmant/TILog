@@ -38,4 +38,18 @@ public class PaybackPolicy extends BaseTimeEntity {
 
     @Column(name = "is_active", nullable = false)
     private boolean active;
+
+    public static PaybackPolicy create(String name, int requiredWriteDays, int subscriptionFee,
+                                        int refundAmount, LocalDate startDate, LocalDate endDate,
+                                        boolean active) {
+        PaybackPolicy policy = new PaybackPolicy();
+        policy.name = name;
+        policy.requiredWriteDays = requiredWriteDays;
+        policy.subscriptionFee = subscriptionFee;
+        policy.refundAmount = refundAmount;
+        policy.startDate = startDate;
+        policy.endDate = endDate;
+        policy.active = active;
+        return policy;
+    }
 }

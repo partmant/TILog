@@ -80,12 +80,18 @@ public class SubscriptionService {
         Subscription subscription = Subscription.createMock(member);
         Subscription savedSubscription = subscriptionRepository.save(subscription);
 
-        PaybackPolicy policy = paybackPolicyService.getCurrentActivePolicy(LocalDate.now());
-        paybackParticipationService.createForSubscription(
-                memberId,
-                savedSubscription,
-                policy
-        );
+        // 활성 페이백 정책이 없어도 구독 자체는 막히면 안 되므로,
+        // processExpiredSubscriptions()의 자동 갱신과 동일하게 실패를 흡수하고 구독만 진행한다.
+        try {
+            PaybackPolicy policy = paybackPolicyService.getCurrentActivePolicy(LocalDate.now());
+            paybackParticipationService.createForSubscription(
+                    memberId,
+                    savedSubscription,
+                    policy
+            );
+        } catch (Exception e) {
+            log.warn("[신규 구독] 활성 페이백 정책 없음 - 구독만 진행됨: memberId={}", memberId);
+        }
 
         member.changeRole(MemberRole.PREMIUM);
 

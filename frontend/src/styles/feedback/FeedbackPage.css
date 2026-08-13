@@ -233,6 +233,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 16px;
+    box-sizing: border-box;
     z-index: 1000;
 }
 
@@ -241,10 +243,13 @@
     background: #ffffff;
     width: 100%;
     max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
     border-radius: 24px;
     padding: 36px;
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.15);
     animation: modalFadeIn 0.3s ease-out forwards;
+    box-sizing: border-box;
 }
 
 @keyframes modalFadeIn {
@@ -290,11 +295,23 @@
     font-family: inherit;
     width: 100%;
     box-sizing: border-box;
+}
+
+/* 드롭다운 화살표 아이콘은 select에만 적용한다.
+   (이전엔 input/textarea에도 같은 규칙이 걸려서, 요청 메시지 textarea나
+   답변 점수 input 위에 화살표 아이콘이 겹쳐 보이는 것처럼 깨져 보였다.) */
+.feedback-modal-form select {
     appearance: none;
+    padding-right: 40px;
     background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
     background-repeat: no-repeat;
     background-position: right 16px center;
     background-size: 16px;
+}
+
+.feedback-modal-form textarea {
+    resize: vertical;
+    min-height: 96px;
 }
 
 .feedback-modal-form input:focus,

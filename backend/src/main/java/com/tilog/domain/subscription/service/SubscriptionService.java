@@ -12,6 +12,7 @@ import com.tilog.domain.subscription.entity.Subscription;
 import com.tilog.domain.subscription.entity.SubscriptionStatus;
 import com.tilog.global.exception.CustomException;
 import com.tilog.global.exception.ErrorCode;
+import com.tilog.global.security.JwtTokenProvider;
 import com.tilog.global.security.SecurityUtil;
 import com.tilog.domain.subscription.repository.SubscriptionRepository;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +48,7 @@ public class SubscriptionService {
     private final MemberRepository memberRepository;
     private final PaybackPolicyService paybackPolicyService;
     private final PaybackParticipationService paybackParticipationService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     // Mock 구독 신청
     // - 유효한 구독(ACTIVE/CANCEL_RESERVED)이 있으면 endedAt을 1달 연장
@@ -73,7 +75,7 @@ public class SubscriptionService {
                     existing.getEndedAt().toLocalDate()
             );
             member.changeRole(MemberRole.PREMIUM);
-            return SubscriptionStatusResponse.from(existing);
+            return SubscriptionStatusResponse.from(existing, reissueAccessToken(member));
         }
 
         // 신규 구독 생성
@@ -95,7 +97,23 @@ public class SubscriptionService {
 
         member.changeRole(MemberRole.PREMIUM);
 
-        return SubscriptionStatusResponse.from(savedSubscription);
+        return SubscriptionStatusResponse.from(savedSubscription, reissueAccessToken(member));
+    }
+
+    // 구독으로 role이 바뀐 직후, 새 role이 반영된 accessToken을 즉시 재발급한다.
+    // (재로그인 없이도 프리미엄 전용 기능에 바로 접근할 수 있도록 하기 위함)
+    private String reissueAccessToken(Member member) {
+        String createdAt = member.getCreatedAt() != null
+                ? member.getCreatedAt().toLocalDate().toString()
+                : "";
+
+        return jwtTokenProvider.createAccessToken(
+                member.getId(),
+                member.getRole(),
+                member.getNickname(),
+                member.getEmail(),
+                createdAt
+        );
     }
 
     // 구독 취소 예약 (ACTIVE → CANCEL_RESERVED)

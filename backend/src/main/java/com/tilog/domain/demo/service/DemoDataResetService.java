@@ -2,6 +2,7 @@ package com.tilog.domain.demo.service;
 
 import com.tilog.domain.bookmark.repository.TilBookmarkRepository;
 import com.tilog.domain.comment.repository.TilCommentRepository;
+import com.tilog.domain.feedback.repository.MentorFeedbackRepository;
 import com.tilog.domain.like.repository.TilPostLikeRepository;
 import com.tilog.domain.member.entity.Member;
 import com.tilog.domain.member.entity.MemberRole;
@@ -60,6 +61,7 @@ public class DemoDataResetService {
     private final PaybackParticipationRepository paybackParticipationRepository;
     private final AiWeeklyReportRepository aiWeeklyReportRepository;
     private final NotificationRepository notificationRepository;
+    private final MentorFeedbackRepository mentorFeedbackRepository;
 
     @Value("${demo.account.email:demo@tilog.kr}")
     private String demoEmail;
@@ -120,11 +122,15 @@ public class DemoDataResetService {
         return reports.size();
     }
 
-    // TIL 게시글 및 하위 데이터(태그·댓글·좋아요·즐겨찾기·이미지) 정리
+    // TIL 게시글 및 하위 데이터(태그·댓글·좋아요·즐겨찾기·이미지·멘토 피드백) 정리
+    // - MentorFeedback.til_id는 NOT NULL FK이고 cascade가 없어서, 이걸 먼저 지우지 않으면
+    //   피드백이 달린 게시글을 지울 때 FK 제약 위반으로 초기화 트랜잭션 전체가 실패한다.
+    //   (한 번 실패하면 이후 초기화도 계속 조용히 실패하게 되는 치명적인 문제였음)
     private int resetPosts(Long memberId) {
         List<Post> posts = postRepository.findByMember_Id(memberId);
         for (Post post : posts) {
             Long postId = post.getId();
+            mentorFeedbackRepository.deleteByTil_Id(postId);
             postTagRepository.deleteByPost_Id(postId);
             tilCommentRepository.deleteByPost_Id(postId);
             tilPostLikeRepository.deleteByPost_Id(postId);

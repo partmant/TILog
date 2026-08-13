@@ -8,4 +8,5 @@ import java.util.List;
 public interface MentorFeedbackRepository extends JpaRepository<MentorFeedback, Long> {
     List<MentorFeedback> findByRequestor_Id(Long requestorId);
     List<MentorFeedback> findByMentor_Id(Long mentorId);
+    void deleteByTil_Id(Long tilId);
 }

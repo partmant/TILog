@@ -36,7 +36,10 @@ jwt:
 gemini:
   api:
     key: ${GOOGLE_GEMINI_API_KEY:}
-    model: gemini-2.5-flash
+    # gemini-2.5-flash가 신규 키에서 404(사용 불가)로 막혀 안정적인 별칭으로 전환.
+    # "-latest" 별칭은 Google이 안정된 최신 Flash 모델로 자동 교체해주므로,
+    # 이후 특정 버전이 폐기돼도 이 값을 계속 바꿔줄 필요가 없다.
+    model: ${GEMINI_API_MODEL:gemini-flash-latest}
 
 # CORS 허용 origin (콤마 구분)
 # - 기본값에 배포 도메인(tilog.n-e.kr)을 포함해 별도 환경변수 없이도 동작

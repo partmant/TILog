@@ -39,7 +39,15 @@ public class MemberController {
 
     @GetMapping("/mentors")
     public ResponseEntity<ApiResponse<List<MemberResponse>>> getMentors(){
-        List<MemberResponse> mentors = memberService.getMentors();
+        // 멘토가 피드백 요청 모달을 열 때 자기 자신이 담당 멘토 목록에 뜨지 않도록 제외한다.
+        // 비로그인 상태에서도 호출 가능한 엔드포인트라 인증 정보가 없으면 제외 없이 전체 반환한다.
+        Long currentMemberId = null;
+        try {
+            currentMemberId = SecurityUtil.getCurrentMemberId();
+        } catch (Exception ignored) {
+        }
+
+        List<MemberResponse> mentors = memberService.getMentors(currentMemberId);
         return ResponseEntity.ok(ApiResponse.success(mentors));
     }
 

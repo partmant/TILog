@@ -121,9 +121,12 @@ public class MemberService {
         return fileName.substring(fileName.lastIndexOf("."));
     }
 
-    public List<MemberResponse> getMentors() {  // 멘토 권한 가진 사용자 목록 조회
+    // 멘토 권한 가진 사용자 목록 조회
+    // - excludeMemberId: 요청자 본인. 멘토가 스스로에게 피드백을 요청하는 걸 막기 위해 목록에서 제외한다.
+    public List<MemberResponse> getMentors(Long excludeMemberId) {
         return memberRepository.findByRole(MemberRole.MENTOR)
                 .stream()
+                .filter(member -> excludeMemberId == null || !member.getId().equals(excludeMemberId))
                 .map(MemberResponse::from)
                 .toList();
     }

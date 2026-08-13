@@ -29,13 +29,16 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * 공개 데모 계정(demo.account.email)이 남긴 데이터를 초기화한다.
+ * 공개 데모 계정들(demo.account.email, demo.mentor.email)이 남긴 데이터를 초기화한다.
  *
  * <p>데모 계정은 실제 계정과 동일하게 글쓰기·구독·AI 리포트 기능을 제한 없이 쓸 수 있게 두는 대신,
  * 방문자가 남긴 데이터를 매일 자정 비워서 다음 방문자에게 항상 깨끗한 상태를 보여주는 방식을 선택했다.
+ * 데모 멘토 계정도 role만 MENTOR일 뿐 나머지 기능(TIL 작성, 구독 등)은 일반 계정과 동일하게
+ * 열려 있어 똑같이 흔적이 쌓일 수 있으므로 같은 방식으로 초기화한다. 다만 role은 계정마다
+ * 복원해야 할 "기본 role"이 다르므로(일반 데모 계정은 USER, 데모 멘토는 MENTOR) 인자로 받는다.
  *
  * <p>삭제 순서는 FK 제약을 따른다:
- * 1) 페이백 참여(구독 FK) → 2) 구독(+ PREMIUM 역할 복원) → 3) AI 주간 리포트 캐시 →
+ * 1) 페이백 참여(구독 FK) → 2) 구독(+ 기본 role 복원) → 3) AI 주간 리포트 캐시 →
  * 4) TIL 게시글 하위 데이터(태그·댓글·좋아요·즐겨찾기·이미지) → 게시글 →
  * 5) 스트릭 통계 · 잔디(작성 이력) → 6) 알림
  */
@@ -61,37 +64,50 @@ public class DemoDataResetService {
     @Value("${demo.account.email:demo@tilog.kr}")
     private String demoEmail;
 
+    @Value("${demo.mentor.email:mentor@tilog.kr}")
+    private String demoMentorEmail;
+
     @Transactional
     public void resetDemoData() {
-        Optional<Member> demoMemberOpt = memberRepository.findByEmail(demoEmail);
-        if (demoMemberOpt.isEmpty()) {
-            log.info("초기화할 데모 계정이 없습니다.");
+        resetAccount(demoEmail, MemberRole.USER);
+    }
+
+    @Transactional
+    public void resetDemoMentorData() {
+        resetAccount(demoMentorEmail, MemberRole.MENTOR);
+    }
+
+    // baseRole: 초기화 후 복원해야 할 기본 role (일반 데모 계정=USER, 데모 멘토=MENTOR)
+    private void resetAccount(String email, MemberRole baseRole) {
+        Optional<Member> memberOpt = memberRepository.findByEmail(email);
+        if (memberOpt.isEmpty()) {
+            log.info("초기화할 계정이 없습니다: {}", email);
             return;
         }
 
-        Member demoMember = demoMemberOpt.get();
-        Long memberId = demoMember.getId();
+        Member member = memberOpt.get();
+        Long memberId = member.getId();
 
-        int deletedPaybacks = resetSubscriptions(memberId, demoMember);
+        int deletedPaybacks = resetSubscriptions(memberId, member, baseRole);
         int deletedReports = resetAiWeeklyReports(memberId);
         int deletedPosts = resetPosts(memberId);
         resetStreakAndHeatmap(memberId);
         notificationRepository.deleteAllByReceiverId(memberId);
 
-        log.info("데모 데이터 초기화 완료 [게시글={}건, 리포트={}건, 페이백={}건]",
-                deletedPosts, deletedReports, deletedPaybacks);
+        log.info("데모 데이터 초기화 완료 [{}] [게시글={}건, 리포트={}건, 페이백={}건]",
+                email, deletedPosts, deletedReports, deletedPaybacks);
     }
 
-    // 구독 + 페이백 참여 정리, 역할을 USER로 복원
-    private int resetSubscriptions(Long memberId, Member demoMember) {
+    // 구독 + 페이백 참여 정리, role을 baseRole로 복원
+    private int resetSubscriptions(Long memberId, Member member, MemberRole baseRole) {
         List<PaybackParticipation> paybacks = paybackParticipationRepository.findByMemberId(memberId);
         paybackParticipationRepository.deleteAll(paybacks);
 
         List<Subscription> subscriptions = subscriptionRepository.findByMemberIdOrderByStartedAtDesc(memberId);
         subscriptionRepository.deleteAll(subscriptions);
 
-        if (!subscriptions.isEmpty() && demoMember.getRole() != MemberRole.USER) {
-            demoMember.changeRole(MemberRole.USER);
+        if (!subscriptions.isEmpty() && member.getRole() != baseRole) {
+            member.changeRole(baseRole);
         }
 
         return paybacks.size();

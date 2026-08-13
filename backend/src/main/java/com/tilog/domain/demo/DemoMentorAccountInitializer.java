@@ -19,9 +19,10 @@ import org.springframework.transaction.annotation.Transactional;
  * 포트폴리오 공개 데모에서 "피드백 요청 -> 멘토 답변" 흐름을 양쪽 다 체험/테스트할 수 있도록,
  * 로그인 가능한 고정 멘토 계정을 서버 기동 시점에 준비한다.
  *
- * <p>demo.account.email(체험용 일반 회원)과는 완전히 분리된 별도 계정이다. 멘토 계정은
- * TIL/스트릭 데이터가 쌓이지 않아 매일 자정 초기화 대상에 포함할 필요가 없으므로,
- * DemoDataResetService/DemoDataResetScheduler와는 무관하게 한 번 생성되면 계속 유지된다.
+ * <p>demo.account.email(체험용 일반 회원)과는 완전히 분리된 별도 계정이다. 다만 role만 MENTOR일
+ * 뿐 TIL 작성·구독 등 나머지 기능은 일반 계정과 동일하게 열려 있어 방문자가 흔적을 남길 수 있으므로,
+ * demo.account.email과 마찬가지로 DemoDataResetScheduler가 매일 자정 데이터를 초기화한다
+ * (role은 MENTOR로 복원됨). 계정 자체는 이 초기화로 삭제되지 않고 계속 유지된다.
  *
  * <p>demo.enabled=true이고 demo.mentor.password가 채워져 있을 때만 동작하며,
  * 이미 존재하는 이메일이면 다시 만들지 않는다.
